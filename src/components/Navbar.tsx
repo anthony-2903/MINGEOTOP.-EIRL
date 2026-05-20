@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Compass, Menu, X, PhoneCall } from 'lucide-react';
+import { Menu, X, PhoneCall } from 'lucide-react';
+import Logo from './Logo';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -41,18 +42,8 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <a href="#inicio" className="flex items-center space-x-2 group">
-            <div className="bg-brand-yellow p-2 rounded-lg text-brand-petrol transition-transform duration-300 group-hover:rotate-45">
-              <Compass className="h-6 w-6 stroke-[2.5]" />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-outfit font-extrabold text-2xl tracking-wider text-white leading-none">
-                MINGEOTOP
-              </span>
-              <span className="text-[10px] text-brand-yellow font-semibold tracking-[0.2em] uppercase leading-none mt-1">
-                Ingeniería & Topografía
-              </span>
-            </div>
+          <a href="#inicio" className="transition-transform duration-300 active:scale-95">
+            <Logo textColor="light" />
           </a>
 
           {/* Desktop Nav Links */}

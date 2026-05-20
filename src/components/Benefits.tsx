@@ -55,7 +55,7 @@ export default function Benefits() {
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-100px' }}
-            className="text-xs sm:text-sm font-extrabold tracking-[0.25em] text-brand-green-light uppercase mb-3"
+            className="text-xs sm:text-sm font-extrabold tracking-[0.25em] text-brand-yellow uppercase mb-3"
           >
             NUESTRAS VENTAJAS
           </motion.h3>

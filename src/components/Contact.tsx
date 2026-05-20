@@ -73,7 +73,7 @@ export default function Contact() {
         particleCount: 100,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ['#0F3D4C', '#2E7D5B', '#F2B705'],
+        colors: ['#15171C', '#2D5B37', '#FF5C00'],
       });
 
       // Reset form
@@ -101,7 +101,7 @@ export default function Contact() {
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-100px' }}
-            className="text-xs sm:text-sm font-extrabold tracking-[0.25em] text-brand-green-light uppercase mb-3"
+            className="text-xs sm:text-sm font-extrabold tracking-[0.25em] text-brand-yellow uppercase mb-3"
           >
             CONTÁCTANOS
           </motion.h3>
@@ -312,7 +312,7 @@ export default function Contact() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full flex items-center justify-center space-x-2 bg-brand-petrol hover:bg-brand-petrol-light text-white py-4 rounded-xl font-outfit font-bold transition-all duration-300 disabled:opacity-75 shadow-lg shadow-brand-petrol/20 hover:shadow-brand-petrol/30 hover-glow-green cursor-pointer"
+                    className="w-full flex items-center justify-center space-x-2 bg-brand-yellow hover:bg-brand-yellow-light text-brand-dark py-4 rounded-xl font-outfit font-bold transition-all duration-300 disabled:opacity-75 shadow-lg shadow-brand-yellow/20 hover:shadow-brand-yellow/30 hover-glow-yellow cursor-pointer"
                   >
                     {isSubmitting ? (
                       <>

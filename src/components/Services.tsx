@@ -79,7 +79,7 @@ export default function Services() {
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-100px' }}
-            className="text-xs sm:text-sm font-extrabold tracking-[0.25em] text-brand-green uppercase mb-3"
+            className="text-xs sm:text-sm font-extrabold tracking-[0.25em] text-brand-yellow uppercase mb-3"
           >
             NUESTROS SERVICIOS
           </motion.h3>
@@ -108,18 +108,21 @@ export default function Services() {
           {servicesList.map((service, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-100px' }}
-              transition={{ delay: index * 0.05 }}
-              className="bg-white border border-gray-100 rounded-2xl p-6 sm:p-8 shadow-premium hover:shadow-premium-hover hover:border-brand-green/30 transition-all duration-300 group flex flex-col justify-between"
+              transition={{ type: 'spring', stiffness: 100, damping: 18, delay: index * 0.05 }}
+              whileHover={{ y: -8, transition: { duration: 0.2 } }}
+              className="bg-white border border-gray-100 rounded-2xl p-6 sm:p-8 shadow-premium hover:shadow-premium-hover hover:border-brand-yellow/30 hover-glow-yellow transition-all duration-300 group flex flex-col justify-between relative overflow-hidden"
             >
+              {/* Card Hover Background Gradient */}
+              <div className="absolute inset-0 bg-gradient-to-br from-brand-yellow/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
               <div className="space-y-4">
                 {/* Icon wrapper */}
-                <div className="w-12 h-12 rounded-xl bg-brand-petrol/5 text-brand-petrol flex items-center justify-center group-hover:bg-brand-green group-hover:text-white transition-all duration-300 shadow-sm">
+                <div className="w-12 h-12 rounded-xl bg-brand-petrol/5 text-brand-petrol flex items-center justify-center group-hover:bg-brand-yellow group-hover:text-brand-dark transition-all duration-300 shadow-sm relative z-10 group-hover:shadow-[0_0_15px_rgba(255,92,0,0.4)]">
                   {service.icon}
                 </div>
-                <h3 className="text-lg sm:text-xl font-bold text-brand-petrol font-outfit leading-tight group-hover:text-brand-green transition-colors duration-300">
+                <h3 className="text-lg sm:text-xl font-bold text-brand-petrol font-outfit leading-tight group-hover:text-brand-yellow transition-colors duration-300 relative z-10">
                   {service.title}
                 </h3>
                 <p className="text-gray-500 text-xs sm:text-sm leading-relaxed font-sans">

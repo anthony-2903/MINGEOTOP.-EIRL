@@ -41,7 +41,7 @@ export default function Process() {
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-100px' }}
-            className="text-xs sm:text-sm font-extrabold tracking-[0.25em] text-brand-green uppercase mb-3"
+            className="text-xs sm:text-sm font-extrabold tracking-[0.25em] text-brand-yellow uppercase mb-3"
           >
             NUESTRO PROCESO
           </motion.h3>
@@ -67,8 +67,15 @@ export default function Process() {
 
         {/* Process Steps */}
         <div className="relative">
-          {/* Vertical / Horizontal Connector Line */}
-          <div className="absolute left-[39px] lg:left-1/2 lg:-translate-x-1/2 top-4 bottom-4 w-1 bg-gradient-to-b from-brand-petrol via-brand-green to-brand-yellow/60 rounded-full -z-10" />
+          {/* Vertical / Horizontal Connector Line with animated glow */}
+          <div className="absolute left-[39px] lg:left-1/2 lg:-translate-x-1/2 top-4 bottom-4 w-1 bg-gradient-to-b from-brand-petrol via-brand-green to-brand-yellow rounded-full -z-10 opacity-70" />
+          {/* Animated tracing dot */}
+          <motion.div
+            initial={{ top: '0%' }}
+            animate={{ top: '100%' }}
+            transition={{ duration: 5, ease: "linear", repeat: Infinity }}
+            className="absolute left-[39px] lg:left-1/2 lg:-translate-x-1/2 w-1 h-24 bg-gradient-to-b from-transparent via-brand-yellow to-transparent rounded-full -z-10 blur-sm"
+          />
 
           <div className="space-y-12 lg:space-y-24">
             {steps.map((step, index) => {
@@ -81,10 +88,12 @@ export default function Process() {
                     isEven ? 'lg:flex-row-reverse' : ''
                   } relative`}
                 >
-                  {/* Bullet Marker (Middle) */}
+                  {/* Bullet Marker (Middle) with Pulse */}
                   <div className="absolute left-[20px] lg:left-1/2 lg:-translate-x-1/2 top-1.5 flex items-center justify-center z-20">
-                    <div className="w-10 h-10 rounded-full bg-white border-4 border-brand-petrol flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                      <span className="text-xs font-black font-outfit text-brand-petrol">{step.num}</span>
+                    <div className="w-10 h-10 rounded-full bg-white border-4 border-brand-petrol flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:border-brand-yellow transition-all duration-300 relative">
+                      <span className="text-xs font-black font-outfit text-brand-petrol group-hover:text-brand-yellow transition-colors duration-300">{step.num}</span>
+                      {/* Pulse effect */}
+                      <span className="absolute inset-0 rounded-full border border-brand-yellow animate-ping opacity-0 group-hover:opacity-100" />
                     </div>
                   </div>
 
@@ -97,14 +106,15 @@ export default function Process() {
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true, margin: '-100px' }}
                     transition={{ duration: 0.6, type: 'spring', stiffness: 80 }}
+                    whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
                     className="w-full lg:w-1/2 pl-16 lg:pl-0 lg:px-12"
                   >
-                    <div className="bg-white border border-gray-100 p-8 rounded-2xl shadow-premium hover:shadow-premium-hover transition-all duration-300 group hover:border-brand-green/30">
+                    <div className="bg-white border border-gray-100 p-8 rounded-2xl shadow-premium hover:shadow-premium-hover transition-all duration-300 group hover:border-brand-yellow/30 hover-glow-yellow">
                       <div className="flex items-center space-x-4 mb-4">
-                        <div className="w-12 h-12 rounded-xl bg-brand-petrol/5 text-brand-petrol group-hover:bg-brand-green group-hover:text-white flex items-center justify-center transition-colors duration-300 flex-shrink-0">
+                        <div className="w-12 h-12 rounded-xl bg-brand-petrol/5 text-brand-petrol group-hover:bg-brand-yellow group-hover:text-brand-dark flex items-center justify-center transition-colors duration-300 flex-shrink-0 relative z-10 group-hover:shadow-[0_0_15px_rgba(255,92,0,0.4)]">
                           {step.icon}
                         </div>
-                        <h3 className="text-xl font-bold text-brand-petrol font-outfit leading-tight group-hover:text-brand-green transition-colors duration-300">
+                        <h3 className="text-xl font-bold text-brand-petrol font-outfit leading-tight group-hover:text-brand-yellow transition-colors duration-300">
                           {step.title}
                         </h3>
                       </div>

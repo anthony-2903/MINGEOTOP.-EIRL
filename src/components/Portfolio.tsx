@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Compass, ArrowUpRight, ShieldCheck } from 'lucide-react';
 
+import minaTajoAbiertoImg from '../assets/mina_tajo_abierto.png';
+import tunelSubterraneoImg from '../assets/tunel_subterraneo.png';
+
 export default function Portfolio() {
   const [filter, setFilter] = useState('todos');
 
@@ -25,6 +28,7 @@ export default function Portfolio() {
       precision: '±2 cm instrumental',
       coords: 'Lat: 10°41\'S / Lon: 76°15\'O',
       color: 'from-brand-petrol via-brand-petrol-dark to-brand-green',
+      image: minaTajoAbiertoImg,
     },
     {
       id: 2,
@@ -76,15 +80,16 @@ export default function Portfolio() {
     },
     {
       id: 6,
-      title: 'Montaje de Chancadora Industrial',
-      category: 'construccion',
-      catName: 'Construcción Civil',
-      client: 'Planta de Cemento S.A.',
+      title: 'Topografía Subterránea y Galerías',
+      category: 'mineria',
+      catName: 'Minería',
+      client: 'Compañía Minera Beta',
       location: 'Arequipa, Perú',
-      specs: 'Alineación milimétrica de ejes, pernos de anclaje mecánicos y nivelación de precisión micrométrica de polines principales.',
-      precision: '±0.5 mm precisión',
-      coords: 'Lat: 16°24\'S / Lon: 71°32\'O',
+      specs: 'Levantamiento 3D de alta precisión con escáner láser de túneles, galerías y frentes de avance para control de sobre-rotura.',
+      precision: '±1 mm nube de puntos',
+      coords: 'Lat: 15°24\'S / Lon: 71°32\'O',
       color: 'from-brand-petrol via-brand-dark to-brand-yellow/30',
+      image: tunelSubterraneoImg,
     },
   ];
 
@@ -104,7 +109,7 @@ export default function Portfolio() {
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-100px' }}
-            className="text-xs sm:text-sm font-extrabold tracking-[0.25em] text-brand-green uppercase mb-3"
+            className="text-xs sm:text-sm font-extrabold tracking-[0.25em] text-brand-yellow uppercase mb-3"
           >
             NUESTRO PORTAFOLIO
           </motion.h3>
@@ -158,9 +163,21 @@ export default function Portfolio() {
                 transition={{ duration: 0.4 }}
                 className="bg-brand-dark text-white rounded-3xl overflow-hidden border border-brand-green/20 shadow-premium group flex flex-col justify-between relative min-h-[380px]"
               >
-                {/* Visual technical background gradient */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${project.color} opacity-40 z-0 group-hover:opacity-60 transition-opacity duration-300`} />
-                <div className="absolute inset-0 bg-topo-grid opacity-10 z-0" />
+                {/* Visual technical background gradient or Image */}
+                {project.image ? (
+                  <div className="absolute inset-0 z-0 overflow-hidden">
+                    <img 
+                      src={project.image} 
+                      alt={project.title} 
+                      className="w-full h-full object-cover opacity-50 group-hover:scale-110 transition-transform duration-700 ease-in-out"
+                    />
+                    <div className="absolute inset-0 bg-brand-dark/60 group-hover:bg-brand-dark/40 transition-colors duration-500" />
+                  </div>
+                ) : (
+                  <div className={`absolute inset-0 bg-gradient-to-br ${project.color} opacity-40 z-0 group-hover:opacity-60 transition-opacity duration-300`} />
+                )}
+                
+                <div className="absolute inset-0 bg-topo-grid opacity-10 z-0 pointer-events-none" />
 
                 {/* Card Header (Specs badge & Coords) */}
                 <div className="p-6 relative z-10 flex items-center justify-between border-b border-white/10 bg-brand-dark/20 backdrop-blur-xs">

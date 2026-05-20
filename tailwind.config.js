@@ -9,22 +9,22 @@ export default {
       colors: {
         brand: {
           petrol: {
-            DEFAULT: '#0F3D4C',
-            light: '#145367',
-            dark: '#0a2731',
+            DEFAULT: '#15171C',
+            light: '#252830',
+            dark: '#0C0E11',
           },
           green: {
-            DEFAULT: '#2E7D5B',
-            light: '#3b9e74',
-            dark: '#215941',
+            DEFAULT: '#2D5B37',
+            light: '#3F7A4A',
+            dark: '#1B3E22',
           },
           yellow: {
-            DEFAULT: '#F2B705',
-            light: '#ffcc33',
-            dark: '#c79604',
+            DEFAULT: '#FF5C00',
+            light: '#FF7C2B',
+            dark: '#C84600',
           },
-          light: '#F5F7FA',
-          dark: '#1F2933',
+          light: '#F8FAFC',
+          dark: '#1E2229',
         }
       },
       fontFamily: {

@@ -1,22 +1,23 @@
-import { Compass, Mail, Phone, MapPin, Shield } from 'lucide-react';
+import { Mail, Phone, MapPin, Shield } from "lucide-react";
+import Logo from "./Logo";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   const linksEmpresa = [
-    { name: 'Inicio', href: '#inicio' },
-    { name: 'Nosotros', href: '#nosotros' },
-    { name: 'Servicios', href: '#servicios' },
-    { name: 'Sectores', href: '#sectores' },
-    { name: 'Equipos', href: '#equipos' },
+    { name: "Inicio", href: "#inicio" },
+    { name: "Nosotros", href: "#nosotros" },
+    { name: "Servicios", href: "#servicios" },
+    { name: "Sectores", href: "#sectores" },
+    { name: "Equipos", href: "#equipos" },
   ];
 
   const linksServicios = [
-    { name: 'Levantamiento Topográfico', href: '#servicios' },
-    { name: 'Georreferenciación GNSS', href: '#servicios' },
-    { name: 'Fotogrametría Aérea', href: '#servicios' },
-    { name: 'Replanteo de Obras', href: '#servicios' },
-    { name: 'Cubicación de Tierras', href: '#servicios' },
+    { name: "Levantamiento Topográfico", href: "#servicios" },
+    { name: "Georreferenciación GNSS", href: "#servicios" },
+    { name: "Fotogrametría Aérea", href: "#servicios" },
+    { name: "Replanteo de Obras", href: "#servicios" },
+    { name: "Cubicación de Tierras", href: "#servicios" },
   ];
 
   return (
@@ -28,21 +29,17 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-12 pb-12 border-b border-white/10">
           {/* Logo & Description Column */}
           <div className="lg:col-span-4 space-y-4">
-            <a href="#inicio" className="flex items-center space-x-2 group">
-              <div className="bg-brand-yellow p-2.5 rounded-lg text-brand-petrol transition-transform duration-300 group-hover:rotate-45">
-                <Compass className="h-6 w-6 stroke-[2.5]" />
-              </div>
-              <div className="flex flex-col">
-                <span className="font-outfit font-extrabold text-2xl tracking-wider text-white leading-none">
-                  MINGEOTOP
-                </span>
-                <span className="text-[10px] text-brand-yellow font-semibold tracking-[0.2em] uppercase leading-none mt-1">
-                  Ingeniería & Topografía
-                </span>
-              </div>
+            <a
+              href="#inicio"
+              className="inline-block transition-transform duration-300 active:scale-95"
+            >
+              <Logo textColor="light" />
             </a>
             <p className="text-sm text-gray-400 leading-relaxed font-sans pt-2">
-              **MINGEOTOP E.I.R.L.** brinda servicios topográficos e ingeniería geoespacial especializada en el Perú, aplicando tecnología de alta precisión, drones profesionales y procesamiento CAD/GIS de vanguardia.
+              MINGEOTOP E.I.R.L brinda servicios topográficos e ingeniería
+              geoespacial especializada en el Perú, aplicando tecnología de alta
+              precisión, drones profesionales y procesamiento CAD/GIS de
+              vanguardia.
             </p>
             <div className="flex items-center space-x-3 pt-2">
               <a
@@ -121,7 +118,9 @@ export default function Footer() {
             <div className="space-y-3.5 text-sm">
               <div className="flex items-start space-x-2.5">
                 <MapPin className="h-4.5 w-4.5 text-brand-green mt-0.5" />
-                <span className="leading-snug">Av. Principal 123, Of. 402, Lima, Perú</span>
+                <span className="leading-snug">
+                  Av. Principal 123, Of. 402, Lima, Perú
+                </span>
               </div>
               <div className="flex items-center space-x-2.5">
                 <Phone className="h-4.5 w-4.5 text-brand-green" />
@@ -142,14 +141,23 @@ export default function Footer() {
         {/* Lower Row */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-500 gap-4">
           <div>
-            © {currentYear} **MINGEOTOP E.I.R.L.** Todos los derechos reservados.
+            © {currentYear} MINGEOTOP E.I.R.L Todos los derechos reservados.
           </div>
           <div className="flex items-center space-x-4">
-            <a href="#contacto" className="hover:text-white transition-colors">Términos de Servicio</a>
+            <a href="#contacto" className="hover:text-white transition-colors">
+              Términos de Servicio
+            </a>
             <span>•</span>
-            <a href="#contacto" className="hover:text-white transition-colors">Política de Privacidad</a>
+            <a href="#contacto" className="hover:text-white transition-colors">
+              Política de Privacidad
+            </a>
             <span>•</span>
-            <a href="#contacto" className="hover:text-white transition-colors font-semibold text-brand-yellow">Libro de Reclamaciones</a>
+            <a
+              href="#contacto"
+              className="hover:text-white transition-colors font-semibold text-brand-yellow"
+            >
+              Libro de Reclamaciones
+            </a>
           </div>
         </div>
       </div>

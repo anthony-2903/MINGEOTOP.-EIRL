@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Compass, ShieldCheck, Target, Award } from 'lucide-react';
 import surveyorImg from '../assets/surveyor.png';
+import Logo from './Logo';
 
 export default function Hero() {
   return (
@@ -21,13 +22,13 @@ export default function Hero() {
           {/* Text Content */}
           <div className="lg:col-span-7 flex flex-col justify-center space-y-8 text-center lg:text-left">
             <motion.div
-              initial={{ opacity: 0, y: -20 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="inline-flex items-center justify-center lg:justify-start space-x-2 bg-brand-green/20 border border-brand-green/30 px-4 py-2 rounded-full w-fit mx-auto lg:mx-0"
+              transition={{ duration: 0.8 }}
+              className="inline-flex items-center space-x-3 bg-brand-petrol-dark/80 border border-brand-yellow/30 px-4 py-2 rounded-full mb-6 hover:border-brand-yellow/60 transition-colors duration-300"
             >
-              <span className="w-2 h-2 rounded-full bg-brand-yellow animate-ping" />
-              <span className="text-xs sm:text-sm font-semibold tracking-wider text-brand-green-light uppercase">
+              <Logo iconOnly={true} className="w-6 h-6 animate-pulse" />
+              <span className="text-xs sm:text-sm font-bold tracking-wider text-brand-yellow uppercase">
                 Tecnología Geoespacial de Vanguardia
               </span>
             </motion.div>
@@ -39,8 +40,11 @@ export default function Hero() {
                 transition={{ duration: 0.8, delay: 0.2 }}
                 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-[1.1] font-outfit"
               >
-                <span className="block text-brand-yellow">MINGEOTOP E.I.R.L.</span>
-                <span className="block text-white text-3xl sm:text-4xl md:text-5xl mt-2 font-normal">
+                <span className="block text-white tracking-wider uppercase">
+                  <span className="text-brand-yellow font-extrabold">MINGEO</span>TOP
+                  <span className="text-lg sm:text-xl font-semibold text-brand-yellow ml-1">E.I.R.L.</span>
+                </span>
+                <span className="block text-white text-3xl sm:text-4xl md:text-5xl mt-3 font-light leading-snug">
                   Ingeniería Topográfica con Precisión Milimétrica
                 </span>
               </motion.h1>
