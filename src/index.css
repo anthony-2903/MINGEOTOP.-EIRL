@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-petrol: #0F3D4C;
+  --color-brand-petrol-light: #145367;
+  --color-brand-petrol-dark: #0a2731;
+
+  --color-brand-green: #2E7D5B;
+  --color-brand-green-light: #3b9e74;
+  --color-brand-green-dark: #215941;
+
+  --color-brand-yellow: #F2B705;
+  --color-brand-yellow-light: #ffcc33;
+  --color-brand-yellow-dark: #c79604;
+
+  --color-brand-light: #F5F7FA;
+  --color-brand-dark: #1F2933;
+
+  --font-sans: 'Inter', sans-serif;
+  --font-outfit: 'Outfit', sans-serif;
+
+  --shadow-premium: 0 10px 30px -10px rgba(15, 61, 76, 0.1);
+  --shadow-premium-hover: 0 20px 40px -15px rgba(15, 61, 76, 0.2);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply font-sans text-brand-dark bg-brand-light selection:bg-brand-yellow selection:text-brand-dark;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-outfit;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-brand-light;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-brand-petrol/30 rounded-full transition-all duration-300;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-brand-petrol/60;
+}
+
+/* Custom topographics backgrounds */
+.bg-topo-grid {
+  background-size: 40px 40px;
+  background-image: linear-gradient(to right, rgba(15, 61, 76, 0.03) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(15, 61, 76, 0.03) 1px, transparent 1px);
+}
+
+.bg-topo-contour {
+  background-image: radial-gradient(circle at 50% 50%, rgba(46, 125, 91, 0.05) 1px, transparent 20%),
+                    radial-gradient(circle at 20% 80%, rgba(46, 125, 91, 0.04) 2px, transparent 40%),
+                    radial-gradient(circle at 80% 30%, rgba(15, 61, 76, 0.04) 3px, transparent 50%);
+}
+
+/* Premium gradient backgrounds */
+.gradient-petrol-green {
+  background: linear-gradient(135deg, #0F3D4C 0%, #175e74 50%, #2E7D5B 100%);
+}
+
+.gradient-green-petrol {
+  background: linear-gradient(135deg, #2E7D5B 0%, #0F3D4C 100%);
+}
+
+.gradient-card-dark {
+  background: linear-gradient(135deg, #1F2933 0%, #131A22 100%);
+}
+
+/* Hover glow effects */
+.hover-glow-yellow:hover {
+  box-shadow: 0 0 15px rgba(242, 183, 5, 0.5);
+}
+
+.hover-glow-green:hover {
+  box-shadow: 0 0 15px rgba(46, 125, 91, 0.5);
+}
+
+/* Text glow */
+.text-glow-yellow {
+  text-shadow: 0 0 10px rgba(242, 183, 5, 0.4);
+}
+
+/* Custom animations */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 20s linear infinite;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -40;
+  }
+}
+
+.animate-dash {
+  stroke-dasharray: 5;
+  animation: dash 2s linear infinite;
+}
