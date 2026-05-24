@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, PhoneCall } from 'lucide-react';
+import { Menu, X, PhoneCall, LayoutDashboard } from 'lucide-react';
 import Logo from './Logo';
 
 export default function Navbar() {
@@ -61,7 +61,15 @@ export default function Navbar() {
           </div>
 
           {/* Action Button */}
-          <div className="hidden lg:block">
+          <div className="hidden lg:flex items-center gap-3">
+            <a
+              id="btn-admin-nav"
+              href="/admin"
+              className="flex items-center space-x-2 border border-white/15 bg-white/5 hover:bg-white/10 text-gray-200 hover:text-white px-4 py-2.5 rounded-lg font-outfit font-semibold text-sm transition-all duration-300"
+            >
+              <LayoutDashboard className="h-4 w-4" />
+              <span>Admin</span>
+            </a>
             <a
               id="btn-cotizar-nav"
               href="#contacto"
@@ -103,6 +111,15 @@ export default function Navbar() {
             </a>
           ))}
           <div className="pt-4 border-t border-brand-green/20 mt-4 px-4">
+            <a
+              id="btn-admin-mobile"
+              href="/admin"
+              onClick={() => setIsOpen(false)}
+              className="mb-3 flex items-center justify-center space-x-2 border border-white/15 bg-white/5 text-gray-100 w-full py-3.5 rounded-lg font-outfit font-bold text-base transition-colors hover:bg-white/10"
+            >
+              <LayoutDashboard className="h-5 w-5" />
+              <span>Panel Admin</span>
+            </a>
             <a
               id="btn-cotizar-mobile"
               href="#contacto"

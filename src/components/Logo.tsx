@@ -6,9 +6,9 @@ interface LogoProps {
   textColor?: 'light' | 'dark';
 }
 
-export default function Logo({ className = '', iconOnly = false, textColor = 'light' }: LogoProps) {
-  // SVG drawing representing the official MINGEOTOP emblem exactly
-  const LogoIcon = () => (
+// SVG drawing representing the official MINGEOTOP emblem exactly
+function LogoIcon() {
+  return (
     <svg
       viewBox="0 0 120 100"
       className="w-full h-full filter drop-shadow-md"
@@ -99,7 +99,9 @@ export default function Logo({ className = '', iconOnly = false, textColor = 'li
       </g>
     </svg>
   );
+}
 
+export default function Logo({ className = '', iconOnly = false, textColor = 'light' }: LogoProps) {
   if (iconOnly) {
     return (
       <div className={`w-12 h-12 flex-shrink-0 hover:scale-110 transition-transform duration-300 ${className}`}>

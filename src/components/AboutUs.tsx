@@ -194,7 +194,7 @@ export default function AboutUs() {
 
                 <div className="flex items-center space-x-4">
                   <div className="bg-white/10 p-3 rounded-xl text-brand-yellow">
-                    <Compass className="h-6 w-6 animate-spin-slow" />
+                    <Compass className="h-6 w-6 animate-soft-pulse" />
                   </div>
                   <div>
                     <h4 className="font-bold font-outfit text-white leading-none font-sans">

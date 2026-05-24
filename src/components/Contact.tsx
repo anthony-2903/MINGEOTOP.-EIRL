@@ -335,7 +335,7 @@ export default function Contact() {
                   transition={{ duration: 0.5 }}
                   className="flex flex-col items-center justify-center text-center py-12 px-4 h-full space-y-6"
                 >
-                  <div className="w-20 h-20 bg-brand-green/10 text-brand-green rounded-full flex items-center justify-center animate-bounce">
+                  <div className="w-20 h-20 bg-brand-green/10 text-brand-green rounded-full flex items-center justify-center animate-success-pop">
                     <CheckCircle className="h-12 w-12" />
                   </div>
                   <div className="space-y-2">

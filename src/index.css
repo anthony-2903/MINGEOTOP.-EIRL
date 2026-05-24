@@ -96,13 +96,12 @@
 
 /* Custom animations */
 @keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0px); }
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -6px, 0); }
 }
 
 .animate-float {
-  animation: float 6s ease-in-out infinite;
+  animation: float 12s ease-in-out infinite;
 }
 
 @keyframes spin-slow {
@@ -111,7 +110,7 @@
 }
 
 .animate-spin-slow {
-  animation: spin-slow 20s linear infinite;
+  animation: spin-slow 60s linear infinite;
 }
 
 @keyframes dash {
@@ -122,5 +121,143 @@
 
 .animate-dash {
   stroke-dasharray: 5;
-  animation: dash 2s linear infinite;
+  animation: dash 5s linear infinite;
+}
+
+@keyframes soft-pulse {
+  0%, 100% {
+    opacity: 0.85;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.035);
+  }
+}
+
+.animate-soft-pulse {
+  animation: soft-pulse 4.5s ease-in-out infinite;
+}
+
+@keyframes whatsapp-pulse {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+    box-shadow: 0 16px 36px -18px rgba(37, 211, 102, 0.65);
+  }
+  50% {
+    transform: translateY(-3px) scale(1.025);
+    box-shadow: 0 22px 44px -18px rgba(37, 211, 102, 0.9);
+  }
+}
+
+.animate-whatsapp-pulse {
+  animation: whatsapp-pulse 4s ease-in-out infinite;
+}
+
+@keyframes success-pop {
+  0% {
+    transform: scale(0.92);
+    opacity: 0.7;
+  }
+  60% {
+    transform: scale(1.04);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-success-pop {
+  animation: success-pop 700ms ease-out both;
+}
+
+@keyframes hero-bg-drift {
+  0% {
+    transform: scale(1.02) translate3d(0, 0, 0);
+  }
+  50% {
+    transform: scale(1.07) translate3d(-1.2%, -0.8%, 0);
+  }
+  100% {
+    transform: scale(1.04) translate3d(1%, 0.6%, 0);
+  }
+}
+
+.hero-bg-motion {
+  animation: hero-bg-drift 9s ease-in-out infinite alternate;
+  transform-origin: center center;
+  will-change: transform, opacity;
+}
+
+@keyframes cinematic-section-reveal {
+  0% {
+    opacity: 0.25;
+    transform: translateY(72px) scale(0.975);
+    filter: saturate(0.94);
+    clip-path: inset(8% 0 0 0);
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: saturate(1);
+    clip-path: inset(0 0 0 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: saturate(1);
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes cinematic-fade-out {
+  0%, 62% {
+    opacity: 1;
+    transform: scale(1);
+    filter: none;
+  }
+  100% {
+    opacity: 0.72;
+    transform: scale(0.985);
+    filter: none;
+  }
+}
+
+@supports (animation-timeline: view()) {
+  .cinematic-scroll > section:not(:first-child):not(#contacto) {
+    animation: cinematic-section-reveal linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 34%;
+    transform-origin: center top;
+    will-change: opacity, transform, filter, clip-path;
+  }
+
+  .cinematic-scroll > #contacto {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    filter: none;
+    clip-path: none;
+  }
+
+  .cinematic-scroll > section:first-child {
+    animation: cinematic-fade-out linear both;
+    animation-timeline: view();
+    animation-range: exit -10% exit 70%;
+    transform-origin: center center;
+    will-change: opacity, transform, filter;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
