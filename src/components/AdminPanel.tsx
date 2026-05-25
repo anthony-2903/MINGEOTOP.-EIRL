@@ -29,6 +29,8 @@ import {
   X,
 } from 'lucide-react';
 import Logo from './Logo';
+import minaTajoAbiertoImg from '../assets/mina_tajo_abierto.png';
+import tunelSubterraneoImg from '../assets/tunel_subterraneo.png';
 
 type AdminSectionId =
   | 'resumen'
@@ -84,7 +86,7 @@ const initialContent: Record<Exclude<AdminSectionId, 'resumen'>, EditableItem> =
   proyectos: {
     title: 'Proyectos de precision ejecutados con exito',
     description:
-      'Controla casos destacados, categorias, clientes, ubicaciones, fichas tecnicas e imagenes del portafolio.',
+      'Controla casos destacados con una imagen principal, descripcion inferior transparente y modal ampliado para cada proyecto.',
     status: 'Publicado',
   },
   testimonios: {
@@ -102,8 +104,8 @@ const initialContent: Record<Exclude<AdminSectionId, 'resumen'>, EditableItem> =
   seo: {
     title: 'MINGEOTOP E.I.R.L. | Topografia, Geodesia y Drones en Peru',
     description:
-      'Define titulo del sitio, descripcion para buscadores, palabras clave, imagen social y estado de indexacion.',
-    status: 'Revision',
+      'Topografia, geodesia, fotogrametria con drones, replanteo de obras, cubicacion y control topografico para mineria, construccion e infraestructura en Peru.',
+    status: 'Publicado',
   },
 };
 
@@ -147,10 +149,36 @@ const serviceItems = [
 ];
 
 const projectItems = [
-  { title: 'Control Volumetrico y Taludes', category: 'Mineria', location: 'Pasco, Peru' },
-  { title: 'Levantamiento Catastral y Ortomosaico', category: 'Drones', location: 'Lima Provincias' },
-  { title: 'Replanteo de Ejes y Verticalidad', category: 'Construccion', location: 'Lima Metropolitana' },
-  { title: 'Red Geodesica de Apoyo WGS84', category: 'Catastro', location: 'Huancavelica' },
+  {
+    title: 'Control Volumetrico y Taludes',
+    category: 'Mineria',
+    location: 'Pasco, Peru',
+    description: 'Cubicacion mensual de stock y control de estabilidad en zona minera.',
+    precision: '+/-2 cm instrumental',
+    image: minaTajoAbiertoImg,
+  },
+  {
+    title: 'Levantamiento Catastral y Ortomosaico',
+    category: 'Drones',
+    location: 'Lima Provincias',
+    description: 'Fotogrametria con dron, ortofoto digital y documentacion tecnica.',
+    precision: 'GSD 3.2 cm/px',
+  },
+  {
+    title: 'Replanteo de Ejes y Verticalidad',
+    category: 'Construccion',
+    location: 'Lima Metropolitana',
+    description: 'Control geometrico de cimentaciones, anclajes y verticalidad estructural.',
+    precision: '+/-1.5 mm angular',
+  },
+  {
+    title: 'Topografia Subterranea y Galerias',
+    category: 'Mineria',
+    location: 'Arequipa, Peru',
+    description: 'Registro tecnico de tuneles, galerias y frentes de avance.',
+    precision: '+/-1 mm nube de puntos',
+    image: tunelSubterraneoImg,
+  },
 ];
 
 const testimonialItems = [
@@ -163,6 +191,7 @@ const contactChannels = [
   { label: 'WhatsApp', value: '+51 913 386 354', icon: MessageCircle },
   { label: 'Telefono', value: '+51 913 386 354', icon: Phone },
   { label: 'Correo', value: 'mingeotop@gmail.com', icon: Mail },
+  { label: 'Facebook', value: 'facebook.com/gimatc.2023', icon: Globe2 },
   { label: 'TikTok', value: '@mingeotop', icon: Globe2 },
 ];
 
@@ -170,7 +199,9 @@ const seoChecks = [
   'Titulo menor a 60 caracteres',
   'Descripcion comercial clara',
   'Palabras clave por servicio',
-  'Imagen social configurada',
+  'Imagen social y Open Graph configurados',
+  'Facebook empresarial vinculado',
+  'Twitter Card configurada',
   'URL canonica definida',
 ];
 
@@ -396,6 +427,37 @@ export default function AdminPanel() {
             </div>
           )}
 
+          {activeSection === 'proyectos' && (
+            <div className="rounded-lg border border-gray-200">
+              <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
+                <h3 className="font-extrabold text-brand-petrol">Formato visual del portafolio</h3>
+                <span className="rounded-full bg-brand-green/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-brand-green">
+                  Modal activo
+                </span>
+              </div>
+              <div className="grid gap-4 p-4 sm:grid-cols-2">
+                {projectItems.slice(0, 2).map((project) => (
+                  <div key={project.title} className="overflow-hidden rounded-lg border border-gray-200 bg-brand-dark text-white">
+                    <div className="relative aspect-[4/3]">
+                      {project.image ? (
+                        <img src={project.image} alt={project.title} className="h-full w-full object-cover" />
+                      ) : (
+                        <div className="h-full w-full bg-gradient-to-br from-brand-petrol via-brand-dark to-brand-green" />
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-brand-dark/80 via-brand-dark/25 to-transparent" />
+                      <div className="absolute inset-x-3 bottom-3 rounded-lg border border-white/15 bg-brand-dark/30 p-3 backdrop-blur-sm">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-brand-green-light">
+                          {project.location}
+                        </p>
+                        <h4 className="mt-1 text-sm font-extrabold leading-tight">{project.title}</h4>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <label className="space-y-2">
             <span className="text-xs font-bold uppercase tracking-wider text-gray-500">Estado</span>
             <select
@@ -460,10 +522,22 @@ export default function AdminPanel() {
           </div>
           <div className="mt-4 space-y-3">
             {projectItems.map((project) => (
-              <div key={project.title} className="flex items-start justify-between gap-3 rounded-lg border border-gray-100 p-3">
-                <div>
-                  <p className="text-sm font-extrabold text-brand-petrol">{project.title}</p>
-                  <p className="mt-1 text-xs text-gray-500">{project.category} - {project.location}</p>
+              <div key={project.title} className="flex items-start gap-3 rounded-lg border border-gray-100 p-3">
+                <div className="relative h-16 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-brand-petrol">
+                  {project.image ? (
+                    <img src={project.image} alt={project.title} className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="h-full w-full bg-gradient-to-br from-brand-petrol via-brand-dark to-brand-green" />
+                  )}
+                  <div className="absolute inset-0 bg-brand-dark/20" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-extrabold leading-tight text-brand-petrol">{project.title}</p>
+                  <p className="mt-1 text-xs font-semibold text-gray-500">{project.category} - {project.location}</p>
+                  <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-gray-500">{project.description}</p>
+                  <p className="mt-2 text-[10px] font-bold uppercase tracking-wider text-brand-green">
+                    Modal con imagen ampliada - {project.precision}
+                  </p>
                 </div>
                 <button className="rounded-lg border border-gray-200 p-2 text-gray-500 hover:text-brand-petrol" title="Editar proyecto">
                   <Pencil className="h-4 w-4" />

@@ -2,11 +2,10 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Compass, Disc, Zap, Plane, Code, MonitorDot, Database, Layers } from 'lucide-react';
 
-// Import newly generated high-fidelity equipment images
-import totalStationImg from '../assets/total_station.png';
-import gnssRtkImg from '../assets/gnss_rtk.png';
-import opticalLevelImg from '../assets/optical_level.png';
-import droneSurveyImg from '../assets/drone_survey.png';
+import totalStationImg from '../assets/equipment_total_station_real.jpg';
+import gnssRtkImg from '../assets/equipment_gnss_real.jpg';
+import opticalLevelImg from '../assets/equipment_level_real.jpg';
+import droneSurveyImg from '../assets/equipment_drone_real.jpg';
 
 export default function Equipment() {
   const hardware = [
@@ -100,8 +99,8 @@ export default function Equipment() {
                 <div className="absolute top-0 -left-[100%] w-1/2 h-full bg-gradient-to-r from-transparent via-white/25 to-transparent skew-x-12 group-hover:left-[200%] transition-all duration-1000 ease-in-out z-20" />
                 
                 {/* Contour background details over image */}
-                <div className="absolute inset-0 bg-topo-grid opacity-20 z-10" />
-                <div className="absolute inset-0 bg-gradient-to-t from-brand-petrol/90 via-transparent to-transparent z-10" />
+                <div className="absolute inset-0 bg-topo-grid opacity-5 z-10" />
+                <div className="absolute inset-0 bg-gradient-to-t from-brand-petrol/55 via-transparent to-transparent z-10" />
 
                 {/* Professional survey image */}
                 <img

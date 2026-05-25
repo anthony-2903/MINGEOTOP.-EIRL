@@ -43,7 +43,7 @@ export default function Footer() {
             </p>
             <div className="flex items-center space-x-3 pt-2">
               <a
-                href="https://facebook.com"
+                href="https://www.facebook.com/gimatc.2023"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-lg bg-white/5 text-gray-400 hover:bg-brand-green hover:text-white flex items-center justify-center transition-all"
