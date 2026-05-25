@@ -56,11 +56,11 @@ export default function App() {
         <Hero />
         <AboutUs />
         <Services />
+        <Portfolio />
         <Sectors />
         <Equipment />
         <Process />
         <Benefits />
-        <Portfolio />
         <Testimonials />
         <Contact />
       </main>

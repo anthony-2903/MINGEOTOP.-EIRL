@@ -22,11 +22,11 @@ export default function Navbar() {
     { name: 'Inicio', href: '#inicio' },
     { name: 'Nosotros', href: '#nosotros' },
     { name: 'Servicios', href: '#servicios' },
+    { name: 'Proyectos', href: '#proyectos' },
     { name: 'Sectores', href: '#sectores' },
     { name: 'Equipos', href: '#equipos' },
     { name: 'Proceso', href: '#proceso' },
     { name: 'Beneficios', href: '#beneficios' },
-    { name: 'Proyectos', href: '#proyectos' },
     { name: 'Contacto', href: '#contacto' },
   ];
 
