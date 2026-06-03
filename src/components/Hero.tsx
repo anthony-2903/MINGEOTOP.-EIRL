@@ -56,7 +56,7 @@ export default function Hero() {
             >
               <Logo iconOnly={true} className="w-6 h-6 animate-soft-pulse" />
               <span className="text-xs sm:text-sm font-bold tracking-wider text-brand-yellow uppercase">
-                Tecnologia Geoespacial de Vanguardia
+                Tecnología Geoespacial de Vanguardia
               </span>
             </motion.div>
 
@@ -72,7 +72,7 @@ export default function Hero() {
                   <span className="text-lg sm:text-xl font-semibold text-brand-yellow ml-1">E.I.R.L.</span>
                 </span>
                 <span className="block text-white text-3xl sm:text-4xl md:text-5xl mt-3 font-light leading-snug">
-                  Ingenieria Topografica con Precision Milimetrica
+                  Ingeniería Topográfica con Precisión Milimétrica
                 </span>
               </motion.h1>
 
@@ -82,7 +82,7 @@ export default function Hero() {
                 transition={{ duration: 0.8, delay: 0.4 }}
                 className="text-base sm:text-lg md:text-xl text-gray-300 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-sans"
               >
-                Soluciones integrales de topografia, geodesia y fotogrametria con drones para proyectos mineros, de construccion civil, rurales, urbanos e industriales en todo el Peru.
+                Soluciones integrales de topografía, geodesia y fotogrametría con drones para proyectos mineros, de construcción civil, rurales, urbanos e industriales en todo el Perú.
               </motion.p>
             </div>
 
@@ -97,7 +97,7 @@ export default function Hero() {
                 href="#contacto"
                 className="w-full sm:w-auto flex items-center justify-center space-x-2 bg-brand-yellow hover:bg-brand-yellow-light text-brand-dark px-8 py-4 rounded-xl font-outfit font-bold transition-all duration-300 transform hover:-translate-y-1 hover-glow-yellow"
               >
-                <span>Solicitar Cotizacion</span>
+                <span>Solicitar Cotización</span>
                 <ArrowRight className="h-5 w-5" />
               </a>
               <a
@@ -117,7 +117,7 @@ export default function Hero() {
             >
               <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
                 <span className="text-2xl sm:text-3xl font-extrabold text-brand-yellow font-outfit">99.9%</span>
-                <span className="text-[10px] sm:text-xs text-gray-400 font-semibold tracking-wider uppercase mt-1">Precision Tecnica</span>
+                <span className="text-[10px] sm:text-xs text-gray-400 font-semibold tracking-wider uppercase mt-1">Precisión Técnica</span>
               </div>
               <div className="flex flex-col items-center lg:items-start text-center lg:text-left border-x border-white/10 px-4">
                 <span className="text-2xl sm:text-3xl font-extrabold text-brand-yellow font-outfit">+150</span>
@@ -125,7 +125,7 @@ export default function Hero() {
               </div>
               <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
                 <span className="text-2xl sm:text-3xl font-extrabold text-brand-yellow font-outfit">100%</span>
-                <span className="text-[10px] sm:text-xs text-gray-400 font-semibold tracking-wider uppercase mt-1">Garantia en Plazos</span>
+                <span className="text-[10px] sm:text-xs text-gray-400 font-semibold tracking-wider uppercase mt-1">Garantía en Plazos</span>
               </div>
             </motion.div>
           </div>

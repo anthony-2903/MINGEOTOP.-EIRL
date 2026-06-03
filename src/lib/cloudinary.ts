@@ -59,7 +59,6 @@ async function uploadToCloudinary(
   const formData = new FormData();
   formData.append('file', file);
   formData.append('upload_preset', UPLOAD_PRESET);
-  formData.append('folder', folder);
 
   const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/${resourceType}/upload`, {
     method: 'POST',
@@ -67,7 +66,14 @@ async function uploadToCloudinary(
   });
 
   if (!response.ok) {
-    throw new Error('No se pudo subir la imagen a Cloudinary.');
+    let detail = '';
+    try {
+      const errBody = await response.json();
+      detail = errBody?.error?.message || JSON.stringify(errBody);
+    } catch (e) {
+      detail = `HTTP ${response.status} ${response.statusText}`;
+    }
+    throw new Error(`Error de Cloudinary: ${detail}`);
   }
 
   const uploaded = (await response.json()) as CloudinaryUploadResponse;

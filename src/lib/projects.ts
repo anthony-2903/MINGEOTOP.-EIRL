@@ -12,9 +12,17 @@ export type Project = {
   image?: string;
   video?: string;
   poster?: string;
+  // Admin-related fields
+  status?: 'published' | 'draft' | 'review';
+  sort_order?: number;
+  image_url?: string;
+  image_webp_url?: string;
+  video_url?: string;
+  video_optimized_url?: string;
+  video_poster_url?: string;
 };
 
-type ProjectRow = {
+export type ProjectRow = {
   id: string;
   title: string;
   description: string;
@@ -26,6 +34,9 @@ type ProjectRow = {
   video_optimized_url: string | null;
   video_url: string | null;
   video_poster_url: string | null;
+  status: 'published' | 'draft' | 'review' | null;
+  sort_order: number | null;
+  created_at?: string;
 };
 
 const categoryLabels: Record<string, string> = {
@@ -63,6 +74,14 @@ function mapProject(row: ProjectRow): Project {
     image: row.image_webp_url ?? row.image_url ?? undefined,
     video: row.video_optimized_url ?? row.video_url ?? undefined,
     poster: row.video_poster_url ?? row.image_webp_url ?? row.image_url ?? undefined,
+    // Keep raw data for editing
+    status: row.status ?? 'draft',
+    sort_order: row.sort_order ?? 0,
+    image_url: row.image_url ?? undefined,
+    image_webp_url: row.image_webp_url ?? undefined,
+    video_url: row.video_url ?? undefined,
+    video_optimized_url: row.video_optimized_url ?? undefined,
+    video_poster_url: row.video_poster_url ?? undefined,
   };
 }
 
@@ -72,7 +91,7 @@ export async function getPublishedProjects() {
   const { data, error } = await supabase
     .from('projects')
     .select(
-      'id,title,description,category,location,precision_label,image_webp_url,image_url,video_optimized_url,video_url,video_poster_url',
+      'id,title,description,category,location,precision_label,image_webp_url,image_url,video_optimized_url,video_url,video_poster_url,status,sort_order',
     )
     .eq('status', 'published')
     .order('sort_order', { ascending: true })
@@ -84,4 +103,74 @@ export async function getPublishedProjects() {
   }
 
   return (data ?? []).map((project) => mapProject(project as ProjectRow));
+}
+
+export async function getAllProjects() {
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from('projects')
+    .select(
+      'id,title,description,category,location,precision_label,image_webp_url,image_url,video_optimized_url,video_url,video_poster_url,status,sort_order,created_at',
+    )
+    .order('sort_order', { ascending: true })
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.warn('No se pudieron cargar todos los proyectos desde Supabase:', error.message);
+    return [];
+  }
+
+  return (data ?? []).map((project) => mapProject(project as ProjectRow));
+}
+
+export async function createProject(projectData: Omit<ProjectRow, 'id'>) {
+  if (!supabase) throw new Error('Supabase no está configurado.');
+
+  const { data, error } = await supabase
+    .from('projects')
+    .insert([projectData])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error al crear el proyecto en Supabase:', error);
+    throw error;
+  }
+
+  return mapProject(data as ProjectRow);
+}
+
+export async function updateProject(id: string, updates: Partial<ProjectRow>) {
+  if (!supabase) throw new Error('Supabase no está configurado.');
+
+  const { data, error } = await supabase
+    .from('projects')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error al actualizar el proyecto en Supabase:', error);
+    throw error;
+  }
+
+  return mapProject(data as ProjectRow);
+}
+
+export async function deleteProject(id: string) {
+  if (!supabase) throw new Error('Supabase no está configurado.');
+
+  const { error } = await supabase
+    .from('projects')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error al eliminar el proyecto en Supabase:', error);
+    throw error;
+  }
+
+  return true;
 }

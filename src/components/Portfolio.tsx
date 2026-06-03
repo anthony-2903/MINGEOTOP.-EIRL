@@ -288,7 +288,7 @@ export default function Portfolio() {
           >
             <motion.div
               layoutId={`project-card-${selectedProject.id}`}
-              className="relative w-full max-w-5xl overflow-hidden rounded-2xl border border-white/15 bg-brand-dark text-white shadow-2xl"
+              className="relative max-h-[92vh] max-w-[94vw] overflow-hidden rounded-2xl border border-white/15 bg-brand-dark text-white shadow-2xl"
               transition={{ type: 'spring', stiffness: 260, damping: 28 }}
               onClick={(event) => event.stopPropagation()}
             >
@@ -301,12 +301,12 @@ export default function Portfolio() {
                 <X className="h-5 w-5" />
               </button>
 
-              <div className="relative aspect-[16/10] max-h-[78vh] w-full overflow-hidden">
+              <div className="relative flex max-h-[72vh] max-w-[94vw] items-center justify-center overflow-hidden bg-brand-dark">
                 {selectedProject.video ? (
                   <video
                     src={selectedProject.video}
                     poster={selectedProject.poster}
-                    className="h-full w-full object-cover"
+                    className="block max-h-[72vh] max-w-[94vw] object-contain"
                     controls
                     autoPlay
                     playsInline
@@ -317,13 +317,15 @@ export default function Portfolio() {
                     animate={{ scale: 1 }}
                     exit={{ scale: 1.02 }}
                     transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                    className="h-full w-full"
+                    className="flex max-h-[72vh] max-w-[94vw] items-center justify-center"
                   >
-                    <ProjectMedia project={selectedProject} className="h-full w-full object-cover" />
+                    <ProjectMedia
+                      project={selectedProject}
+                      className="block max-h-[72vh] max-w-[94vw] object-contain"
+                    />
                   </motion.div>
                 )}
 
-                <div className="absolute inset-0 bg-gradient-to-t from-brand-dark via-brand-dark/35 to-transparent pointer-events-none" />
                 <div className="absolute inset-0 bg-topo-grid opacity-10 pointer-events-none" />
 
                 <motion.div
