@@ -1,186 +1,217 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Compass, Disc, Zap, Plane, Code, MonitorDot, Database, Layers } from 'lucide-react';
+import { CheckCircle2, ClipboardCheck, Database, FileDigit, Map, Ruler, Satellite } from 'lucide-react';
 
 import totalStationImg from '../assets/equipment_total_station_real.jpg';
 import gnssRtkImg from '../assets/equipment_gnss_real.jpg';
 import opticalLevelImg from '../assets/equipment_level_real.jpg';
 import droneSurveyImg from '../assets/equipment_drone_real.jpg';
 
-export default function Equipment() {
-  const hardware = [
-    {
-      name: 'Estación Total Electrónica',
-      image: totalStationImg,
-      specs: 'Medición angular milimétrica y EDM de gran alcance (hasta 5000m sin prisma). Ideal para replanteos estructurales e instrumentación de presas.',
-      icon: <Compass className="h-6 w-6 text-brand-yellow group-hover:text-brand-dark transition-colors duration-300" />,
-      features: ['Precisión angular de 1"', 'Medición sin prisma', 'Compensador de doble eje'],
-    },
-    {
-      name: 'GPS Diferencial GNSS RTK',
-      image: gnssRtkImg,
-      specs: 'Receptores multiconstelación de triple frecuencia (GPS, GLONASS, Galileo, BeiDou) con precisión centimétrica en tiempo real.',
-      icon: <Layers className="h-6 w-6 text-brand-yellow group-hover:text-brand-dark transition-colors duration-300" />,
-      features: ['Estación Base y Móvil', 'Precisión H: 8mm, V: 15mm', 'Enlace radio UHF y GSM'],
-    },
-    {
-      name: 'Nivel Automático de Precisión',
-      image: opticalLevelImg,
-      specs: 'Instrumental óptico de alta gama para nivelación geométrica diferencial y control de asentamientos estructurales.',
-      icon: <Disc className="h-6 w-6 text-brand-yellow group-hover:text-brand-dark transition-colors duration-300" />,
-      features: ['Aumento de 32x', 'Desviación estándar de 0.7mm/km', 'Compensador automático de aire'],
-    },
-    {
-      name: 'Drones para Fotogrametría',
-      image: droneSurveyImg,
-      specs: 'Drones profesionales multiespectrales y RGB de alta resolución para cartografía, catastro y modelos 3D volumétricos.',
-      icon: <Plane className="h-6 w-6 text-brand-yellow group-hover:text-brand-dark transition-colors duration-300" />,
-      features: ['Cámara de 45 MP con obturador mecánico', 'Módulo RTK integrado', 'Planificación automática de vuelos'],
-    },
-  ];
+const instruments = [
+  {
+    code: 'EQ-01',
+    name: 'Estación total electrónica',
+    image: totalStationImg,
+    use: 'Replanteo, control estructural, poligonales y levantamientos de detalle.',
+    specs: ['Medición angular de precisión', 'EDM con y sin prisma', 'Compensador de doble eje'],
+  },
+  {
+    code: 'EQ-02',
+    name: 'GNSS diferencial RTK',
+    image: gnssRtkImg,
+    use: 'Control geodésico, puntos base, catastro, vías y redes de apoyo.',
+    specs: ['Multiconstelación satelital', 'Corrección en tiempo real', 'Precisión centimétrica'],
+  },
+  {
+    code: 'EQ-03',
+    name: 'Nivel automático de precisión',
+    image: opticalLevelImg,
+    use: 'Nivelación geométrica, control de cotas y verificación de asentamientos.',
+    specs: ['Aumento óptico 32x', 'Lectura estable en campo', 'Control altimétrico fino'],
+  },
+  {
+    code: 'EQ-04',
+    name: 'Dron para fotogrametría',
+    image: droneSurveyImg,
+    use: 'Ortomosaicos, modelos digitales, cubicaciones y registro visual de obra.',
+    specs: ['Captura RGB de alta resolución', 'Planificación de vuelo', 'Modelos 2D y 3D'],
+  },
+];
 
-  const softwares = [
-    { name: 'AutoCAD', category: 'Dibujo CAD Técnico', icon: <Code className="h-5 w-5" /> },
-    { name: 'Civil 3D', category: 'Diseño Vial & Movimiento Tierras', icon: <MonitorDot className="h-5 w-5" /> },
-    { name: 'ArcGIS / QGIS', category: 'Sistemas de Información Geográfica (GIS)', icon: <Database className="h-5 w-5" /> },
-    { name: 'Pix4D / Agisoft', category: 'Procesamiento Fotogramétrico Dron', icon: <Zap className="h-5 w-5" /> },
-  ];
+const workflow = [
+  { label: 'Captura', value: 'Campo', icon: <Satellite className="h-4 w-4" /> },
+  { label: 'Control', value: 'Geodesia', icon: <Ruler className="h-4 w-4" /> },
+  { label: 'Proceso', value: 'CAD / GIS', icon: <Database className="h-4 w-4" /> },
+  { label: 'Entrega', value: 'Planos', icon: <FileDigit className="h-4 w-4" /> },
+];
+
+const software = [
+  'AutoCAD',
+  'Civil 3D',
+  'ArcGIS / QGIS',
+  'Pix4D / Agisoft',
+  'Reportes técnicos',
+  'Planos DWG / PDF',
+];
+
+export default function Equipment() {
+  const featured = instruments[0];
 
   return (
-    <section id="equipos" className="py-24 bg-brand-light relative overflow-hidden bg-topo-contour">
-      {/* Light contour overlay */}
-      <div className="absolute top-0 left-0 w-full h-full bg-topo-grid opacity-30 -z-10" />
+    <section id="equipos" className="relative overflow-hidden bg-white py-24">
+      <div className="absolute inset-x-0 top-0 h-px bg-gray-200" />
+      <div className="absolute inset-0 bg-topo-grid opacity-35" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <motion.h3
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-100px' }}
-            className="text-xs sm:text-sm font-extrabold tracking-[0.25em] text-brand-yellow uppercase mb-3"
-          >
-            EQUIPOS Y TECNOLOGÍA
-          </motion.h3>
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-100px' }}
-            transition={{ delay: 0.1 }}
-            className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-brand-petrol font-outfit"
-          >
-            Instrumental de Alta Gama y Procesamiento Digital
-          </motion.h2>
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-12 grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-end">
+          <div>
+            <motion.h3
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-100px' }}
+              className="mb-3 text-xs font-extrabold uppercase tracking-[0.25em] text-brand-yellow sm:text-sm"
+            >
+              Equipos y tecnología
+            </motion.h3>
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-100px' }}
+              transition={{ delay: 0.1 }}
+              className="font-outfit text-3xl font-extrabold leading-tight text-brand-petrol sm:text-4xl md:text-5xl"
+            >
+              Instrumental técnico y procesamiento digital
+            </motion.h2>
+          </div>
+
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-100px' }}
             transition={{ delay: 0.2 }}
-            className="mt-4 text-base sm:text-lg text-gray-500 font-sans"
+            className="max-w-2xl text-sm leading-relaxed text-gray-600 sm:text-base"
           >
-            Invertimos continuamente en la calibración y renovación de nuestros equipos de campo y herramientas de software para asegurar planos confiables y cubicaciones exactas.
+            Trabajamos con instrumental topográfico, control geodésico y gabinete digital para
+            convertir datos de campo en planos, modelos, metrados y documentación técnica verificable.
           </motion.p>
         </div>
 
-        {/* Enhanced Hardware Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-20">
-          {hardware.map((item, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-100px' }}
-              transition={{ type: 'spring', stiffness: 100, damping: 18, delay: index * 0.1 }}
-              whileHover={{ y: -8, transition: { duration: 0.2 } }}
-              className="bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-premium hover:shadow-premium-hover hover:border-brand-yellow/30 hover-glow-yellow transition-all duration-300 group flex flex-col justify-between"
-            >
-              {/* Image Container with scanner HUD shimmer sweep */}
-              <div className="h-60 sm:h-64 relative overflow-hidden bg-brand-petrol w-full">
-                {/* Tech Scan Sweep Overlay */}
-                <div className="absolute top-0 -left-[100%] w-1/2 h-full bg-gradient-to-r from-transparent via-white/25 to-transparent skew-x-12 group-hover:left-[200%] transition-all duration-1000 ease-in-out z-20" />
-                
-                {/* Contour background details over image */}
-                <div className="absolute inset-0 bg-topo-grid opacity-5 z-10" />
-                <div className="absolute inset-0 bg-gradient-to-t from-brand-petrol/55 via-transparent to-transparent z-10" />
-
-                {/* Professional survey image */}
+        <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
+          <motion.div
+            initial={{ opacity: 0, x: -26 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: '-100px' }}
+            transition={{ duration: 0.5 }}
+            className="overflow-hidden border border-gray-200 bg-brand-light"
+          >
+            <div className="grid min-h-[520px] lg:grid-cols-[0.9fr_1.1fr]">
+              <div className="relative min-h-[300px] bg-brand-petrol">
                 <img
-                  src={item.image}
-                  alt={item.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                  src={featured.image}
+                  alt={featured.name}
+                  className="h-full w-full object-cover"
                   loading="lazy"
                 />
-
-                {/* Floating Technical Icon Badge */}
-                <div className="absolute bottom-4 left-4 z-10 w-12 h-12 rounded-xl bg-brand-petrol/90 border border-brand-yellow/30 text-white flex items-center justify-center shadow-lg group-hover:bg-brand-yellow group-hover:text-brand-dark transition-all duration-300">
-                  {item.icon}
+                <div className="absolute inset-0 bg-gradient-to-t from-brand-petrol/70 via-transparent to-transparent" />
+                <div className="absolute bottom-5 left-5 right-5 border-l-2 border-brand-yellow pl-4 text-white">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-brand-yellow">
+                    Equipo destacado
+                  </span>
+                  <h3 className="mt-2 font-outfit text-2xl font-extrabold">{featured.name}</h3>
                 </div>
               </div>
 
-              {/* Text specifications container */}
-              <div className="p-6 sm:p-8 space-y-4 flex-grow flex flex-col justify-between bg-white">
-                <div className="space-y-2">
-                  <h3 className="text-xl sm:text-2xl font-bold text-brand-petrol font-outfit leading-tight group-hover:text-brand-yellow transition-colors duration-300">
-                    {item.name}
-                  </h3>
-                  <p className="text-gray-500 text-sm leading-relaxed font-sans">
-                    {item.specs}
-                  </p>
+              <div className="flex flex-col justify-between p-5 sm:p-7">
+                <div>
+                  <div className="mb-6 inline-flex items-center gap-2 border border-brand-petrol/10 bg-white px-3 py-2 text-xs font-bold uppercase tracking-wider text-brand-petrol">
+                    <ClipboardCheck className="h-4 w-4 text-brand-yellow" />
+                    Registro técnico de equipo
+                  </div>
+
+                  <p className="text-sm leading-relaxed text-gray-600">{featured.use}</p>
+
+                  <div className="mt-7 divide-y divide-gray-200 border-y border-gray-200">
+                    {featured.specs.map((spec) => (
+                      <div key={spec} className="flex items-start gap-3 py-3 text-sm text-brand-petrol">
+                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-brand-green" />
+                        <span>{spec}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
-                {/* Features Technical Pills */}
-                <div className="flex flex-wrap gap-2 pt-2">
-                  {item.features.map((feat, idx) => (
-                    <span
-                      key={idx}
-                      className="text-[10px] sm:text-xs font-bold bg-brand-light border border-gray-200/60 text-brand-petrol px-3 py-1.5 rounded-lg"
-                    >
-                      {feat}
-                    </span>
+                <div className="mt-8 grid grid-cols-2 gap-3">
+                  {workflow.map((item) => (
+                    <div key={item.label} className="border border-gray-200 bg-white p-3">
+                      <div className="mb-2 text-brand-yellow">{item.icon}</div>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                        {item.label}
+                      </p>
+                      <p className="mt-1 font-outfit text-sm font-bold text-brand-petrol">{item.value}</p>
+                    </div>
                   ))}
                 </div>
               </div>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Softwares Grid */}
-        <div className="bg-brand-petrol text-white p-8 sm:p-12 rounded-3xl relative overflow-hidden border border-brand-green/20 shadow-xl">
-          {/* Decorative glowing lines */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-brand-green/10 rounded-full blur-3xl -z-10" />
-
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            {/* Title / Info */}
-            <div className="lg:col-span-5 space-y-4">
-              <span className="text-[10px] sm:text-xs font-bold text-brand-yellow uppercase tracking-widest">
-                Software & Gabinete Técnico
-              </span>
-              <h3 className="text-2xl sm:text-3xl font-extrabold font-outfit leading-tight">
-                Modelado Digital de Alta Fidelidad
-              </h3>
-              <p className="text-sm text-gray-300 leading-relaxed font-sans">
-                No solo medimos en campo, procesamos los datos utilizando las herramientas estándares de la industria. Generamos informes técnicos oficiales y planos certificados listos para aprobación municipal o gubernamental.
-              </p>
             </div>
+          </motion.div>
 
-            {/* Software Items */}
-            <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {softwares.map((sw, idx) => (
-                <div
-                  key={idx}
-                  className="bg-brand-petrol-dark/60 border border-brand-green/20 p-4 rounded-xl flex items-center space-x-3 hover:border-brand-yellow/50 transition-colors duration-300 group"
-                >
-                  <div className="bg-brand-yellow p-2.5 rounded-lg text-brand-petrol group-hover:scale-110 transition-transform duration-300">
-                    {sw.icon}
+          <div className="grid gap-3">
+            {instruments.slice(1).map((item, index) => (
+              <motion.article
+                key={item.code}
+                initial={{ opacity: 0, y: 22 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-100px' }}
+                transition={{ delay: index * 0.08, duration: 0.42 }}
+                className="grid grid-cols-[116px_1fr] overflow-hidden border border-gray-200 bg-white transition-colors duration-300 hover:border-brand-yellow/50 sm:grid-cols-[150px_1fr]"
+              >
+                <img src={item.image} alt={item.name} className="h-full min-h-[150px] w-full object-cover" loading="lazy" />
+                <div className="p-4 sm:p-5">
+                  <div className="mb-2 flex flex-wrap items-center gap-2">
+                    <span className="bg-brand-petrol px-2 py-1 text-[10px] font-black tracking-wider text-white">
+                      {item.code}
+                    </span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-brand-yellow">
+                      Instrumental
+                    </span>
                   </div>
-                  <div>
-                    <h4 className="font-bold font-outfit text-white text-base leading-none">{sw.name}</h4>
-                    <span className="text-[10px] text-gray-400 mt-1 block">{sw.category}</span>
-                  </div>
+                  <h3 className="font-outfit text-lg font-extrabold leading-tight text-brand-petrol">
+                    {item.name}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-gray-600">{item.use}</p>
                 </div>
-              ))}
-            </div>
+              </motion.article>
+            ))}
           </div>
         </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 26 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-100px' }}
+          transition={{ duration: 0.5 }}
+          className="mt-6 grid gap-6 border border-brand-petrol/10 bg-brand-petrol p-5 text-white sm:p-7 lg:grid-cols-[0.8fr_1.2fr]"
+        >
+          <div className="border-l-2 border-brand-yellow pl-4">
+            <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-brand-yellow">
+              Gabinete digital
+            </span>
+            <h3 className="mt-2 font-outfit text-2xl font-extrabold">Procesamiento y entrega técnica</h3>
+            <p className="mt-3 text-sm leading-relaxed text-gray-300">
+              La medición no termina en campo. Ordenamos, validamos y entregamos información lista
+              para expedientes, construcción, control minero o gestión territorial.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-px overflow-hidden border border-white/10 bg-white/10 sm:grid-cols-3">
+            {software.map((item) => (
+              <div key={item} className="flex min-h-20 items-center gap-3 bg-brand-petrol-dark px-4 py-3">
+                <Map className="h-4 w-4 shrink-0 text-brand-yellow" />
+                <span className="text-sm font-semibold text-gray-100">{item}</span>
+              </div>
+            ))}
+          </div>
+        </motion.div>
       </div>
     </section>
   );

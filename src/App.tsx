@@ -9,7 +9,6 @@ import Equipment from './components/Equipment';
 import Process from './components/Process';
 import Benefits from './components/Benefits';
 import Portfolio from './components/Portfolio';
-import Testimonials from './components/Testimonials';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
 import AdminPanel from './components/AdminPanel';
@@ -61,7 +60,6 @@ export default function App() {
         <Equipment />
         <Process />
         <Benefits />
-        <Testimonials />
         <Contact />
       </main>
 

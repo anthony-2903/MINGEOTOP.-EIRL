@@ -110,6 +110,7 @@ export default function Portfolio() {
   const [filter, setFilter] = useState('todos');
   const [projects, setProjects] = useState<Project[]>(fallbackProjects);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [selectedLayoutId, setSelectedLayoutId] = useState('');
 
   useEffect(() => {
     let mounted = true;
@@ -129,6 +130,8 @@ export default function Portfolio() {
     filter === 'todos'
       ? projects
       : projects.filter((project) => project.category === filter);
+  const carouselProjects =
+    filteredProjects.length > 0 ? [...filteredProjects, ...filteredProjects] : [];
 
   useEffect(() => {
     if (!selectedProject) return;
@@ -200,26 +203,38 @@ export default function Portfolio() {
             ))}
           </div>
 
+          <div className="relative overflow-hidden">
+            <div className="pointer-events-none absolute inset-y-0 left-0 z-20 w-10 bg-gradient-to-r from-white to-transparent sm:w-20" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 z-20 w-10 bg-gradient-to-l from-white to-transparent sm:w-20" />
+
           <motion.div
+            key={filter}
             layout
-            className="grid h-[720px] auto-cols-[90vw] grid-flow-col-dense grid-rows-3 gap-2 overflow-x-auto overflow-y-hidden overscroll-x-contain scroll-px-4 snap-x snap-mandatory pb-5 sm:h-[560px] sm:auto-cols-[320px] sm:gap-2.5 lg:h-[620px] lg:auto-cols-[360px] xl:h-[680px] xl:auto-cols-[410px]"
+            className="project-carousel-track grid h-[720px] w-max auto-cols-[90vw] grid-flow-col-dense grid-rows-3 gap-2 pb-5 sm:h-[560px] sm:auto-cols-[320px] sm:gap-2.5 lg:h-[620px] lg:auto-cols-[360px] xl:h-[680px] xl:auto-cols-[410px]"
           >
             <AnimatePresence mode="popLayout">
-              {filteredProjects.map((project) => (
+              {carouselProjects.map((project, index) => {
+                const layoutId = `project-card-${project.id}-${index}`;
+
+                return (
                 <motion.div
-                  key={project.id}
+                  key={`${project.id}-${index}`}
                   layout
-                  layoutId={`project-card-${project.id}`}
+                  layoutId={layoutId}
                   initial={{ opacity: 0, scale: 0.94 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.94 }}
                   transition={{ duration: 0.35 }}
                   role="button"
                   tabIndex={0}
-                  onClick={() => setSelectedProject(project)}
+                  onClick={() => {
+                    setSelectedLayoutId(layoutId);
+                    setSelectedProject(project);
+                  }}
                   onKeyDown={(event) => {
                     if (event.key === 'Enter' || event.key === ' ') {
                       event.preventDefault();
+                      setSelectedLayoutId(layoutId);
                       setSelectedProject(project);
                     }
                   }}
@@ -245,9 +260,11 @@ export default function Portfolio() {
                     )}
                   </div>
                 </motion.div>
-              ))}
+                );
+              })}
             </AnimatePresence>
           </motion.div>
+          </div>
         </div>
       </section>
 
@@ -261,7 +278,7 @@ export default function Portfolio() {
             onClick={() => setSelectedProject(null)}
           >
             <motion.div
-              layoutId={`project-card-${selectedProject.id}`}
+              layoutId={selectedLayoutId}
               className="relative flex max-h-[92dvh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-white/15 bg-brand-dark text-white shadow-2xl"
               transition={{ type: 'spring', stiffness: 260, damping: 28 }}
               onClick={(event) => event.stopPropagation()}

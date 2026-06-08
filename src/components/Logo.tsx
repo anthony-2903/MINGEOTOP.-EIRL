@@ -66,20 +66,20 @@ export default function Logo({ className = '', iconOnly = false, textColor = 'li
   }
 
   return (
-    <div className={`group flex items-center space-x-3 ${className}`}>
-      <div className="flex items-center justify-center rounded-xl border border-white/10 bg-white/5 p-1 shadow-sm transition-all duration-300 group-hover:border-brand-yellow/30 group-hover:bg-brand-petrol-light/20">
-        <div className="h-12 w-12 flex-shrink-0">
+    <div className={`group flex min-w-0 items-center space-x-2 sm:space-x-3 ${className}`}>
+      <div className="flex shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5 p-1 shadow-sm transition-all duration-300 group-hover:border-brand-yellow/30 group-hover:bg-brand-petrol-light/20 sm:rounded-xl">
+        <div className="h-10 w-10 flex-shrink-0 sm:h-12 sm:w-12">
           <LogoIcon />
         </div>
       </div>
 
-      <div className="flex flex-col">
-        <div className="font-outfit text-2xl font-extrabold leading-none tracking-wide sm:text-3xl">
+      <div className="flex min-w-0 flex-col">
+        <div className="font-outfit text-xl font-extrabold leading-none tracking-wide sm:text-2xl 2xl:text-3xl">
           <span className="text-brand-yellow drop-shadow-sm">MINGEO</span>
           <span className={`${textColor === 'light' ? 'text-white' : 'text-brand-petrol'} drop-shadow-sm`}>TOP</span>
         </div>
         <span
-          className={`mt-1.5 text-[8.5px] font-bold uppercase leading-none tracking-[0.24em] ${
+          className={`mt-1.5 hidden text-[8px] font-bold uppercase leading-none tracking-[0.18em] min-[420px]:block sm:text-[8.5px] sm:tracking-[0.24em] ${
             textColor === 'light' ? 'text-gray-300' : 'text-brand-green'
           }`}
         >

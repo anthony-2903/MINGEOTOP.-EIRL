@@ -154,6 +154,25 @@
   animation: whatsapp-pulse 4s ease-in-out infinite;
 }
 
+@keyframes project-carousel-loop {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.project-carousel-track {
+  animation: project-carousel-loop 46s linear infinite;
+  will-change: transform;
+}
+
+.project-carousel-track:hover,
+.project-carousel-track:focus-within {
+  animation-play-state: paused;
+}
+
 @keyframes success-pop {
   0% {
     transform: scale(0.92);

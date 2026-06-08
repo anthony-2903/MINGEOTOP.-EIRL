@@ -7,7 +7,6 @@ import {
   FileText,
   FolderKanban,
   Globe2,
-  Home,
   Image,
   LayoutDashboard,
   LockKeyhole,
@@ -21,10 +20,8 @@ import {
   Play,
   Plus,
   Save,
-  Search,
   Settings,
   ShieldCheck,
-  Star,
   Trash2,
   Upload,
   User,
@@ -46,13 +43,10 @@ import { uploadImageToCloudinary, uploadVideoToCloudinary } from '../lib/cloudin
 
 type AdminSectionId =
   | 'resumen'
-  | 'inicio'
   | 'nosotros'
   | 'servicios'
   | 'proyectos'
-  | 'testimonios'
-  | 'contacto'
-  | 'seo';
+  | 'contacto';
 
 type EditableItem = {
   title: string;
@@ -67,22 +61,13 @@ const sections: Array<{
   icon: typeof LayoutDashboard;
 }> = [
   { id: 'resumen', label: 'Resumen', description: 'Vista general', icon: LayoutDashboard },
-  { id: 'inicio', label: 'Inicio', description: 'Hero y llamadas', icon: Home },
   { id: 'nosotros', label: 'Nosotros', description: 'Misión y valores', icon: Users },
   { id: 'servicios', label: 'Servicios', description: 'Catálogo comercial', icon: Map },
   { id: 'proyectos', label: 'Proyectos', description: 'Portafolio', icon: FolderKanban },
-  { id: 'testimonios', label: 'Testimonios', description: 'Confianza social', icon: MessageCircle },
   { id: 'contacto', label: 'Contacto', description: 'Canales y formulario', icon: Mail },
-  { id: 'seo', label: 'SEO', description: 'Búsqueda y metadata', icon: Search },
 ];
 
 const initialContent: Record<Exclude<AdminSectionId, 'resumen'>, EditableItem> = {
-  inicio: {
-    title: 'Ingeniería Topográfica con Precisión Milimétrica',
-    description:
-      'Soluciones integrales de topografía, geodesia y fotogrametría con drones para proyectos mineros, civiles, rurales, urbanos e industriales.',
-    status: 'Publicado',
-  },
   nosotros: {
     title: 'Comprometidos con la precisión, tecnología y experiencia en campo',
     description:
@@ -101,57 +86,36 @@ const initialContent: Record<Exclude<AdminSectionId, 'resumen'>, EditableItem> =
       'Controla casos destacados con una imagen principal, descripción inferior transparente y modal ampliado para cada proyecto.',
     status: 'Publicado',
   },
-  testimonios: {
-    title: 'Opiniones de clientes y aliados',
-    description:
-      'Gestiona testimonios, cargos, empresas, calificaciones y mensajes visibles en la landing.',
-    status: 'Borrador',
-  },
   contacto: {
     title: 'Solicita tu cotización técnica sin compromiso',
     description:
       'Actualiza teléfono, WhatsApp, correo, dirección, servicios del formulario y mensaje de confirmación.',
     status: 'Publicado',
   },
-  seo: {
-    title: 'MINGEOTOP E.I.R.L. | Topografía, Geodesia y Drones en Perú',
-    description:
-      'Topografía, geodesia, fotogrametría con drones, replanteo de obras, cubicación y control topográfico para minería, construcción e infraestructura en Perú.',
-    status: 'Publicado',
-  },
 };
 
 const quickStats = [
-  { label: 'Secciones', value: '8', icon: LayoutDashboard },
-  { label: 'Gestionables', value: '4', icon: FolderKanban },
-  { label: 'Fijas en código', value: '3', icon: LockKeyhole },
+  { label: 'Secciones', value: '5', icon: LayoutDashboard },
+  { label: 'Gestionables', value: '3', icon: FolderKanban },
+  { label: 'Fijas en código', value: '1', icon: LockKeyhole },
   { label: 'Leads demo', value: '24', icon: BarChart3 },
 ];
 
 const recentChanges = [
-  'Inicio, Nosotros y SEO definidos como contenido estático de código',
+  'Nosotros definido como contenido estático de código',
   'Servicios preparados para gestión desde el panel administrativo',
   'Proyectos conectados a lectura de Supabase con respaldo local',
-  'Testimonios y contacto separados como contenido gestionable',
+  'Contacto separado como contenido gestionable',
 ];
 
 const staticSections = [
-  { label: 'Inicio', detail: 'Hero, CTA principales y métricas de marca' },
   { label: 'Nosotros', detail: 'Misión, visión, valores y narrativa institucional' },
-  { label: 'SEO', detail: 'Título, descripción, Open Graph y metadata base' },
 ];
 
 const managedSections = [
   { label: 'Servicios', detail: 'Catálogo comercial y servicios visibles' },
   { label: 'Proyectos', detail: 'Portafolio, imágenes, videos y estados' },
-  { label: 'Testimonios', detail: 'Opiniones, cargos, empresas y calificación' },
   { label: 'Contacto', detail: 'Canales, formulario y opciones de servicio' },
-];
-
-const heroActions = [
-  { label: 'Botón principal', value: 'Solicitar Cotización', target: '#contacto' },
-  { label: 'Botón secundario', value: 'Ver Servicios', target: '#servicios' },
-  { label: 'Indicador clave', value: '+150 proyectos', target: 'Hero stats' },
 ];
 
 const aboutBlocks = [
@@ -206,12 +170,6 @@ const projectItems = [
   },
 ];
 
-const testimonialItems = [
-  { name: 'Ing. Carlos Ramirez', role: 'Jefe de Proyecto', rating: 5 },
-  { name: 'Mariela Torres', role: 'Administradora de Obra', rating: 5 },
-  { name: 'Oscar Medina', role: 'Supervisor de Campo', rating: 4 },
-];
-
 const contactChannels = [
   { label: 'WhatsApp', value: '+51 913 386 354', icon: MessageCircle },
   { label: 'Teléfono', value: '+51 913 386 354', icon: Phone },
@@ -220,23 +178,13 @@ const contactChannels = [
   { label: 'TikTok', value: '@mingeotop', icon: Globe2 },
 ];
 
-const seoChecks = [
-  'Título menor a 60 caracteres',
-  'Descripción comercial clara',
-  'Palabras clave por servicio',
-  'Imagen social y Open Graph configurados',
-  'Facebook empresarial vinculado',
-  'Twitter Card configurada',
-  'URL canónica definida',
-];
-
 const fieldClasses =
   'w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-brand-dark outline-none transition focus:border-brand-yellow focus:ring-4 focus:ring-brand-yellow/10';
 
 const ADMIN_EMAIL = 'admin@mingeotop.com';
 
 function isManagedSection(section: AdminSectionId) {
-  return section === 'servicios' || section === 'proyectos' || section === 'testimonios' || section === 'contacto';
+  return section === 'servicios' || section === 'proyectos' || section === 'contacto';
 }
 
 function statusClasses(status: EditableItem['status']) {
@@ -498,7 +446,7 @@ export default function AdminPanel() {
     }
   }, [isAuthenticated]);
 
-  const editableSection = activeSection === 'resumen' ? 'inicio' : activeSection;
+  const editableSection = activeSection === 'resumen' ? 'proyectos' : activeSection;
   const selectedContent = content[editableSection];
   const isCurrentSectionManaged = isManagedSection(activeSection);
 
@@ -630,7 +578,7 @@ export default function AdminPanel() {
                   La landing está separada por contenido fijo y gestionable
                 </h2>
                 <p className="mt-2 max-w-2xl text-sm leading-relaxed text-gray-600">
-                  Los textos institucionales se mantienen estables en código, mientras que servicios, proyectos, testimonios y contacto quedan preparados para gestión.
+                  Los textos institucionales se mantienen estables en código, mientras que servicios, proyectos y contacto quedan preparados para gestión.
                 </p>
               </div>
               <div className="rounded-lg bg-brand-petrol px-5 py-4 text-center text-white">
@@ -812,9 +760,7 @@ export default function AdminPanel() {
                 ? 'Catálogo comercial'
                 : activeSection === 'contacto'
                   ? 'Canales de atención'
-                  : activeSection === 'seo'
-                    ? 'Configuración de búsqueda'
-                    : 'Editor de contenido'}
+                  : 'Editor de contenido'}
             </p>
             <h2 className="mt-2 text-2xl font-extrabold text-brand-petrol">
               {sections.find((section) => section.id === activeSection)?.label}
@@ -837,7 +783,7 @@ export default function AdminPanel() {
         <div className="mt-6 grid gap-5">
           <label className="space-y-2">
             <span className="text-xs font-bold uppercase tracking-wider text-gray-500">
-              {activeSection === 'seo' ? 'Título SEO' : 'Título principal'}
+              Título principal
             </span>
             <input
               value={selectedContent.title}
@@ -854,7 +800,7 @@ export default function AdminPanel() {
             <textarea
               value={selectedContent.description}
               onChange={(event) => updateContent('description', event.target.value)}
-              rows={activeSection === 'inicio' ? 4 : 5}
+              rows={5}
               disabled={!isCurrentSectionManaged}
               className={`${fieldClasses} disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500`}
             />
@@ -863,18 +809,6 @@ export default function AdminPanel() {
           {!isCurrentSectionManaged && (
             <div className="rounded-lg border border-brand-petrol/10 bg-brand-light px-4 py-3 text-sm leading-relaxed text-gray-600">
               Esta sección queda como contenido estático de código. Los cambios estructurales se hacen en componentes para mantener estable la identidad de la landing.
-            </div>
-          )}
-
-          {activeSection === 'inicio' && (
-            <div className="grid gap-3 sm:grid-cols-3">
-              {heroActions.map((action) => (
-                <div key={action.label} className="rounded-lg border border-gray-200 bg-brand-light p-4">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-gray-500">{action.label}</p>
-                  <p className="mt-2 text-sm font-extrabold text-brand-petrol">{action.value}</p>
-                  <p className="mt-1 text-xs text-gray-500">{action.target}</p>
-                </div>
-              ))}
             </div>
           )}
 
@@ -1054,38 +988,6 @@ export default function AdminPanel() {
       );
     }
 
-    if (activeSection === 'testimonios') {
-      return (
-        <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-          <div className="flex items-center justify-between gap-3">
-            <h3 className="font-extrabold text-brand-petrol">Opiniones</h3>
-            <button className="inline-flex items-center gap-2 rounded-lg bg-brand-petrol px-3 py-2 text-xs font-bold text-white">
-              <Plus className="h-4 w-4" />
-              Agregar
-            </button>
-          </div>
-          <div className="mt-4 space-y-3">
-            {testimonialItems.map((testimonial) => (
-              <div key={testimonial.name} className="flex items-start justify-between gap-3 rounded-lg border border-gray-100 p-3">
-                <div>
-                  <div className="flex gap-1 text-brand-yellow-dark">
-                    {Array.from({ length: testimonial.rating }).map((_, index) => (
-                      <Star key={index} className="h-3.5 w-3.5 fill-current" />
-                    ))}
-                  </div>
-                  <p className="mt-2 text-sm font-extrabold text-brand-petrol">{testimonial.name}</p>
-                  <p className="text-xs text-gray-500">{testimonial.role}</p>
-                </div>
-                <button className="rounded-lg border border-gray-200 p-2 text-gray-500 hover:text-brand-petrol" title="Editar testimonio">
-                  <Pencil className="h-4 w-4" />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      );
-    }
-
     if (activeSection === 'contacto') {
       return (
         <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
@@ -1101,33 +1003,6 @@ export default function AdminPanel() {
               <div key={field} className="flex items-center justify-between gap-3 rounded-lg bg-brand-light px-3 py-2">
                 <span className="text-sm font-semibold text-brand-petrol">{field}</span>
                 <button className="rounded-lg border border-gray-200 bg-white p-1.5 text-gray-500 hover:text-brand-petrol" title="Editar campo">
-                  <Pencil className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      );
-    }
-
-    if (activeSection === 'seo') {
-      return (
-        <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-          <div className="flex items-center justify-between gap-3">
-            <h3 className="font-extrabold text-brand-petrol">Checklist SEO</h3>
-            <button className="inline-flex items-center gap-2 rounded-lg bg-brand-petrol px-3 py-2 text-xs font-bold text-white">
-              <Plus className="h-4 w-4" />
-              Agregar
-            </button>
-          </div>
-          <div className="mt-4 space-y-3">
-            {seoChecks.map((check) => (
-              <div key={check} className="flex items-center justify-between gap-3 rounded-lg bg-brand-light p-3">
-                <div className="flex items-center gap-3">
-                  <Check className="h-4 w-4 text-brand-green" />
-                  <span className="text-sm font-semibold text-brand-petrol">{check}</span>
-                </div>
-                <button className="rounded-lg border border-gray-200 bg-white p-1.5 text-gray-500 hover:text-brand-petrol" title="Editar criterio SEO">
                   <Pencil className="h-3.5 w-3.5" />
                 </button>
               </div>
@@ -1183,7 +1058,7 @@ export default function AdminPanel() {
                 Controla la landing page desde un panel privado.
               </h1>
               <p className="mt-5 text-base leading-relaxed text-gray-300">
-                Gestiona secciones, mensajes comerciales, estado de publicación, SEO y datos de contacto de MINGEOTOP E.I.R.L.
+                Gestiona secciones, mensajes comerciales, estado de publicación y datos de contacto de MINGEOTOP E.I.R.L.
               </p>
             </div>
             <div className="flex items-center gap-3 text-sm text-gray-400">
