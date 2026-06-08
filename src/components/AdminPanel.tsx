@@ -28,8 +28,6 @@ import {
   X,
 } from 'lucide-react';
 import Logo from './Logo';
-import minaTajoAbiertoImg from '../assets/mina_tajo_abierto.png';
-import tunelSubterraneoImg from '../assets/tunel_subterraneo.png';
 import { isSupabaseConfigured, supabase } from '../lib/supabase';
 import {
   getAllProjects,
@@ -100,38 +98,6 @@ const serviceItems = [
   'Fotogrametría con Dron',
 ];
 
-const projectItems = [
-  {
-    title: 'Control Volumétrico y Taludes',
-    category: 'Minería',
-    location: 'Pasco, Perú',
-    description: 'Cubicación mensual de stock y control de estabilidad en zona minera.',
-    precision: '+/-2 cm instrumental',
-    image: minaTajoAbiertoImg,
-  },
-  {
-    title: 'Levantamiento Catastral y Ortomosaico',
-    category: 'Drones',
-    location: 'Lima Provincias',
-    description: 'Fotogrametría con dron, ortofoto digital y documentación técnica.',
-    precision: 'GSD 3.2 cm/px',
-  },
-  {
-    title: 'Replanteo de Ejes y Verticalidad',
-    category: 'Construcción',
-    location: 'Lima Metropolitana',
-    description: 'Control geométrico de cimentaciones, anclajes y verticalidad estructural.',
-    precision: '+/-1.5 mm angular',
-  },
-  {
-    title: 'Topografía Subterránea y Galerías',
-    category: 'Minería',
-    location: 'Arequipa, Perú',
-    description: 'Registro técnico de túneles, galerías y frentes de avance.',
-    precision: '+/-1 mm nube de puntos',
-    image: tunelSubterraneoImg,
-  },
-];
 
 const contactChannels = [
   { label: 'WhatsApp', value: '+51 913 386 354', icon: MessageCircle },

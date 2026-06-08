@@ -2,80 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Compass, MapPin, Pause, Play, ShieldCheck, X } from 'lucide-react';
 
-import minaTajoAbiertoImg from '../assets/mina_tajo_abierto.png';
-import tunelSubterraneoImg from '../assets/tunel_subterraneo.png';
 import { getPublishedProjects, type Project } from '../lib/projects';
-
-const fallbackProjects: Project[] = [
-  {
-    id: 'fallback-mineria-1',
-    title: 'Control Volumetrico y Taludes',
-    category: 'mineria',
-    catName: 'Mineria',
-    location: 'Pasco, Peru',
-    specs:
-      'Cubicacion mensual de stock, control de estabilidad de botaderos y levantamiento topografico en zona minera.',
-    precision: '+/-2 cm instrumental',
-    color: 'from-brand-petrol via-brand-petrol-dark to-brand-green',
-    image: minaTajoAbiertoImg,
-  },
-  {
-    id: 'fallback-dron-1',
-    title: 'Levantamiento Catastral y Ortomosaico',
-    category: 'dron',
-    catName: 'Drones & Catastro',
-    location: 'Lima Provincias, Peru',
-    specs:
-      'Fotogrametria con dron, generacion de ortofoto digital, curvas de nivel y documentacion tecnica del terreno.',
-    precision: 'GSD 3.2 cm/px',
-    color: 'from-brand-green via-[#1f3a3a] to-brand-yellow/30',
-  },
-  {
-    id: 'fallback-construccion-1',
-    title: 'Replanteo de Ejes y Verticalidad',
-    category: 'construccion',
-    catName: 'Construccion Civil',
-    location: 'Lima Metropolitana',
-    specs:
-      'Control geometrico de cimentaciones, colocacion de pernos de anclaje y verificacion de verticalidad estructural.',
-    precision: '+/-1.5 mm angular',
-    color: 'from-brand-petrol via-[#1c3842] to-brand-yellow/40',
-  },
-  {
-    id: 'fallback-dron-2',
-    title: 'Red Geodesica de Apoyo WGS84',
-    category: 'dron',
-    catName: 'Drones & Catastro',
-    location: 'Huancavelica, Peru',
-    specs:
-      'Monumentacion, enlace y validacion de puntos geodesicos para servir como base de control en campo.',
-    precision: 'Horizontal < 5 mm',
-    color: 'from-brand-dark via-brand-petrol to-brand-green',
-  },
-  {
-    id: 'fallback-vias-1',
-    title: 'Levantamiento y Trazo Vial',
-    category: 'vias',
-    catName: 'Carreteras',
-    location: 'Junin, Peru',
-    specs:
-      'Topografia del eje de via, perfiles longitudinales, secciones transversales y metrados de corte y relleno.',
-    precision: '+/-1 cm altimetrica',
-    color: 'from-[#D97706] via-brand-petrol to-brand-green',
-  },
-  {
-    id: 'fallback-mineria-2',
-    title: 'Topografia Subterranea y Galerias',
-    category: 'mineria',
-    catName: 'Mineria',
-    location: 'Arequipa, Peru',
-    specs:
-      'Registro tecnico de tuneles, galerias y frentes de avance para control de obra y seguimiento de produccion.',
-    precision: '+/-1 mm nube de puntos',
-    color: 'from-brand-petrol via-brand-dark to-brand-yellow/30',
-    image: tunelSubterraneoImg,
-  },
-];
 
 const categories = [
   { id: 'todos', name: 'Todos' },
@@ -124,7 +51,7 @@ function ProjectMasonrySkeleton() {
 
 export default function Portfolio() {
   const [filter, setFilter] = useState('todos');
-  const [projects, setProjects] = useState<Project[]>(fallbackProjects);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [isLoadingProjects, setIsLoadingProjects] = useState(true);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [selectedLayoutId, setSelectedLayoutId] = useState('');
@@ -137,7 +64,7 @@ export default function Portfolio() {
 
     getPublishedProjects()
       .then((supabaseProjects) => {
-        if (mounted && supabaseProjects.length > 0) {
+        if (mounted) {
           setProjects(supabaseProjects);
         }
       })
@@ -158,6 +85,7 @@ export default function Portfolio() {
       : projects.filter((project) => project.category === filter);
   const carouselProjects =
     filteredProjects.length > 0 ? [...filteredProjects, ...filteredProjects] : [];
+  const hasProjects = filteredProjects.length > 0;
 
   useEffect(() => {
     const carousel = carouselRef.current;
@@ -283,7 +211,7 @@ export default function Portfolio() {
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                disabled={isLoadingProjects}
+                disabled={isLoadingProjects || !hasProjects}
                 onClick={() => setIsAutoScrollEnabled((current) => !current)}
                 className="inline-flex h-10 items-center gap-2 rounded-md border border-gray-200 bg-white px-3 text-xs font-bold uppercase tracking-wider text-brand-petrol shadow-sm transition hover:border-brand-yellow hover:bg-brand-light disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label={isAutoScrollEnabled ? 'Pausar carrusel' : 'Reproducir carrusel'}
@@ -293,7 +221,7 @@ export default function Portfolio() {
               </button>
               <button
                 type="button"
-                disabled={isLoadingProjects}
+                disabled={isLoadingProjects || !hasProjects}
                 onClick={() => scrollCarousel('previous')}
                 className="flex h-10 w-10 items-center justify-center rounded-md border border-gray-200 bg-white text-brand-petrol shadow-sm transition hover:border-brand-yellow hover:bg-brand-light disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label="Ver proyectos anteriores"
@@ -302,7 +230,7 @@ export default function Portfolio() {
               </button>
               <button
                 type="button"
-                disabled={isLoadingProjects}
+                disabled={isLoadingProjects || !hasProjects}
                 onClick={() => scrollCarousel('next')}
                 className="flex h-10 w-10 items-center justify-center rounded-md border border-gray-200 bg-white text-brand-petrol shadow-sm transition hover:border-brand-yellow hover:bg-brand-light disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label="Ver siguientes proyectos"
@@ -343,6 +271,17 @@ export default function Portfolio() {
           >
           {isLoadingProjects ? (
             <ProjectMasonrySkeleton />
+          ) : !hasProjects ? (
+            <div className="flex min-h-[320px] items-center justify-center rounded-md border border-dashed border-gray-200 bg-white/75 px-6 text-center">
+              <div className="max-w-md">
+                <p className="font-outfit text-xl font-extrabold text-brand-petrol">
+                  No hay proyectos publicados
+                </p>
+                <p className="mt-2 text-sm leading-relaxed text-gray-500">
+                  Los proyectos creados desde el panel apareceran aqui cuando tengan estado published.
+                </p>
+              </div>
+            </div>
           ) : (
           <motion.div
             key={filter}
