@@ -58,7 +58,7 @@ export default function Equipment() {
   const featured = instruments[0];
 
   return (
-    <section id="equipos" className="relative overflow-hidden bg-white py-24">
+    <section id="equipos" className="section-fade-to-petrol relative overflow-hidden bg-white py-24">
       <div className="absolute inset-x-0 top-0 h-px bg-gray-200" />
       <div className="absolute inset-0 bg-topo-grid opacity-35" />
 

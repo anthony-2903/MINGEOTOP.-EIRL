@@ -64,7 +64,7 @@ export default function Sectors() {
   ];
 
   return (
-    <section id="sectores" className="py-24 bg-brand-dark text-white relative overflow-hidden bg-topo-contour">
+    <section id="sectores" className="section-fade-to-light py-24 bg-brand-dark text-white relative overflow-hidden bg-topo-contour">
       {/* Visual background overlays */}
       <div className="absolute inset-0 bg-brand-petrol-dark/80 z-0" />
       

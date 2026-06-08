@@ -56,7 +56,7 @@ export default function Hero() {
             >
               <Logo iconOnly={true} className="w-6 h-6 animate-soft-pulse" />
               <span className="text-xs sm:text-sm font-bold tracking-wider text-brand-yellow uppercase">
-                Tecnología Geoespacial de Vanguardia
+                Topografía, geodesia y control de obra
               </span>
             </motion.div>
 
@@ -72,7 +72,7 @@ export default function Hero() {
                   <span className="text-lg sm:text-xl font-semibold text-brand-yellow ml-1">E.I.R.L.</span>
                 </span>
                 <span className="block text-white text-3xl sm:text-4xl md:text-5xl mt-3 font-light leading-snug">
-                  Ingeniería Topográfica con Precisión Milimétrica
+                  Medición en campo y entregables técnicos para obra
                 </span>
               </motion.h1>
 
@@ -82,7 +82,7 @@ export default function Hero() {
                 transition={{ duration: 0.8, delay: 0.4 }}
                 className="text-base sm:text-lg md:text-xl text-gray-300 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-sans"
               >
-                Soluciones integrales de topografía, geodesia y fotogrametría con drones para proyectos mineros, de construcción civil, rurales, urbanos e industriales en todo el Perú.
+                Levantamientos, replanteos, cubicaciones, planos DWG/PDF, ortomosaicos y control topográfico para minería, construcción e infraestructura en todo el Perú.
               </motion.p>
             </div>
 
@@ -102,10 +102,10 @@ export default function Hero() {
               </a>
               <a
                 id="btn-hero-servicios"
-                href="#servicios"
+                href="#proyectos"
                 className="w-full sm:w-auto flex items-center justify-center space-x-2 bg-transparent hover:bg-white/5 text-white border-2 border-brand-green/80 hover:border-brand-green px-8 py-3.5 rounded-xl font-outfit font-semibold transition-all duration-300 transform hover:-translate-y-1"
               >
-                <span>Ver Servicios</span>
+                <span>Ver Proyectos</span>
               </a>
             </motion.div>
 

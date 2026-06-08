@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   BarChart3,
   Check,
@@ -25,7 +25,6 @@ import {
   Trash2,
   Upload,
   User,
-  Users,
   X,
 } from 'lucide-react';
 import Logo from './Logo';
@@ -41,12 +40,7 @@ import {
 } from '../lib/projects';
 import { uploadImageToCloudinary, uploadVideoToCloudinary } from '../lib/cloudinary';
 
-type AdminSectionId =
-  | 'resumen'
-  | 'nosotros'
-  | 'servicios'
-  | 'proyectos'
-  | 'contacto';
+type AdminSectionId = 'servicios' | 'proyectos' | 'contacto';
 
 type EditableItem = {
   title: string;
@@ -60,20 +54,12 @@ const sections: Array<{
   description: string;
   icon: typeof LayoutDashboard;
 }> = [
-  { id: 'resumen', label: 'Resumen', description: 'Vista general', icon: LayoutDashboard },
-  { id: 'nosotros', label: 'Nosotros', description: 'Misión y valores', icon: Users },
-  { id: 'servicios', label: 'Servicios', description: 'Catálogo comercial', icon: Map },
   { id: 'proyectos', label: 'Proyectos', description: 'Portafolio', icon: FolderKanban },
+  { id: 'servicios', label: 'Servicios', description: 'Catálogo comercial', icon: Map },
   { id: 'contacto', label: 'Contacto', description: 'Canales y formulario', icon: Mail },
 ];
 
-const initialContent: Record<Exclude<AdminSectionId, 'resumen'>, EditableItem> = {
-  nosotros: {
-    title: 'Comprometidos con la precisión, tecnología y experiencia en campo',
-    description:
-      'Presenta la trayectoria, misión, visión, valores y cobertura nacional de MINGEOTOP E.I.R.L.',
-    status: 'Publicado',
-  },
+const initialContent: Record<AdminSectionId, EditableItem> = {
   servicios: {
     title: 'Soluciones geoespaciales y topografía especializada',
     description:
@@ -95,33 +81,10 @@ const initialContent: Record<Exclude<AdminSectionId, 'resumen'>, EditableItem> =
 };
 
 const quickStats = [
-  { label: 'Secciones', value: '5', icon: LayoutDashboard },
+  { label: 'Secciones', value: '3', icon: LayoutDashboard },
   { label: 'Gestionables', value: '3', icon: FolderKanban },
-  { label: 'Fijas en código', value: '1', icon: LockKeyhole },
   { label: 'Leads demo', value: '24', icon: BarChart3 },
-];
-
-const recentChanges = [
-  'Nosotros definido como contenido estático de código',
-  'Servicios preparados para gestión desde el panel administrativo',
-  'Proyectos conectados a lectura de Supabase con respaldo local',
-  'Contacto separado como contenido gestionable',
-];
-
-const staticSections = [
-  { label: 'Nosotros', detail: 'Misión, visión, valores y narrativa institucional' },
-];
-
-const managedSections = [
-  { label: 'Servicios', detail: 'Catálogo comercial y servicios visibles' },
-  { label: 'Proyectos', detail: 'Portafolio, imágenes, videos y estados' },
-  { label: 'Contacto', detail: 'Canales, formulario y opciones de servicio' },
-];
-
-const aboutBlocks = [
-  { title: 'Nuestra Misión', text: 'Servicios topográficos y geodésicos de alta precisión.' },
-  { title: 'Nuestra Visión', text: 'Socio estratégico geoespacial a nivel nacional.' },
-  { title: 'Valores Clave', text: 'Precisión, seguridad, ética y trato personalizado.' },
+  { label: 'Publicación', value: 'Web', icon: ShieldCheck },
 ];
 
 const serviceItems = [
@@ -193,13 +156,48 @@ function statusClasses(status: EditableItem['status']) {
   return 'bg-gray-100 text-gray-500 border-gray-200';
 }
 
+function AdminProjectRowsSkeleton() {
+  return (
+    <div className="mt-6 divide-y divide-gray-100">
+      {Array.from({ length: 5 }).map((_, index) => (
+        <div key={index} className="flex flex-col gap-4 py-5 sm:flex-row sm:items-center sm:justify-between first:pt-0">
+          <div className="flex items-start gap-4">
+            <div className="relative h-20 w-28 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
+              <div className="skeleton-shimmer absolute inset-0" />
+            </div>
+            <div className="min-w-0 flex-1 space-y-3">
+              <div className="relative h-4 w-40 overflow-hidden rounded bg-gray-100">
+                <div className="skeleton-shimmer absolute inset-0" />
+              </div>
+              <div className="relative h-5 w-64 max-w-full overflow-hidden rounded bg-gray-100">
+                <div className="skeleton-shimmer absolute inset-0" />
+              </div>
+              <div className="relative h-3 w-52 max-w-full overflow-hidden rounded bg-gray-100">
+                <div className="skeleton-shimmer absolute inset-0" />
+              </div>
+            </div>
+          </div>
+          <div className="flex gap-2 self-end sm:self-center">
+            <div className="relative h-9 w-20 overflow-hidden rounded-lg bg-gray-100">
+              <div className="skeleton-shimmer absolute inset-0" />
+            </div>
+            <div className="relative h-9 w-24 overflow-hidden rounded-lg bg-gray-100">
+              <div className="skeleton-shimmer absolute inset-0" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function AdminPanel() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isCheckingSession, setIsCheckingSession] = useState(true);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [loginData, setLoginData] = useState({ email: ADMIN_EMAIL, password: '' });
   const [loginError, setLoginError] = useState('');
-  const [activeSection, setActiveSection] = useState<AdminSectionId>('resumen');
+  const [activeSection, setActiveSection] = useState<AdminSectionId>('proyectos');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [content, setContent] = useState(initialContent);
   const [saved, setSaved] = useState(false);
@@ -446,14 +444,9 @@ export default function AdminPanel() {
     }
   }, [isAuthenticated]);
 
-  const editableSection = activeSection === 'resumen' ? 'proyectos' : activeSection;
+  const editableSection = activeSection;
   const selectedContent = content[editableSection];
   const isCurrentSectionManaged = isManagedSection(activeSection);
-
-  const completion = useMemo(() => {
-    const published = Object.values(content).filter((item) => item.status === 'Publicado').length;
-    return Math.round((published / Object.keys(content).length) * 100);
-  }, [content]);
 
   useEffect(() => {
     if (!supabase) {
@@ -561,84 +554,10 @@ export default function AdminPanel() {
 
     setIsAuthenticated(false);
     setLoginData({ email: ADMIN_EMAIL, password: '' });
-    setActiveSection('resumen');
+    setActiveSection('proyectos');
   };
 
   const renderSectionEditor = () => {
-    if (activeSection === 'resumen') {
-      return (
-        <div className="space-y-6">
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-yellow-dark">
-                  Estado general
-                </p>
-                <h2 className="mt-2 text-2xl font-extrabold text-brand-petrol">
-                  La landing está separada por contenido fijo y gestionable
-                </h2>
-                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-gray-600">
-                  Los textos institucionales se mantienen estables en código, mientras que servicios, proyectos y contacto quedan preparados para gestión.
-                </p>
-              </div>
-              <div className="rounded-lg bg-brand-petrol px-5 py-4 text-center text-white">
-                <p className="text-3xl font-extrabold text-brand-yellow">{completion}%</p>
-                <p className="text-xs font-bold uppercase tracking-wider text-gray-300">Publicado</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid gap-4 lg:grid-cols-2">
-            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-              <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-brand-petrol/10 p-2 text-brand-petrol">
-                  <LockKeyhole className="h-5 w-5" />
-                </div>
-                <h3 className="text-lg font-extrabold text-brand-petrol">Fijo en código</h3>
-              </div>
-              <div className="mt-4 space-y-3">
-                {staticSections.map((section) => (
-                  <div key={section.label} className="rounded-lg bg-brand-light p-3">
-                    <p className="text-sm font-extrabold text-brand-petrol">{section.label}</p>
-                    <p className="mt-1 text-xs leading-relaxed text-gray-500">{section.detail}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-              <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-brand-green/10 p-2 text-brand-green">
-                  <Settings className="h-5 w-5" />
-                </div>
-                <h3 className="text-lg font-extrabold text-brand-petrol">Gestionable</h3>
-              </div>
-              <div className="mt-4 space-y-3">
-                {managedSections.map((section) => (
-                  <div key={section.label} className="rounded-lg bg-brand-light p-3">
-                    <p className="text-sm font-extrabold text-brand-petrol">{section.label}</p>
-                    <p className="mt-1 text-xs leading-relaxed text-gray-500">{section.detail}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-            <h3 className="text-lg font-extrabold text-brand-petrol">Cambios recientes</h3>
-            <div className="mt-4 space-y-3">
-              {recentChanges.map((change) => (
-                <div key={change} className="flex items-start gap-3 rounded-lg bg-brand-light p-3">
-                  <ShieldCheck className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand-green" />
-                  <span className="text-sm text-gray-700">{change}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      );
-    }
-
     if (activeSection === 'proyectos') {
       return (
         <div className="space-y-6">
@@ -666,9 +585,7 @@ export default function AdminPanel() {
             </div>
 
             {isLoadingProjects ? (
-              <div className="py-12 text-center text-gray-500">
-                <span className="animate-pulse font-semibold">Cargando proyectos desde Supabase...</span>
-              </div>
+              <AdminProjectRowsSkeleton />
             ) : dbProjects.length === 0 ? (
               <div className="py-12 text-center text-gray-500">
                 <FolderKanban className="mx-auto h-12 w-12 text-gray-300" />
@@ -956,33 +873,6 @@ export default function AdminPanel() {
               <li>Sube imágenes optimizadas en formato <strong>WebP</strong> o usa el cargador automático.</li>
               <li>Los videos deben tener formato MP4 optimizado para web.</li>
             </ul>
-          </div>
-        </div>
-      );
-    }
-
-    if (activeSection === 'nosotros') {
-      return (
-        <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-          <div className="flex items-center justify-between gap-3">
-            <h3 className="font-extrabold text-brand-petrol">Bloques de contenido</h3>
-            <button className="inline-flex items-center gap-2 rounded-lg bg-brand-petrol px-3 py-2 text-xs font-bold text-white">
-              <Plus className="h-4 w-4" />
-              Agregar
-            </button>
-          </div>
-          <div className="mt-4 space-y-3">
-            {aboutBlocks.map((block) => (
-              <div key={block.title} className="flex items-start justify-between gap-3 rounded-lg bg-brand-light p-3">
-                <div>
-                  <p className="text-sm font-extrabold text-brand-petrol">{block.title}</p>
-                  <p className="mt-1 text-xs leading-relaxed text-gray-500">{block.text}</p>
-                </div>
-                <button className="rounded-lg border border-gray-200 bg-white p-2 text-gray-500 hover:text-brand-petrol" title="Editar bloque">
-                  <Pencil className="h-4 w-4" />
-                </button>
-              </div>
-            ))}
           </div>
         </div>
       );

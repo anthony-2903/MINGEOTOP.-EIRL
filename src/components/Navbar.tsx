@@ -18,8 +18,8 @@ export default function Navbar() {
   const navLinks = [
     { name: 'Inicio', href: '#inicio' },
     { name: 'Nosotros', href: '#nosotros' },
-    { name: 'Servicios', href: '#servicios' },
     { name: 'Proyectos', href: '#proyectos' },
+    { name: 'Servicios', href: '#servicios' },
     { name: 'Sectores', href: '#sectores' },
     { name: 'Equipos', href: '#equipos' },
     { name: 'Proceso', href: '#proceso' },

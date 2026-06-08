@@ -54,8 +54,8 @@ export default function App() {
       <main className="flex-grow cinematic-scroll">
         <Hero />
         <AboutUs />
-        <Services />
         <Portfolio />
+        <Services />
         <Sectors />
         <Equipment />
         <Process />

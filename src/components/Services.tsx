@@ -1,143 +1,137 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import {
-  Map,
-  Compass,
-  MapPin,
   Activity,
-  Layers,
-  FileText,
   Boxes,
-  TrendingDown,
+  ChevronRight,
+  Compass,
+  FileText,
+  Layers,
+  Map,
+  MapPin,
   Mountain,
   Plane,
-  ChevronRight
+  TrendingDown,
 } from 'lucide-react';
 
+const servicesList = [
+  {
+    icon: <Map className="h-6 w-6" />,
+    title: 'Levantamientos topográficos',
+    desc: 'Nube de puntos, plano topográfico, curvas de nivel y registro de detalles del terreno para diseño, obra o expediente técnico.',
+  },
+  {
+    icon: <MapPin className="h-6 w-6" />,
+    title: 'Replanteo de obras',
+    desc: 'Marcación de ejes, niveles, límites, puntos de control y elementos estructurales para ejecutar la obra según planos aprobados.',
+  },
+  {
+    icon: <Compass className="h-6 w-6" />,
+    title: 'Georreferenciación',
+    desc: 'Coordenadas precisas vinculadas a red geodésica, con puntos de control, reporte técnico y respaldo para compatibilidad GIS.',
+  },
+  {
+    icon: <Activity className="h-6 w-6" />,
+    title: 'Control topográfico de obra',
+    desc: 'Seguimiento de avances, verificación de cotas, control geométrico, reportes periódicos y alertas de desviación.',
+  },
+  {
+    icon: <Layers className="h-6 w-6" />,
+    title: 'Curvas de nivel',
+    desc: 'Curvas, perfiles y superficies digitales para plataformas, drenajes, vías, explanaciones y movimiento de tierras.',
+  },
+  {
+    icon: <FileText className="h-6 w-6" />,
+    title: 'Planos topográficos',
+    desc: 'Planos DWG/PDF, perfiles longitudinales, secciones transversales, cuadros de coordenadas y documentación lista para expediente.',
+  },
+  {
+    icon: <Boxes className="h-6 w-6" />,
+    title: 'Cubicación',
+    desc: 'Volúmenes de acopios, cortes, rellenos, canteras o botaderos con reporte comparativo y soporte para valorizaciones.',
+  },
+  {
+    icon: <TrendingDown className="h-6 w-6" />,
+    title: 'Movimiento de tierras',
+    desc: 'Control de excavaciones, rellenos, plataformas y terraplenes mediante metrados, superficies comparativas y reportes de avance.',
+  },
+  {
+    icon: <Mountain className="h-6 w-6" />,
+    title: 'Topografía minera',
+    desc: 'Levantamiento de galerías, frentes, taludes, botaderos y zonas operativas para control de producción y seguridad.',
+  },
+  {
+    icon: <Plane className="h-6 w-6" />,
+    title: 'Fotogrametría con dron',
+    desc: 'Ortomosaicos, modelos 3D, MDT, MDS, nube de puntos y registro visual de obra para análisis técnico.',
+  },
+];
+
 export default function Services() {
-  const servicesList = [
-    {
-      icon: <Map className="h-6 w-6" />,
-      title: 'Levantamientos Topográficos',
-      desc: 'Determinación exacta de la configuración del terreno (alturas, relieves, linderos y detalles naturales o artificiales) para proyectos de ingeniería.',
-    },
-    {
-      icon: <MapPin className="h-6 w-6" />,
-      title: 'Replanteo de Obras',
-      desc: 'Traslado exacto de los planos de diseño al terreno real, marcando ejes, niveles y límites estructurales para la correcta construcción.',
-    },
-    {
-      icon: <Compass className="h-6 w-6" />,
-      title: 'Georreferenciación',
-      desc: 'Establecimiento de coordenadas geográficas de alta precisión vinculadas a la red geodésica nacional (IGN) usando equipos GNSS satelitales.',
-    },
-    {
-      icon: <Activity className="h-6 w-6" />,
-      title: 'Control Topográfico de Obra',
-      desc: 'Supervisión constante y control geométrico continuo en obra civil, previniendo desviaciones críticas en estructuras, túneles y cimentaciones.',
-    },
-    {
-      icon: <Layers className="h-6 w-6" />,
-      title: 'Curvas de Nivel',
-      desc: 'Representación gráfica detallada del relieve del terreno mediante isolíneas que conectan puntos de igual altitud, ideal para modelado 3D.',
-    },
-    {
-      icon: <FileText className="h-6 w-6" />,
-      title: 'Planos Topográficos',
-      desc: 'Dibujo y digitalización en CAD/GIS de planos catastrales, altimétricos, perfiles longitudinales y secciones transversales bajo normas oficiales.',
-    },
-    {
-      icon: <Boxes className="h-6 w-6" />,
-      title: 'Cubicación',
-      desc: 'Cálculo exacto del volumen de materiales acumulados (acopios, canteras, acopios mineros) para un inventariado riguroso.',
-    },
-    {
-      icon: <TrendingDown className="h-6 w-6" />,
-      title: 'Movimiento de Tierras',
-      desc: 'Cuantificación y replanteo en excavaciones, rellenos y terraplenes. Control mensual de avance volumétrico en obras viales y civiles.',
-    },
-    {
-      icon: <Mountain className="h-6 w-6" />,
-      title: 'Topografía Minera',
-      desc: 'Control topográfico en interior mina (subterránea) y tajo abierto, galerías, chimeneas, control de botaderos y taludes inestables.',
-    },
-    {
-      icon: <Plane className="h-6 w-6" />,
-      title: 'Fotogrametría con Dron',
-      desc: 'Captura aérea masiva para generación de Ortomosaicos de alta resolución, Modelos Digitales de Terreno (MDT) y Nubes de Puntos densas.',
-    },
-  ];
-
   return (
-    <section id="servicios" className="py-24 bg-brand-light relative overflow-hidden bg-topo-grid bg-topo-contour">
-      {/* Light decorative gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-brand-light/90 to-brand-light z-0" />
+    <section id="servicios" className="section-fade-to-dark relative overflow-hidden bg-brand-light bg-topo-grid bg-topo-contour py-24">
+      <div className="absolute inset-0 z-0 bg-gradient-to-b from-transparent via-brand-light/90 to-brand-light" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="text-center max-w-3xl mx-auto mb-16">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto mb-16 max-w-3xl text-center">
           <motion.h3
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-100px' }}
-            className="text-xs sm:text-sm font-extrabold tracking-[0.25em] text-brand-yellow uppercase mb-3"
+            className="mb-3 text-xs font-extrabold uppercase tracking-[0.25em] text-brand-yellow sm:text-sm"
           >
-            NUESTROS SERVICIOS
+            Nuestros servicios
           </motion.h3>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-100px' }}
             transition={{ delay: 0.1 }}
-            className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-brand-petrol font-outfit"
+            className="font-outfit text-3xl font-extrabold text-brand-petrol sm:text-4xl md:text-5xl"
           >
-            Soluciones Geoespaciales y Topografía Especializada
+            Servicios topográficos con entregables listos para obra
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-100px' }}
             transition={{ delay: 0.2 }}
-            className="mt-4 text-base sm:text-lg text-gray-500 font-sans"
+            className="mt-4 text-base text-gray-500 sm:text-lg"
           >
-            Cubrimos todas las necesidades de medición, mapeo y control geométrico en campo con precisión milimétrica y procesamiento digital avanzado.
+            Medimos, procesamos y entregamos información técnica en formatos útiles para diseño,
+            construcción, minería, catastro y control de avance.
           </motion.p>
         </div>
 
-        {/* Services Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {servicesList.map((service, index) => (
             <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 40 }}
+              key={service.title}
+              initial={{ opacity: 0, y: 28 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-100px' }}
-              transition={{ type: 'spring', stiffness: 100, damping: 18, delay: index * 0.05 }}
-              whileHover={{ y: -8, transition: { duration: 0.2 } }}
-              className="bg-white border border-gray-100 rounded-2xl p-6 sm:p-8 shadow-premium hover:shadow-premium-hover hover:border-brand-yellow/30 hover-glow-yellow transition-all duration-300 group flex flex-col justify-between relative overflow-hidden"
+              transition={{ type: 'spring', stiffness: 105, damping: 20, delay: index * 0.04 }}
+              whileHover={{ y: -4, transition: { duration: 0.2 } }}
+              className="group relative flex flex-col justify-between overflow-hidden rounded-lg border border-gray-200 bg-white p-6 shadow-premium transition-all duration-300 hover:border-brand-yellow/40 hover:shadow-premium-hover sm:p-7"
             >
-              {/* Card Hover Background Gradient */}
-              <div className="absolute inset-0 bg-gradient-to-br from-brand-yellow/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+              <div className="absolute inset-x-0 top-0 h-1 bg-brand-petrol transition-colors duration-300 group-hover:bg-brand-yellow" />
               <div className="space-y-4">
-                {/* Icon wrapper */}
-                <div className="w-12 h-12 rounded-xl bg-brand-petrol/5 text-brand-petrol flex items-center justify-center group-hover:bg-brand-yellow group-hover:text-brand-dark transition-all duration-300 shadow-sm relative z-10 group-hover:shadow-[0_0_15px_rgba(255,92,0,0.4)]">
+                <div className="relative z-10 flex h-12 w-12 items-center justify-center rounded-lg bg-brand-petrol/5 text-brand-petrol shadow-sm transition-all duration-300 group-hover:bg-brand-yellow group-hover:text-brand-dark">
                   {service.icon}
                 </div>
-                <h3 className="text-lg sm:text-xl font-bold text-brand-petrol font-outfit leading-tight group-hover:text-brand-yellow transition-colors duration-300 relative z-10">
+                <h3 className="relative z-10 font-outfit text-lg font-bold leading-tight text-brand-petrol transition-colors duration-300 group-hover:text-brand-yellow sm:text-xl">
                   {service.title}
                 </h3>
-                <p className="text-gray-500 text-xs sm:text-sm leading-relaxed font-sans">
-                  {service.desc}
-                </p>
+                <p className="text-sm leading-relaxed text-gray-500">{service.desc}</p>
               </div>
 
-              {/* Action Indicator */}
-              <div className="pt-6 mt-6 border-t border-gray-50 flex items-center justify-between">
-                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                  Código de Servicio: MT-0{index + 1}
+              <div className="mt-6 flex items-center justify-between border-t border-gray-100 pt-5">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                  Servicio MT-{String(index + 1).padStart(2, '0')}
                 </span>
                 <a
                   href="#contacto"
-                  className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-brand-light text-brand-petrol hover:bg-brand-yellow hover:text-brand-dark transition-all duration-300 group-hover:translate-x-1"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 bg-white text-brand-petrol transition-all duration-300 hover:border-brand-yellow hover:bg-brand-yellow hover:text-brand-dark"
                   title="Solicitar cotización de este servicio"
                 >
                   <ChevronRight className="h-4 w-4" />

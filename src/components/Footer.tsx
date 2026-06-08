@@ -7,6 +7,7 @@ export default function Footer() {
   const linksEmpresa = [
     { name: "Inicio", href: "#inicio" },
     { name: "Nosotros", href: "#nosotros" },
+    { name: "Proyectos", href: "#proyectos" },
     { name: "Servicios", href: "#servicios" },
     { name: "Sectores", href: "#sectores" },
     { name: "Equipos", href: "#equipos" },

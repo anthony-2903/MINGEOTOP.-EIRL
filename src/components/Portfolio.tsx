@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Compass, MapPin, Play, ShieldCheck, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Compass, MapPin, Pause, Play, ShieldCheck, X } from 'lucide-react';
 
 import minaTajoAbiertoImg from '../assets/mina_tajo_abierto.png';
 import tunelSubterraneoImg from '../assets/tunel_subterraneo.png';
@@ -106,20 +106,46 @@ function ProjectMedia({ project, className }: { project: Project; className: str
   return <div className={`${className} bg-gradient-to-br ${project.color}`} />;
 }
 
+function ProjectMasonrySkeleton() {
+  return (
+    <div className="grid h-[720px] auto-cols-[90vw] grid-flow-col-dense grid-rows-3 gap-2 pb-6 sm:h-[560px] sm:auto-cols-[320px] sm:gap-2.5 lg:h-[620px] lg:auto-cols-[360px] xl:h-[680px] xl:auto-cols-[410px]">
+      {Array.from({ length: 10 }).map((_, index) => (
+        <div
+          key={index}
+          className="relative size-full overflow-hidden rounded-md border border-gray-200 bg-gray-100 nth-[1]:row-span-2 nth-[3n+2]:col-span-2 nth-[6]:row-span-2 nth-[13]:row-span-2"
+        >
+          <div className="skeleton-shimmer absolute inset-0 bg-gray-100" />
+          <div className="absolute left-3 top-3 h-7 w-24 rounded-md bg-white/75" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function Portfolio() {
   const [filter, setFilter] = useState('todos');
   const [projects, setProjects] = useState<Project[]>(fallbackProjects);
+  const [isLoadingProjects, setIsLoadingProjects] = useState(true);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [selectedLayoutId, setSelectedLayoutId] = useState('');
+  const [isAutoScrollEnabled, setIsAutoScrollEnabled] = useState(true);
+  const carouselRef = useRef<HTMLDivElement | null>(null);
+  const isUserInteractingRef = useRef(false);
 
   useEffect(() => {
     let mounted = true;
 
-    getPublishedProjects().then((supabaseProjects) => {
-      if (mounted && supabaseProjects.length > 0) {
-        setProjects(supabaseProjects);
-      }
-    });
+    getPublishedProjects()
+      .then((supabaseProjects) => {
+        if (mounted && supabaseProjects.length > 0) {
+          setProjects(supabaseProjects);
+        }
+      })
+      .finally(() => {
+        if (mounted) {
+          setIsLoadingProjects(false);
+        }
+      });
 
     return () => {
       mounted = false;
@@ -132,6 +158,52 @@ export default function Portfolio() {
       : projects.filter((project) => project.category === filter);
   const carouselProjects =
     filteredProjects.length > 0 ? [...filteredProjects, ...filteredProjects] : [];
+
+  useEffect(() => {
+    const carousel = carouselRef.current;
+    if (!carousel || filteredProjects.length < 2) return;
+
+    let animationFrame = 0;
+    let lastTimestamp = performance.now();
+    const speed = 42;
+
+    const animate = (timestamp: number) => {
+      const delta = timestamp - lastTimestamp;
+      lastTimestamp = timestamp;
+
+      if (isAutoScrollEnabled && !isUserInteractingRef.current && !selectedProject) {
+        const halfScrollWidth = carousel.scrollWidth / 2;
+        carousel.scrollLeft += (speed * delta) / 1000;
+
+        if (halfScrollWidth > 0 && carousel.scrollLeft >= halfScrollWidth) {
+          carousel.scrollLeft -= halfScrollWidth;
+        }
+      }
+
+      animationFrame = requestAnimationFrame(animate);
+    };
+
+    carousel.scrollLeft = 0;
+    animationFrame = requestAnimationFrame(animate);
+
+    return () => cancelAnimationFrame(animationFrame);
+  }, [filter, filteredProjects.length, isAutoScrollEnabled, selectedProject]);
+
+  const scrollCarousel = (direction: 'previous' | 'next') => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+
+    isUserInteractingRef.current = true;
+    const distance = Math.min(carousel.clientWidth * 0.86, 720);
+    carousel.scrollBy({
+      left: direction === 'next' ? distance : -distance,
+      behavior: 'smooth',
+    });
+
+    window.setTimeout(() => {
+      isUserInteractingRef.current = false;
+    }, 1100);
+  };
 
   useEffect(() => {
     if (!selectedProject) return;
@@ -173,7 +245,7 @@ export default function Portfolio() {
               transition={{ delay: 0.1 }}
               className="font-outfit text-3xl font-extrabold text-brand-petrol sm:text-4xl md:text-5xl"
             >
-              Proyectos ejecutados con precision
+              Experiencia comprobada en campo
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -183,11 +255,12 @@ export default function Portfolio() {
               className="mt-4 text-base text-gray-500 sm:text-lg"
             >
               Una muestra visual de trabajos realizados en mineria, infraestructura vial,
-              construccion y saneamiento tecnico de terrenos.
+              construccion y saneamiento tecnico de terrenos. Cada proyecto documenta
+              entregables reales: planos, control de campo, cubicaciones, modelos y registro tecnico.
             </motion.p>
           </div>
 
-          <div className="mx-auto mb-10 flex max-w-2xl flex-wrap items-center justify-center gap-2 sm:mb-12">
+          <div className="mx-auto mb-8 flex max-w-2xl flex-wrap items-center justify-center gap-2 sm:mb-10">
             {categories.map((category) => (
               <button
                 key={category.id}
@@ -203,14 +276,78 @@ export default function Portfolio() {
             ))}
           </div>
 
-          <div className="relative overflow-hidden">
-            <div className="pointer-events-none absolute inset-y-0 left-0 z-20 w-10 bg-gradient-to-r from-white to-transparent sm:w-20" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 z-20 w-10 bg-gradient-to-l from-white to-transparent sm:w-20" />
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-gray-400">
+              {isLoadingProjects ? 'Cargando portafolio' : 'Desliza para explorar'}
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                disabled={isLoadingProjects}
+                onClick={() => setIsAutoScrollEnabled((current) => !current)}
+                className="inline-flex h-10 items-center gap-2 rounded-md border border-gray-200 bg-white px-3 text-xs font-bold uppercase tracking-wider text-brand-petrol shadow-sm transition hover:border-brand-yellow hover:bg-brand-light disabled:cursor-not-allowed disabled:opacity-50"
+                aria-label={isAutoScrollEnabled ? 'Pausar carrusel' : 'Reproducir carrusel'}
+              >
+                {isAutoScrollEnabled ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                <span className="hidden sm:inline">{isAutoScrollEnabled ? 'Pausar' : 'Reproducir'}</span>
+              </button>
+              <button
+                type="button"
+                disabled={isLoadingProjects}
+                onClick={() => scrollCarousel('previous')}
+                className="flex h-10 w-10 items-center justify-center rounded-md border border-gray-200 bg-white text-brand-petrol shadow-sm transition hover:border-brand-yellow hover:bg-brand-light disabled:cursor-not-allowed disabled:opacity-50"
+                aria-label="Ver proyectos anteriores"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                disabled={isLoadingProjects}
+                onClick={() => scrollCarousel('next')}
+                className="flex h-10 w-10 items-center justify-center rounded-md border border-gray-200 bg-white text-brand-petrol shadow-sm transition hover:border-brand-yellow hover:bg-brand-light disabled:cursor-not-allowed disabled:opacity-50"
+                aria-label="Ver siguientes proyectos"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
 
+          <div
+            ref={carouselRef}
+            className="project-carousel-viewport relative overflow-x-auto overflow-y-hidden overscroll-x-contain"
+            onPointerDown={() => {
+              isUserInteractingRef.current = true;
+            }}
+            onPointerUp={() => {
+              window.setTimeout(() => {
+                isUserInteractingRef.current = false;
+              }, 900);
+            }}
+            onPointerCancel={() => {
+              isUserInteractingRef.current = false;
+            }}
+            onTouchStart={() => {
+              isUserInteractingRef.current = true;
+            }}
+            onTouchEnd={() => {
+              window.setTimeout(() => {
+                isUserInteractingRef.current = false;
+              }, 900);
+            }}
+            onWheel={() => {
+              isUserInteractingRef.current = true;
+              window.setTimeout(() => {
+                isUserInteractingRef.current = false;
+              }, 900);
+            }}
+          >
+          {isLoadingProjects ? (
+            <ProjectMasonrySkeleton />
+          ) : (
           <motion.div
             key={filter}
             layout
-            className="project-carousel-track grid h-[720px] w-max auto-cols-[90vw] grid-flow-col-dense grid-rows-3 gap-2 pb-5 sm:h-[560px] sm:auto-cols-[320px] sm:gap-2.5 lg:h-[620px] lg:auto-cols-[360px] xl:h-[680px] xl:auto-cols-[410px]"
+            className="project-carousel-track grid h-[720px] w-max auto-cols-[90vw] grid-flow-col-dense grid-rows-3 gap-2 pb-6 sm:h-[560px] sm:auto-cols-[320px] sm:gap-2.5 lg:h-[620px] lg:auto-cols-[360px] xl:h-[680px] xl:auto-cols-[410px]"
           >
             <AnimatePresence mode="popLayout">
               {carouselProjects.map((project, index) => {
@@ -238,11 +375,11 @@ export default function Portfolio() {
                       setSelectedProject(project);
                     }
                   }}
-                  className="group relative size-full cursor-pointer overflow-hidden rounded-md border border-brand-green/20 bg-brand-dark text-left text-white shadow-premium outline-none transition-shadow duration-300 nth-[1]:row-span-2 nth-[3n+2]:col-span-2 nth-[4n+1]:snap-center nth-[6]:row-span-2 nth-[13]:row-span-2 focus-visible:ring-4 focus-visible:ring-brand-yellow/40"
+                  className="group relative size-full cursor-pointer snap-start overflow-hidden rounded-md border border-brand-green/20 bg-brand-dark text-left text-white shadow-premium outline-none transition-all duration-300 hover:border-brand-yellow/45 hover:shadow-premium-hover nth-[1]:row-span-2 nth-[3n+2]:col-span-2 nth-[4n+1]:snap-center nth-[6]:row-span-2 nth-[13]:row-span-2 focus-visible:ring-4 focus-visible:ring-brand-yellow/40"
                 >
                   <ProjectMedia
                     project={project}
-                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.035]"
                   />
 
                   <div className="absolute inset-0 bg-gradient-to-t from-brand-dark/50 via-transparent to-transparent" />
@@ -264,6 +401,7 @@ export default function Portfolio() {
               })}
             </AnimatePresence>
           </motion.div>
+          )}
           </div>
         </div>
       </section>
