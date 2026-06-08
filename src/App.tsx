@@ -16,7 +16,8 @@ import { ArrowUp, MessageCircle } from 'lucide-react';
 
 export default function App() {
   const [showBackToTop, setShowBackToTop] = useState(false);
-  const isAdminRoute = window.location.pathname === '/admin';
+  const normalizedPath = window.location.pathname.replace(/\/$/, '');
+  const isAdminRoute = normalizedPath === '/admin';
   const { scrollYProgress } = useScroll();
   const smoothScrollProgress = useSpring(scrollYProgress, {
     stiffness: 90,

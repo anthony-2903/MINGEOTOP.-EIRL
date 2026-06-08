@@ -3,8 +3,16 @@
   "trailingSlash": false,
   "rewrites": [
     {
+      "source": "/admin",
+      "destination": "/"
+    },
+    {
+      "source": "/admin/(.*)",
+      "destination": "/"
+    },
+    {
       "source": "/(.*)",
-      "destination": "/index.html"
+      "destination": "/"
     }
   ],
   "headers": [
