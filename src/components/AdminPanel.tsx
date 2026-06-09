@@ -990,17 +990,6 @@ export default function AdminPanel() {
                   {isLoggingIn ? 'Ingresando...' : 'Ingresar al panel'}
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsAuthenticated(true);
-                    setIsCheckingSession(false);
-                  }}
-                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-bold text-brand-petrol transition hover:bg-brand-light cursor-pointer"
-                >
-                  <ShieldCheck className="h-4 w-4 text-brand-green" />
-                  Acceso Rápido (Desarrollo)
-                </button>
 
                 <div className="mt-5 rounded-lg bg-brand-light p-4 text-xs leading-relaxed text-gray-500">
                   <strong className="text-brand-petrol">Usuario admin:</strong> {ADMIN_EMAIL}
