@@ -2,11 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import Logo from './Logo';
+import estacionTotalImg from '../assets/estacion-total-.webp';
+import imgHero2 from '../assets/imghero2.webp';
+import imgHero3 from '../assets/imghero3.webp';
 
 const heroImages = [
-  'https://www.rumbominero.com/wp-content/uploads/2026/03/Ley-Mineria.jpg',
-  'https://www.esan.edu.pe/images/blog/2021/12/09/1500x844-logistica-mineria-gestion-9-12-2021.jpg',
-  'https://www.correiasmercurio.com.br/wp-content/uploads/2024/05/O-futuro-da-mineracao-Tendencias-e-inovacao-1-1024x615.webp',
+  estacionTotalImg,
+  imgHero2,
+  imgHero3,
 ];
 
 export default function Hero() {
