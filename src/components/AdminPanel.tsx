@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
-  BarChart3,
   Check,
   ChevronRight,
   Eye,
@@ -20,6 +19,7 @@ import {
   Play,
   Plus,
   Save,
+  Search,
   Settings,
   ShieldCheck,
   Trash2,
@@ -28,6 +28,7 @@ import {
   X,
 } from 'lucide-react';
 import Logo from './Logo';
+import LoginModel from './LoginModel';
 import { isSupabaseConfigured, supabase } from '../lib/supabase';
 import {
   getAllProjects,
@@ -78,24 +79,17 @@ const initialContent: Record<AdminSectionId, EditableItem> = {
   },
 };
 
-const quickStats = [
-  { label: 'Secciones', value: '3', icon: LayoutDashboard },
-  { label: 'Gestionables', value: '3', icon: FolderKanban },
-  { label: 'Leads demo', value: '24', icon: BarChart3 },
-  { label: 'Publicación', value: 'Web', icon: ShieldCheck },
-];
-
 const serviceItems = [
-  'Levantamientos Topográficos',
-  'Replanteo de Obras',
-  'Georreferenciación',
-  'Control Topográfico de Obra',
-  'Curvas de Nivel',
-  'Planos Topográficos',
-  'Cubicación',
-  'Movimiento de Tierras',
-  'Topografía Minera',
-  'Fotogrametría con Dron',
+  { title: 'Levantamientos Topográficos', category: 'Campo', deliverable: 'Plano, curvas de nivel y nube de puntos' },
+  { title: 'Replanteo de Obras', category: 'Obra', deliverable: 'Ejes, niveles y puntos de control' },
+  { title: 'Georreferenciación', category: 'Geodesia', deliverable: 'Coordenadas, reporte técnico y puntos GNSS' },
+  { title: 'Control Topográfico de Obra', category: 'Obra', deliverable: 'Reportes de avance y control geométrico' },
+  { title: 'Curvas de Nivel', category: 'Terreno', deliverable: 'Superficies, perfiles y modelo digital' },
+  { title: 'Planos Topográficos', category: 'Gabinete', deliverable: 'DWG, PDF, perfiles y cuadros de coordenadas' },
+  { title: 'Cubicación', category: 'Volúmenes', deliverable: 'Cortes, rellenos y reporte comparativo' },
+  { title: 'Movimiento de Tierras', category: 'Volúmenes', deliverable: 'Metrados, superficies y control de plataformas' },
+  { title: 'Topografía Minera', category: 'Minería', deliverable: 'Taludes, botaderos y zonas operativas' },
+  { title: 'Fotogrametría con Dron', category: 'Dron', deliverable: 'Ortomosaicos, modelos 3D y MDT/MDS' },
 ];
 
 
@@ -167,6 +161,7 @@ export default function AdminPanel() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [content, setContent] = useState(initialContent);
   const [saved, setSaved] = useState(false);
+  const [serviceSearch, setServiceSearch] = useState('');
 
   // DB projects states
   const [dbProjects, setDbProjects] = useState<Project[]>([]);
@@ -189,14 +184,13 @@ export default function AdminPanel() {
   });
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState('');
+  const [uploadPercent, setUploadPercent] = useState(0);
   const [isSavingProject, setIsSavingProject] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
   const [isDeletingProject, setIsDeletingProject] = useState(false);
-
-  // Drag and Drop States
-  const [isImageDragging, setIsImageDragging] = useState(false);
-  const [isVideoDragging, setIsVideoDragging] = useState(false);
+  const [isMediaDragging, setIsMediaDragging] = useState(false);
+  const uploadProgressTimer = useRef<number | null>(null);
 
   const loadProjects = async () => {
     setIsLoadingProjects(true);
@@ -210,9 +204,33 @@ export default function AdminPanel() {
     }
   };
 
-  const uploadImageFile = async (file: File) => {
+  const startUploadFeedback = (message: string) => {
+    if (uploadProgressTimer.current) {
+      window.clearInterval(uploadProgressTimer.current);
+    }
+
     setIsUploading(true);
-    setUploadProgress('Subiendo imagen a Cloudinary...');
+    setUploadProgress(message);
+    setUploadPercent(8);
+    uploadProgressTimer.current = window.setInterval(() => {
+      setUploadPercent((current) => {
+        if (current >= 92) return current;
+        return Math.min(92, current + Math.max(1, Math.round((92 - current) / 6)));
+      });
+    }, 300);
+  };
+
+  const finishUploadFeedback = (message: string, percent = 100) => {
+    if (uploadProgressTimer.current) {
+      window.clearInterval(uploadProgressTimer.current);
+      uploadProgressTimer.current = null;
+    }
+    setUploadPercent(percent);
+    setUploadProgress(message);
+  };
+
+  const uploadImageFile = async (file: File) => {
+    startUploadFeedback('Subiendo imagen a Cloudinary...');
     try {
       const res = await uploadImageToCloudinary(file);
       setProjectForm(prev => ({
@@ -220,26 +238,18 @@ export default function AdminPanel() {
         image_url: res.originalUrl,
         image_webp_url: res.webpUrl
       }));
-      setUploadProgress('Imagen subida con éxito.');
+      finishUploadFeedback('Imagen subida con exito.');
     } catch (err: any) {
       console.error('Error uploading image:', err);
       alert('Error al subir la imagen: ' + err.message);
-      setUploadProgress('Error al subir imagen.');
+      finishUploadFeedback('Error al subir imagen.', 0);
     } finally {
       setIsUploading(false);
     }
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      uploadImageFile(file);
-    }
-  };
-
   const uploadVideoFile = async (file: File) => {
-    setIsUploading(true);
-    setUploadProgress('Subiendo video a Cloudinary (esto puede tardar)...');
+    startUploadFeedback('Subiendo video a Cloudinary...');
     try {
       const res = await uploadVideoToCloudinary(file);
       setProjectForm(prev => ({
@@ -248,57 +258,53 @@ export default function AdminPanel() {
         video_optimized_url: res.optimizedUrl,
         video_poster_url: res.posterUrl
       }));
-      setUploadProgress('Video subido con éxito.');
+      finishUploadFeedback('Video subido con exito.');
     } catch (err: any) {
       console.error('Error uploading video:', err);
       alert('Error al subir el video: ' + err.message);
-      setUploadProgress('Error al subir video.');
+      finishUploadFeedback('Error al subir video.', 0);
     } finally {
       setIsUploading(false);
     }
   };
 
-  const handleVideoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const uploadMediaFile = async (file: File) => {
+    if (file.type.startsWith('image/')) {
+      await uploadImageFile(file);
+      return;
+    }
+
+    if (file.type.startsWith('video/')) {
+      await uploadVideoFile(file);
+      return;
+    }
+
+    alert('Por favor, selecciona una imagen o un video valido.');
+  };
+
+  const handleMediaUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      uploadVideoFile(file);
+      await uploadMediaFile(file);
     }
+    event.target.value = '';
   };
 
-  // Drag and Drop Event Handlers
-  const handleImageDragOver = (e: React.DragEvent) => {
+  const handleMediaDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    setIsImageDragging(true);
-  };
-  const handleImageDragLeave = () => {
-    setIsImageDragging(false);
-  };
-  const handleImageDrop = async (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsImageDragging(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file && file.type.startsWith('image/')) {
-      await uploadImageFile(file);
-    } else if (file) {
-      alert('Por favor, arrastra un archivo de imagen válido.');
-    }
+    setIsMediaDragging(true);
   };
 
-  const handleVideoDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsVideoDragging(true);
+  const handleMediaDragLeave = () => {
+    setIsMediaDragging(false);
   };
-  const handleVideoDragLeave = () => {
-    setIsVideoDragging(false);
-  };
-  const handleVideoDrop = async (e: React.DragEvent) => {
+
+  const handleMediaDrop = async (e: React.DragEvent) => {
     e.preventDefault();
-    setIsVideoDragging(false);
+    setIsMediaDragging(false);
     const file = e.dataTransfer.files?.[0];
-    if (file && file.type.startsWith('video/')) {
-      await uploadVideoFile(file);
-    } else if (file) {
-      alert('Por favor, arrastra un archivo de video válido.');
+    if (file) {
+      await uploadMediaFile(file);
     }
   };
 
@@ -310,8 +316,8 @@ export default function AdminPanel() {
       location: '',
       description: '',
       precision_label: '',
-      sort_order: dbProjects.length + 1,
-      status: 'draft',
+      sort_order: Math.max(0, ...dbProjects.map(project => project.sort_order ?? 0)) + 1,
+      status: 'published',
       image_url: '',
       image_webp_url: '',
       video_url: '',
@@ -319,6 +325,7 @@ export default function AdminPanel() {
       video_poster_url: '',
     });
     setUploadProgress('');
+    setUploadPercent(0);
     setProjectModalOpen(true);
   };
 
@@ -339,6 +346,7 @@ export default function AdminPanel() {
       video_poster_url: project.video_poster_url || '',
     });
     setUploadProgress('');
+    setUploadPercent(0);
     setProjectModalOpen(true);
   };
 
@@ -351,14 +359,18 @@ export default function AdminPanel() {
 
     setIsSavingProject(true);
     try {
+      const nextSortOrder = editingProject
+        ? Number(editingProject.sort_order ?? projectForm.sort_order ?? 0)
+        : Math.max(0, ...dbProjects.map(project => project.sort_order ?? 0)) + 1;
+
       const payload: any = {
         title: projectForm.title,
         category: projectForm.category,
         location: projectForm.location || null,
         description: projectForm.description,
-        precision_label: projectForm.precision_label || null,
-        sort_order: Number(projectForm.sort_order),
-        status: projectForm.status,
+        precision_label: null,
+        sort_order: nextSortOrder,
+        status: 'published',
         image_url: projectForm.image_url || null,
         image_webp_url: projectForm.image_webp_url || null,
         video_url: projectForm.video_url || null,
@@ -410,9 +422,24 @@ export default function AdminPanel() {
     }
   }, [isAuthenticated]);
 
+  useEffect(() => {
+    return () => {
+      if (uploadProgressTimer.current) {
+        window.clearInterval(uploadProgressTimer.current);
+      }
+    };
+  }, []);
+
   const editableSection = activeSection;
   const selectedContent = content[editableSection];
   const isCurrentSectionManaged = isManagedSection(activeSection);
+  const filteredServices = serviceItems.filter((service) => {
+    const search = serviceSearch.trim().toLowerCase();
+    if (!search) return true;
+    return [service.title, service.category, service.deliverable].some((value) =>
+      value.toLowerCase().includes(search),
+    );
+  });
 
   useEffect(() => {
     if (!supabase) {
@@ -634,16 +661,139 @@ export default function AdminPanel() {
       );
     }
 
+    if (activeSection === 'servicios') {
+      return (
+        <div className="space-y-6">
+          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+            <div className="flex flex-col gap-4 border-b border-gray-100 pb-5 lg:flex-row lg:items-start lg:justify-between">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-yellow-dark font-outfit">
+                  Catalogo comercial
+                </p>
+                <h2 className="mt-2 text-2xl font-extrabold text-brand-petrol font-outfit">
+                  Gestion de Servicios
+                </h2>
+                <p className="mt-2 max-w-2xl text-sm text-gray-500">
+                  Revisa los servicios visibles en la landing y el alcance comercial que se comunica al cliente.
+                </p>
+              </div>
+              <span className="inline-flex w-fit items-center rounded-full border border-brand-green/20 bg-brand-green/10 px-3 py-1 text-xs font-bold text-brand-green">
+                Publicado
+              </span>
+            </div>
+
+            <div className="mt-5 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-lg border border-gray-100 bg-brand-light p-4">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Servicios</span>
+                <strong className="mt-1 block text-2xl font-extrabold text-brand-petrol">{serviceItems.length}</strong>
+              </div>
+              <div className="rounded-lg border border-gray-100 bg-brand-light p-4">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Categorias</span>
+                <strong className="mt-1 block text-2xl font-extrabold text-brand-petrol">
+                  {new Set(serviceItems.map(service => service.category)).size}
+                </strong>
+              </div>
+              <div className="rounded-lg border border-brand-yellow/20 bg-brand-yellow/10 p-4">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-brand-yellow-dark">Estado</span>
+                <strong className="mt-1 block text-2xl font-extrabold text-brand-petrol">Activo</strong>
+              </div>
+            </div>
+
+            <div className="mt-6 grid gap-5">
+              <label className="space-y-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-gray-500">Titulo principal</span>
+                <input
+                  value={selectedContent.title}
+                  onChange={(event) => updateContent('title', event.target.value)}
+                  className={fieldClasses}
+                />
+              </label>
+
+              <label className="space-y-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-gray-500">Descripcion</span>
+                <textarea
+                  value={selectedContent.description}
+                  onChange={(event) => updateContent('description', event.target.value)}
+                  rows={4}
+                  className={fieldClasses}
+                />
+              </label>
+
+              <label className="space-y-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-gray-500">Buscar servicio</span>
+                <div className="relative">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                  <input
+                    value={serviceSearch}
+                    onChange={(event) => setServiceSearch(event.target.value)}
+                    className={`${fieldClasses} pl-10`}
+                    placeholder="Buscar por nombre, categoria o entregable"
+                  />
+                </div>
+              </label>
+
+              <div className="overflow-hidden rounded-lg border border-gray-200">
+                <div className="flex items-center justify-between border-b border-gray-100 bg-gray-50 px-4 py-3">
+                  <h3 className="font-extrabold text-brand-petrol">Servicios visibles</h3>
+                  <span className="text-xs font-bold text-gray-400">
+                    {filteredServices.length} de {serviceItems.length}
+                  </span>
+                </div>
+                <div className="divide-y divide-gray-100">
+                  {filteredServices.map((service, index) => (
+                    <div key={service.title} className="grid gap-3 px-4 py-4 sm:grid-cols-[auto_1fr_auto] sm:items-center">
+                      <span className="inline-flex h-9 w-12 items-center justify-center rounded-lg bg-brand-petrol text-xs font-extrabold text-white">
+                        MT-{String(serviceItems.findIndex(item => item.title === service.title) + 1).padStart(2, '0')}
+                      </span>
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-sm font-bold text-brand-petrol">{service.title}</p>
+                          <span className="rounded-full bg-brand-light px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                            {service.category}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-xs leading-relaxed text-gray-500">{service.deliverable}</p>
+                      </div>
+                      <span className="inline-flex w-fit items-center rounded-full border border-brand-green/20 bg-brand-green/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-brand-green">
+                        Visible
+                      </span>
+                    </div>
+                  ))}
+
+                  {filteredServices.length === 0 && (
+                    <div className="px-4 py-8 text-center text-sm font-semibold text-gray-500">
+                      No se encontraron servicios con ese criterio.
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-brand-petrol/10 bg-brand-light px-4 py-3 text-sm leading-relaxed text-gray-600">
+                El catalogo visible se mantiene sincronizado con el componente publico de servicios. Para cambiar iconos, orden o descripciones de cada tarjeta se edita el codigo del componente.
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end border-t border-gray-100 pt-5">
+              <button
+                type="button"
+                onClick={handleSave}
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-yellow px-4 py-3 text-sm font-bold text-brand-dark shadow-lg shadow-brand-yellow/20 transition hover:bg-brand-yellow-light"
+              >
+                {saved ? <Check className="h-4 w-4" /> : <Save className="h-4 w-4" />}
+                {saved ? 'Cambios guardados' : 'Guardar contenido'}
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
         <div className="flex flex-col gap-3 border-b border-gray-100 pb-5 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-yellow-dark">
-              {activeSection === 'servicios'
-                ? 'Catálogo comercial'
-                : activeSection === 'contacto'
-                  ? 'Canales de atención'
-                  : 'Editor de contenido'}
+            <p className="hidden text-xs font-bold uppercase tracking-[0.2em] text-brand-yellow-dark sm:block">
+              Canales de atencion
             </p>
             <h2 className="mt-2 text-2xl font-extrabold text-brand-petrol">
               {sections.find((section) => section.id === activeSection)?.label}
@@ -695,43 +845,13 @@ export default function AdminPanel() {
             </div>
           )}
 
-          {activeSection === 'servicios' && (
-            <div className="rounded-lg border border-gray-200">
-              <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
-                <h3 className="font-extrabold text-brand-petrol">Servicios visibles</h3>
-                <button className="inline-flex items-center gap-2 rounded-lg bg-brand-petrol px-3 py-2 text-xs font-bold text-white">
-                  <Plus className="h-4 w-4" />
-                  Agregar
-                </button>
-              </div>
-              <div className="divide-y divide-gray-100">
-                {serviceItems.slice(0, 6).map((service, index) => (
-                  <div key={service} className="flex items-center justify-between gap-3 px-4 py-3">
-                    <div>
-                      <p className="text-sm font-bold text-brand-petrol">{service}</p>
-                      <p className="text-xs text-gray-500">Código MT-0{index + 1}</p>
-                    </div>
-                    <div className="flex gap-2">
-                      <button className="rounded-lg border border-gray-200 p-2 text-gray-500 hover:text-brand-petrol">
-                        <Pencil className="h-4 w-4" />
-                      </button>
-                      <button className="rounded-lg border border-gray-200 p-2 text-gray-500 hover:text-red-500">
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
           {activeSection === 'contacto' && (
             <div className="grid gap-3 sm:grid-cols-2">
               {contactChannels.map((channel) => {
                 const Icon = channel.icon;
                 return (
                   <div key={channel.label} className="rounded-lg border border-gray-200 bg-brand-light p-4">
-                    <div className="flex items-center gap-3">
+                    <div className="flex min-w-0 items-center gap-3">
                       <div className="rounded-lg bg-brand-green/10 p-2 text-brand-green">
                         <Icon className="h-5 w-5" />
                       </div>
@@ -787,15 +907,28 @@ export default function AdminPanel() {
   const renderContextPanel = () => {
     if (activeSection === 'servicios') {
       return (
-        <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-          <h3 className="font-extrabold text-brand-petrol">Listado completo</h3>
-          <div className="mt-4 space-y-2">
-            {serviceItems.map((service, index) => (
-              <button key={service} className="flex w-full items-center justify-between rounded-lg bg-brand-light px-3 py-2 text-left text-sm hover:bg-brand-yellow/10">
-                <span className="font-semibold text-brand-petrol">{service}</span>
-                <span className="text-xs font-bold text-gray-400">MT-{String(index + 1).padStart(2, '0')}</span>
-              </button>
+        <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm space-y-5">
+          <div>
+            <h3 className="font-extrabold text-brand-petrol">Resumen de Servicios</h3>
+            <p className="mt-1 text-xs text-gray-500">Lectura rapida del catalogo visible en la landing.</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            {[...new Set(serviceItems.map(service => service.category))].map((category) => (
+              <div key={category} className="rounded-lg border border-gray-100 bg-brand-light px-3 py-2">
+                <span className="block text-sm font-extrabold text-brand-petrol">
+                  {serviceItems.filter(service => service.category === category).length}
+                </span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">{category}</span>
+              </div>
             ))}
+          </div>
+
+          <div className="border-t border-gray-100 pt-4 space-y-2">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 font-outfit">Nota operativa</h4>
+            <p className="text-xs leading-relaxed text-gray-500">
+              Los servicios individuales son tarjetas del componente publico. Esta vista sirve para revisar contenido y guardar textos generales.
+            </p>
           </div>
         </div>
       );
@@ -904,79 +1037,83 @@ export default function AdminPanel() {
     return (
       <div className="min-h-screen bg-brand-petrol text-white">
         <div className="grid min-h-screen lg:grid-cols-12">
-          <section className="hidden bg-topo-grid bg-topo-contour px-10 py-12 lg:col-span-7 lg:flex lg:flex-col lg:justify-between">
-            <Logo textColor="light" />
-            <div className="max-w-xl">
-              <p className="text-xs font-bold uppercase tracking-[0.25em] text-brand-yellow">
-                Acceso administrativo
-              </p>
-              <h1 className="mt-4 text-5xl font-extrabold leading-tight font-outfit">
-                Controla la landing page desde un panel privado.
-              </h1>
-              <p className="mt-5 text-base leading-relaxed text-gray-300">
-                Gestiona secciones, mensajes comerciales, estado de publicación y datos de contacto de MINGEOTOP E.I.R.L.
-              </p>
+          <section className="relative hidden overflow-hidden bg-topo-grid bg-topo-contour px-8 py-8 lg:col-span-7 lg:flex lg:flex-col lg:justify-between xl:px-10 xl:py-12">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,183,77,0.18)_0%,rgba(45,91,55,0.12)_38%,transparent_70%)]" />
+            <div className="relative z-10">
+              <Logo textColor="light" />
             </div>
-            <div className="flex items-center gap-3 text-sm text-gray-400">
+
+            <div className="relative z-10 flex flex-1 items-center justify-center">
+              <div className="relative h-[560px] w-full max-w-5xl xl:h-[680px]">
+                <div className="absolute inset-8 rounded-full bg-brand-yellow/10 blur-3xl xl:inset-14" />
+                <LoginModel className="relative h-full w-full" />
+              </div>
+            </div>
+
+            <div className="relative z-10 flex items-center gap-3 text-sm text-gray-400">
               <ShieldCheck className="h-5 w-5 text-brand-green-light" />
               <span>Base visual preparada para autenticacion real con backend.</span>
             </div>
           </section>
 
-          <main className="flex min-h-screen items-center justify-center px-4 py-10 sm:px-6 lg:col-span-5 lg:px-10">
-            <div className="w-full max-w-md">
+          <main className="flex min-h-screen items-center justify-center px-4 py-8 sm:px-6 lg:col-span-5 lg:px-8 xl:px-10">
+            <div className="w-full max-w-[460px]">
               <div className="mb-8 flex justify-center lg:hidden">
                 <Logo textColor="light" />
               </div>
 
-              <form onSubmit={handleLogin} className="rounded-lg border border-white/10 bg-white p-6 text-brand-dark shadow-2xl sm:p-8">
-                <div className="mb-6">
-                  <div className="mb-4 inline-flex rounded-lg bg-brand-yellow/10 p-3 text-brand-yellow-dark">
-                    <LockKeyhole className="h-6 w-6" />
+              <form onSubmit={handleLogin} className="relative overflow-hidden rounded-2xl border border-white/80 bg-white p-6 text-brand-dark shadow-[0_28px_80px_rgba(9,20,31,0.22)] sm:p-8">
+                <div className="pointer-events-none absolute -right-20 -top-24 h-48 w-48 rounded-full bg-brand-yellow/15 blur-3xl" />
+                <div className="pointer-events-none absolute -bottom-24 -left-20 h-48 w-48 rounded-full bg-brand-green/10 blur-3xl" />
+
+                <div className="relative mb-8 text-center">
+                  <div className="mx-auto flex justify-center">
+                    <Logo className="h-auto w-64 max-w-full sm:w-72" />
                   </div>
-                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-yellow-dark">
-                    Login
-                  </p>
-                  <h2 className="mt-2 text-3xl font-extrabold text-brand-petrol font-outfit">
+                  <div className="mx-auto mt-5 inline-flex items-center gap-2 rounded-full border border-brand-yellow/20 bg-brand-yellow/10 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.22em] text-brand-yellow-dark">
+                    <LockKeyhole className="h-3.5 w-3.5" />
+                    Login seguro
+                  </div>
+                  <h2 className="mt-5 text-2xl font-extrabold leading-tight text-brand-petrol font-outfit sm:text-3xl">
                     Panel administrativo
                   </h2>
-                  <p className="mt-2 text-sm leading-relaxed text-gray-500">
-                    Ingresa con las credenciales de administración para modificar la landing.
+                  <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-gray-500">
+                    Ingresa con tus credenciales para gestionar la landing.
                   </p>
                 </div>
 
-                <div className="space-y-4">
+                <div className="relative space-y-4">
                   <label className="space-y-2 block">
                     <span className="text-xs font-bold uppercase tracking-wider text-gray-500">Correo</span>
                     <div className="relative">
-                      <User className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                      <User className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-petrol/45" />
                       <input
                         type="email"
                         value={loginData.email}
                         onChange={(event) => setLoginData((current) => ({ ...current, email: event.target.value }))}
-                        className={`${fieldClasses} pl-11`}
+                        className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3.5 pl-11 text-sm text-brand-dark outline-none transition placeholder:text-gray-400 focus:border-brand-yellow focus:ring-4 focus:ring-brand-yellow/10"
                         placeholder="admin@mingeotop.com"
                       />
                     </div>
                   </label>
 
                   <label className="space-y-2 block">
-                    <span className="text-xs font-bold uppercase tracking-wider text-gray-500">Contraseña</span>
+                    <span className="text-xs font-bold uppercase tracking-wider text-gray-500">Contrasena</span>
                     <div className="relative">
-                      <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                      <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-petrol/45" />
                       <input
                         type="password"
                         value={loginData.password}
                         onChange={(event) => setLoginData((current) => ({ ...current, password: event.target.value }))}
-                        className={`${fieldClasses} pl-11`}
-                        placeholder="Contraseña"
+                        className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3.5 pl-11 text-sm text-brand-dark outline-none transition placeholder:text-gray-400 focus:border-brand-yellow focus:ring-4 focus:ring-brand-yellow/10"
+                        placeholder="Contrasena"
                       />
                     </div>
                   </label>
                 </div>
 
                 {loginError && (
-                  <p className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
+                  <p className="relative mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
                     {loginError}
                   </p>
                 )}
@@ -984,17 +1121,16 @@ export default function AdminPanel() {
                 <button
                   type="submit"
                   disabled={isLoggingIn}
-                  className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-brand-yellow px-4 py-3 text-sm font-bold text-brand-dark shadow-lg shadow-brand-yellow/20 transition hover:bg-brand-yellow-light disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
+                  className="relative mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-brand-yellow px-4 py-3.5 text-sm font-extrabold text-brand-dark shadow-[0_18px_34px_rgba(255,92,0,0.24)] transition hover:-translate-y-0.5 hover:bg-brand-yellow-light disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-70 cursor-pointer"
                 >
                   <LockKeyhole className="h-4 w-4" />
                   {isLoggingIn ? 'Ingresando...' : 'Ingresar al panel'}
                 </button>
 
-
-                <div className="mt-5 rounded-lg bg-brand-light p-4 text-xs leading-relaxed text-gray-500">
+                <div className="relative mt-5 rounded-xl border border-gray-100 bg-brand-light/80 p-4 text-xs leading-relaxed text-gray-500">
                   <strong className="text-brand-petrol">Usuario admin:</strong> {ADMIN_EMAIL}
                   <br />
-                  La contraseña se valida directamente con Supabase Auth.
+                  La contrasena se valida directamente con Supabase Auth.
                 </div>
               </form>
             </div>
@@ -1055,21 +1191,23 @@ export default function AdminPanel() {
             })}
           </nav>
 
-          <div className="border-t border-white/10 p-4">
+          <div className="flex items-center justify-center gap-3 border-t border-white/10 p-4">
             <button
               type="button"
               onClick={handleLogout}
-              className="mb-3 flex w-full items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-white transition hover:border-brand-yellow hover:bg-white/10"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-white transition hover:border-brand-yellow hover:bg-white/10"
+              title="Cerrar sesion"
+              aria-label="Cerrar sesion"
             >
-              <LockKeyhole className="h-4 w-4" />
-              Cerrar sesión
+              <LockKeyhole className="h-5 w-5" />
             </button>
             <a
               href="/"
-              className="flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-white transition hover:border-brand-yellow hover:bg-brand-yellow hover:text-brand-dark"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-white transition hover:border-brand-yellow hover:bg-brand-yellow hover:text-brand-dark"
+              title="Ver landing"
+              aria-label="Ver landing"
             >
-              <Eye className="h-4 w-4" />
-              Ver landing
+              <Eye className="h-5 w-5" />
             </a>
           </div>
         </div>
@@ -1086,7 +1224,7 @@ export default function AdminPanel() {
 
       <div className="lg:pl-72">
         <header className="sticky top-0 z-30 border-b border-gray-200 bg-white/90 backdrop-blur">
-          <div className="flex min-h-16 items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+          <div className="flex min-h-16 items-center justify-between gap-3 px-3 py-3 sm:px-5 lg:px-6 xl:px-8">
             <div className="flex items-center gap-3">
               <button
                 type="button"
@@ -1100,56 +1238,38 @@ export default function AdminPanel() {
                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-yellow-dark">
                   Panel administrativo
                 </p>
-                <h1 className="text-xl font-extrabold text-brand-petrol sm:text-2xl">
+                <h1 className="truncate text-base font-extrabold text-brand-petrol sm:text-xl lg:text-2xl">
                   Administración de landing page
                 </h1>
               </div>
             </div>
 
-            <div className="hidden items-center gap-2 sm:flex">
+            <div className="flex items-center gap-2">
               <a
                 href="/"
-                className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-bold text-brand-petrol transition hover:border-brand-yellow"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-brand-petrol transition hover:border-brand-yellow"
+                title="Ver landing"
+                aria-label="Ver landing"
               >
                 <Eye className="h-4 w-4" />
-                Previsualizar
               </a>
               <button
                 type="button"
                 onClick={handleSave}
-                className="inline-flex items-center gap-2 rounded-lg bg-brand-yellow px-4 py-2 text-sm font-bold text-brand-dark shadow-lg shadow-brand-yellow/20 transition hover:bg-brand-yellow-light"
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-brand-yellow px-3 text-sm font-bold text-brand-dark shadow-lg shadow-brand-yellow/20 transition hover:bg-brand-yellow-light sm:px-4"
               >
                 {saved ? <Check className="h-4 w-4" /> : <Save className="h-4 w-4" />}
-                {saved ? 'Guardado' : 'Guardar'}
+                <span className="hidden sm:inline">{saved ? 'Guardado' : 'Guardar'}</span>
               </button>
             </div>
           </div>
         </header>
 
-        <main className="px-4 py-6 sm:px-6 lg:px-8">
-          <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {quickStats.map((stat) => {
-              const Icon = stat.icon;
-              return (
-                <div key={stat.label} className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-bold uppercase tracking-wider text-gray-500">{stat.label}</p>
-                      <p className="mt-2 text-3xl font-extrabold text-brand-petrol">{stat.value}</p>
-                    </div>
-                    <div className="rounded-lg bg-brand-green/10 p-3 text-brand-green">
-                      <Icon className="h-6 w-6" />
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </section>
+        <main className="px-3 py-4 sm:px-5 sm:py-6 lg:px-6 xl:px-8">
+          <section className="grid gap-5 lg:grid-cols-12 xl:gap-6">
+            <div className="lg:col-span-8">{renderSectionEditor()}</div>
 
-          <section className="mt-6 grid gap-6 xl:grid-cols-12">
-            <div className="xl:col-span-8">{renderSectionEditor()}</div>
-
-            <aside className="space-y-6 xl:col-span-4">
+            <aside className="space-y-5 lg:col-span-4 xl:space-y-6">
               {renderContextPanel()}
 
               <div className="rounded-lg border border-gray-200 bg-brand-petrol p-5 text-white shadow-sm">
@@ -1223,45 +1343,8 @@ export default function AdminPanel() {
                   />
                 </label>
 
-                <label className="space-y-1 block">
-                  <span className="text-xs font-bold uppercase tracking-wider text-gray-500">Precisión Instrumental</span>
-                  <input
-                    type="text"
-                    required
-                    value={projectForm.precision_label}
-                    onChange={e => setProjectForm(prev => ({ ...prev, precision_label: e.target.value }))}
-                    className={fieldClasses}
-                    placeholder="Ej. ±2 cm instrumental"
-                  />
-                </label>
-
-                <label className="space-y-1 block">
-                  <span className="text-xs font-bold uppercase tracking-wider text-gray-500">Orden de Visualización</span>
-                  <input
-                    type="number"
-                    min="0"
-                    required
-                    value={projectForm.sort_order}
-                    onChange={e => setProjectForm(prev => ({ ...prev, sort_order: parseInt(e.target.value) || 0 }))}
-                    className={fieldClasses}
-                  />
-                </label>
-
-                <label className="space-y-1 block">
-                  <span className="text-xs font-bold uppercase tracking-wider text-gray-500 font-outfit">Estado</span>
-                  <select
-                    value={projectForm.status}
-                    onChange={e => setProjectForm(prev => ({ ...prev, status: e.target.value as any }))}
-                    className={fieldClasses}
-                  >
-                    <option value="published">Publicado</option>
-                    <option value="draft">Borrador</option>
-                    <option value="review">Revisión</option>
-                  </select>
-                </label>
-
                 <div className="space-y-1 block sm:col-span-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-gray-500 block">Descripción / Detalles Técnicos</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-gray-500 block">Descripcion / Detalles Tecnicos</span>
                   <textarea
                     required
                     rows={3}
@@ -1272,102 +1355,82 @@ export default function AdminPanel() {
                   />
                 </div>
 
-                {/* Multimedia - Image */}
-                <div className="border border-gray-200 rounded-xl p-4 sm:col-span-2 bg-gray-50 space-y-3">
-                  <span className="text-xs font-bold uppercase tracking-wider text-brand-petrol block font-outfit">Imagen de Portada (Requerido)</span>
-                  
-                  {projectForm.image_url && (
-                    <div className="relative h-28 w-44 overflow-hidden rounded-lg border border-gray-200 bg-white">
-                      <img src={projectForm.image_url} className="h-full w-full object-cover" alt="Vista previa" />
+                <div className="border border-gray-200 rounded-xl p-4 sm:col-span-2 bg-gray-50 space-y-4">
+                  <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                    <span className="text-xs font-bold uppercase tracking-wider text-brand-petrol block font-outfit">Archivo multimedia</span>
+                    <span className="text-[11px] font-semibold text-gray-500">Imagen o video para el proyecto</span>
+                  </div>
+
+                  {(projectForm.image_url || projectForm.video_url) && (
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {projectForm.image_url && (
+                        <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+                          <div className="h-32 w-full">
+                            <img src={projectForm.image_url} className="h-full w-full object-cover" alt="Vista previa" />
+                          </div>
+                          <div className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-brand-green">
+                            <Check className="h-4 w-4" /> Imagen cargada
+                          </div>
+                        </div>
+                      )}
+
+                      {projectForm.video_url && (
+                        <div className="rounded-lg border border-gray-200 bg-white px-3 py-3 text-xs font-semibold text-brand-green">
+                          <div className="flex items-center gap-1.5">
+                            <Check className="h-4 w-4" /> Video cargado
+                          </div>
+                          <p className="mt-2 truncate text-gray-500">{projectForm.video_url.split('/').pop()}</p>
+                        </div>
+                      )}
                     </div>
                   )}
 
-                  <div className="flex flex-col gap-2 sm:flex-row">
-                    <label
-                      onDragOver={handleImageDragOver}
-                      onDragLeave={handleImageDragLeave}
-                      onDrop={handleImageDrop}
-                      className={`flex-1 flex flex-col justify-center items-center border-2 border-dashed rounded-lg p-4 bg-white hover:bg-gray-50 cursor-pointer transition ${
-                        isImageDragging ? 'border-brand-yellow bg-brand-yellow/5' : 'border-gray-300'
-                      }`}
-                    >
-                      <Upload className={`h-6 w-6 text-gray-400 ${isImageDragging ? 'animate-bounce text-brand-yellow-dark' : 'animate-pulse'}`} />
-                      <span className="mt-1 text-xs text-gray-500 font-semibold">
-                        {isImageDragging ? '¡Suelta la imagen aquí!' : 'Subir o arrastrar imagen a Cloudinary'}
-                      </span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        disabled={isUploading}
-                        className="hidden"
-                      />
-                    </label>
-                    
-                    <div className="flex-1 flex flex-col justify-end space-y-1">
-                      <span className="text-[10px] font-bold text-gray-400 uppercase">URL directa de imagen</span>
-                      <input
-                        type="text"
-                        value={projectForm.image_url}
-                        onChange={e => setProjectForm(prev => ({ ...prev, image_url: e.target.value, image_webp_url: e.target.value }))}
-                        placeholder="https://..."
-                        className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-brand-dark outline-none"
-                      />
-                    </div>
-                  </div>
-                </div>
+                  <label
+                    onDragOver={handleMediaDragOver}
+                    onDragLeave={handleMediaDragLeave}
+                    onDrop={handleMediaDrop}
+                    className={[
+                      'flex min-h-36 flex-col items-center justify-center rounded-lg border-2 border-dashed bg-white p-5 text-center transition',
+                      isMediaDragging ? 'border-brand-yellow bg-brand-yellow/5' : 'border-gray-300 hover:bg-gray-50',
+                      isUploading ? 'cursor-wait opacity-80' : 'cursor-pointer',
+                    ].join(' ')}
+                  >
+                    <Upload className={[
+                      'h-7 w-7 text-gray-400',
+                      isMediaDragging || isUploading ? 'animate-bounce text-brand-yellow-dark' : 'animate-pulse',
+                    ].join(' ')} />
+                    <span className="mt-2 text-sm font-bold text-brand-petrol">
+                      {isMediaDragging ? 'Suelta el archivo aqui' : 'Subir o arrastrar imagen/video'}
+                    </span>
+                    <span className="mt-1 text-xs font-semibold text-gray-500">Formatos aceptados: imagenes y videos</span>
+                    <input
+                      type="file"
+                      accept="image/*,video/*"
+                      onChange={handleMediaUpload}
+                      disabled={isUploading}
+                      className="hidden"
+                    />
+                  </label>
 
-                {/* Multimedia - Video */}
-                <div className="border border-gray-200 rounded-xl p-4 sm:col-span-2 bg-gray-50 space-y-3">
-                  <span className="text-xs font-bold uppercase tracking-wider text-brand-petrol block font-outfit">Video del Proyecto (Opcional)</span>
-                  
-                  {projectForm.video_url && (
-                    <div className="text-xs text-brand-green font-medium flex items-center gap-1.5">
-                      <Check className="h-4 w-4" /> Video cargado: {projectForm.video_url.split('/').pop()}
+                  {uploadProgress && (
+                    <div className="rounded-lg border border-brand-yellow/20 bg-brand-yellow/10 px-4 py-3">
+                      <div className="flex items-center justify-between gap-3 text-xs font-semibold text-brand-petrol">
+                        <span className="flex items-center gap-2">
+                          <span className="inline-block h-2 w-2 rounded-full bg-brand-yellow animate-ping" />
+                          {uploadProgress}
+                        </span>
+                        <span>{uploadPercent}%</span>
+                      </div>
+                      <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/80">
+                        <div
+                          className="h-full rounded-full bg-brand-yellow transition-all duration-300 ease-out"
+                          style={{ width: uploadPercent + '%' }}
+                        />
+                      </div>
                     </div>
                   )}
-
-                  <div className="flex flex-col gap-2 sm:flex-row">
-                    <label
-                      onDragOver={handleVideoDragOver}
-                      onDragLeave={handleVideoDragLeave}
-                      onDrop={handleVideoDrop}
-                      className={`flex-1 flex flex-col justify-center items-center border-2 border-dashed rounded-lg p-4 bg-white hover:bg-gray-50 cursor-pointer transition ${
-                        isVideoDragging ? 'border-brand-yellow bg-brand-yellow/5' : 'border-gray-300'
-                      }`}
-                    >
-                      <Upload className={`h-6 w-6 text-gray-400 ${isVideoDragging ? 'animate-bounce text-brand-yellow-dark' : 'animate-pulse'}`} />
-                      <span className="mt-1 text-xs text-gray-500 font-semibold">
-                        {isVideoDragging ? '¡Suelta el video aquí!' : 'Subir o arrastrar video a Cloudinary'}
-                      </span>
-                      <input
-                        type="file"
-                        accept="video/*"
-                        onChange={handleVideoUpload}
-                        disabled={isUploading}
-                        className="hidden"
-                      />
-                    </label>
-
-                    <div className="flex-1 flex flex-col justify-end space-y-1">
-                      <span className="text-[10px] font-bold text-gray-400 uppercase">URL directa de video</span>
-                      <input
-                        type="text"
-                        value={projectForm.video_url}
-                        onChange={e => setProjectForm(prev => ({ ...prev, video_url: e.target.value, video_optimized_url: e.target.value }))}
-                        placeholder="https://..."
-                        className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-brand-dark outline-none"
-                      />
-                    </div>
-                  </div>
                 </div>
 
-                {uploadProgress && (
-                  <div className="sm:col-span-2 text-xs font-semibold text-brand-petrol bg-brand-yellow/10 rounded-lg px-4 py-2 border border-brand-yellow/20 flex items-center gap-2">
-                    <span className="inline-block w-2 h-2 rounded-full bg-brand-yellow animate-ping" />
-                    {uploadProgress}
-                  </div>
-                )}
               </div>
 
               <div className="flex justify-end gap-3 border-t border-gray-100 pt-4">
