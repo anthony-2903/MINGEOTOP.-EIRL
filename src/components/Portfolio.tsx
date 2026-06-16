@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   Check,
+  ChevronLeft,
   ChevronRight,
   Compass,
   Layers,
@@ -15,23 +16,14 @@ import {
 
 import { getPublishedProjects, type Project } from '../lib/projects';
 
+type MediaOrientation = 'unknown' | 'vertical' | 'horizontal';
+
 const categories = [
   { id: 'todos', name: 'Todos' },
-  { id: 'mineria', name: 'Minería' },
-  { id: 'construccion', name: 'Construcción' },
+  { id: 'mineria', name: 'Mineria' },
+  { id: 'construccion', name: 'Construccion' },
   { id: 'vias', name: 'Carreteras' },
   { id: 'dron', name: 'Drones & Catastro' },
-];
-
-const projectLayoutClasses = [
-  'md:col-span-2 lg:col-span-2 lg:row-span-2 min-h-[520px]',
-  'lg:col-span-1 min-h-[360px]',
-  'lg:col-span-1 min-h-[360px]',
-  'lg:col-span-1 min-h-[420px]',
-  'md:col-span-2 lg:col-span-2 min-h-[420px]',
-  'lg:col-span-1 min-h-[360px]',
-  'lg:col-span-1 min-h-[360px]',
-  'md:col-span-2 lg:col-span-2 min-h-[460px]',
 ];
 
 function ProjectMedia({ project, className }: { project: Project; className: string }) {
@@ -58,17 +50,15 @@ function ProjectMedia({ project, className }: { project: Project; className: str
 
 function ProjectMasonrySkeleton() {
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:auto-rows-[180px] lg:grid-cols-3">
+    <div className="flex gap-5 overflow-hidden pb-4">
       {Array.from({ length: 8 }).map((_, index) => (
         <div
           key={index}
-          className={`relative overflow-hidden rounded-sm border border-white/10 bg-white/[0.06] ${
-            projectLayoutClasses[index % projectLayoutClasses.length]
-          }`}
+          className="relative h-[500px] w-[82vw] shrink-0 overflow-hidden rounded-lg border border-brand-petrol/10 bg-white shadow-premium sm:w-[320px] lg:w-[306px]"
         >
-          <div className="skeleton-shimmer absolute inset-0 bg-white/10" />
-          <div className="absolute bottom-5 left-5 h-5 w-3/5 rounded-sm bg-white/20" />
-          <div className="absolute bottom-12 left-5 h-4 w-24 rounded-sm bg-brand-yellow/40" />
+          <div className="skeleton-shimmer absolute inset-0 bg-gray-100" />
+          <div className="absolute bottom-7 left-5 h-6 w-3/5 rounded-sm bg-white/80" />
+          <div className="absolute bottom-16 left-5 h-4 w-24 rounded-sm bg-brand-yellow/40" />
         </div>
       ))}
     </div>
@@ -89,8 +79,8 @@ function getProjectTags(project: Project) {
 function getProjectBenefits(project: Project) {
   return [
     `Especialidad: ${project.catName}`,
-    `Ubicación: ${project.location}`,
-    `Control técnico: ${project.precision}`,
+    `Ubicacion: ${project.location}`,
+    `Control tecnico: ${project.precision}`,
   ];
 }
 
@@ -100,11 +90,18 @@ function buildWhatsappUrl(project: Project) {
   )}`;
 }
 
+function getMediaOrientation(width: number, height: number): MediaOrientation {
+  if (!width || !height) return 'unknown';
+  return height > width ? 'vertical' : 'horizontal';
+}
+
 export default function Portfolio() {
   const [filter, setFilter] = useState('todos');
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoadingProjects, setIsLoadingProjects] = useState(true);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [selectedMediaOrientation, setSelectedMediaOrientation] = useState<MediaOrientation>('unknown');
+  const carouselRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -132,6 +129,22 @@ export default function Portfolio() {
       : projects.filter((project) => project.category === filter);
   const hasProjects = filteredProjects.length > 0;
 
+  const openProject = (project: Project) => {
+    setSelectedMediaOrientation('unknown');
+    setSelectedProject(project);
+  };
+
+  const scrollCarousel = (direction: 'previous' | 'next') => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+
+    const distance = Math.min(carousel.clientWidth * 0.88, 980);
+    carousel.scrollBy({
+      left: direction === 'next' ? distance : -distance,
+      behavior: 'smooth',
+    });
+  };
+
   useEffect(() => {
     if (!selectedProject) return;
 
@@ -150,22 +163,24 @@ export default function Portfolio() {
     };
   }, [selectedProject]);
 
+  const isSelectedMediaVertical = selectedMediaOrientation === 'vertical';
+
   return (
     <>
-      <section id="proyectos" className="relative overflow-hidden bg-brand-petrol-dark py-24 text-white lg:py-32">
-        <div className="absolute inset-0 bg-topo-grid opacity-20" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(255,92,0,0.16),transparent_34%),radial-gradient(circle_at_80%_34%,rgba(63,122,74,0.14),transparent_30%)]" />
-        <div className="absolute inset-x-0 top-0 h-px bg-white/10" />
-        <div className="absolute inset-x-0 bottom-0 h-px bg-white/10" />
+      <section id="proyectos" className="relative overflow-hidden bg-white py-24 text-brand-petrol lg:py-28">
+        <div className="absolute inset-0 bg-topo-grid opacity-45" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(255,92,0,0.08),transparent_28%),radial-gradient(circle_at_88%_20%,rgba(45,91,55,0.09),transparent_30%)]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-brand-petrol/10" />
+        <div className="absolute inset-x-0 bottom-0 h-px bg-brand-petrol/10" />
 
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-12 grid gap-8 border-b border-white/10 pb-10 lg:grid-cols-12 lg:items-end">
-            <div className="lg:col-span-8">
+          <div className="mb-8 grid gap-6 lg:grid-cols-12 lg:items-end">
+            <div className="lg:col-span-7">
               <motion.p
                 initial={{ opacity: 0, y: 15 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-100px' }}
-                className="reveal-item mb-4 text-xs font-extrabold uppercase tracking-[0.34em] text-brand-yellow sm:text-sm"
+                className="reveal-item mb-3 text-xs font-extrabold uppercase tracking-[0.32em] text-brand-yellow sm:text-sm"
                 data-gsap-title
               >
                 Nuestro portafolio
@@ -175,61 +190,90 @@ export default function Portfolio() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-100px' }}
                 transition={{ delay: 0.08 }}
-                className="max-w-4xl font-outfit text-4xl font-extrabold leading-[0.98] text-white sm:text-5xl lg:text-6xl"
+                className="max-w-4xl font-outfit text-4xl font-light leading-[1.02] text-brand-petrol sm:text-5xl lg:text-6xl"
                 data-gsap-title
               >
-                Cinco capacidades. Una sola visión.
+                Proyectos con <span className="font-extrabold">precision tecnica</span>
               </motion.h2>
             </div>
-            <div className="lg:col-span-4">
+            <div className="lg:col-span-5">
               <motion.p
                 initial={{ opacity: 0, y: 22 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-100px' }}
                 transition={{ delay: 0.16 }}
-                className="reveal-item border-l border-brand-yellow/60 pl-5 text-sm leading-relaxed text-gray-300 sm:text-base"
+                className="reveal-item border-l border-brand-yellow pl-5 text-sm leading-relaxed text-gray-600 sm:text-base"
               >
                 Cada proyecto funciona como evidencia independiente, pero gana valor cuando se lee
-                como parte de una visión integrada: campo, georreferenciación, control de obra,
-                fotogrametría y documentación técnica al servicio de decisiones precisas.
+                como parte de una vision integrada: campo, georreferenciacion, control de obra,
+                fotogrametria y documentacion tecnica al servicio de decisiones precisas.
               </motion.p>
             </div>
           </div>
 
-          <div className="mb-8 flex flex-wrap items-center gap-2 border-y border-white/10 py-3">
-            {categories.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => setFilter(category.id)}
-                className={`rounded-sm px-4 py-2.5 font-outfit text-xs font-extrabold uppercase tracking-[0.14em] transition-all duration-300 sm:text-sm ${
-                  filter === category.id
-                    ? 'bg-brand-yellow text-brand-dark shadow-[0_14px_30px_-18px_rgba(255,92,0,0.9)]'
-                    : 'border border-white/10 bg-white/[0.04] text-gray-300 hover:border-brand-yellow/50 hover:bg-white/[0.08] hover:text-white'
-                }`}
-              >
-                {category.name}
-              </button>
-            ))}
+          <div className="mb-8 flex flex-col gap-4 border-y border-brand-petrol/10 py-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-wrap items-center gap-2">
+              {categories.map((category) => (
+                <button
+                  key={category.id}
+                  onClick={() => setFilter(category.id)}
+                  className={`rounded-full px-4 py-2.5 font-outfit text-xs font-extrabold uppercase tracking-[0.12em] transition-all duration-300 sm:text-sm ${
+                    filter === category.id
+                      ? 'bg-brand-petrol text-white shadow-[0_18px_34px_-22px_rgba(21,23,28,0.85)]'
+                      : 'border border-brand-petrol/10 bg-brand-light text-brand-petrol hover:border-brand-yellow/60 hover:bg-white hover:text-brand-yellow'
+                  }`}
+                >
+                  {category.name}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-extrabold uppercase tracking-[0.2em] text-gray-400">
+                {isLoadingProjects ? 'Cargando' : `${filteredProjects.length} proyectos`}
+              </span>
+              <div className="hidden items-center gap-2 sm:flex">
+                <button
+                  type="button"
+                  onClick={() => scrollCarousel('previous')}
+                  disabled={isLoadingProjects || !hasProjects}
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-brand-petrol/10 bg-white text-brand-petrol shadow-premium transition-all duration-300 hover:border-brand-yellow hover:bg-brand-yellow hover:text-brand-dark disabled:cursor-not-allowed disabled:opacity-40"
+                  aria-label="Ver proyectos anteriores"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scrollCarousel('next')}
+                  disabled={isLoadingProjects || !hasProjects}
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-brand-petrol/10 bg-white text-brand-petrol shadow-premium transition-all duration-300 hover:border-brand-yellow hover:bg-brand-yellow hover:text-brand-dark disabled:cursor-not-allowed disabled:opacity-40"
+                  aria-label="Ver siguientes proyectos"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
           </div>
 
           {isLoadingProjects ? (
             <ProjectMasonrySkeleton />
           ) : !hasProjects ? (
-            <div className="flex min-h-[320px] items-center justify-center rounded-sm border border-dashed border-white/20 bg-white/[0.04] px-6 text-center">
+            <div className="flex min-h-[320px] items-center justify-center rounded-lg border border-dashed border-brand-petrol/20 bg-brand-light px-6 text-center">
               <div className="max-w-md">
-                <p className="font-outfit text-xl font-extrabold text-white">
+                <p className="font-outfit text-xl font-extrabold text-brand-petrol">
                   No hay proyectos publicados
                 </p>
-                <p className="mt-2 text-sm leading-relaxed text-gray-400">
-                  Los proyectos creados desde el panel aparecerán aquí cuando tengan estado published.
+                <p className="mt-2 text-sm leading-relaxed text-gray-500">
+                  Los proyectos creados desde el panel apareceran aqui cuando tengan estado published.
                 </p>
               </div>
             </div>
           ) : (
             <motion.div
               key={filter}
+              ref={carouselRef}
               layout
-              className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:auto-rows-[180px] lg:grid-cols-3"
+              className="project-carousel-viewport -mx-4 grid auto-cols-[82vw] grid-flow-col gap-5 overflow-x-auto px-4 pb-6 sm:-mx-6 sm:auto-cols-[320px] sm:px-6 lg:-mx-8 lg:auto-cols-[306px] lg:px-8"
             >
               <AnimatePresence mode="popLayout">
                 {filteredProjects.map((project, index) => (
@@ -240,17 +284,15 @@ export default function Portfolio() {
                     animate={{ opacity: 1, y: 0, clipPath: 'inset(0% 0 0 0)' }}
                     exit={{ opacity: 0, scale: 0.96 }}
                     transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: index * 0.035 }}
-                    className={`reveal-item portfolio-project-frame group relative cursor-pointer overflow-hidden rounded-sm border border-white/10 bg-brand-dark text-left text-white outline-none transition-all duration-500 hover:-translate-y-1 hover:border-brand-yellow/70 hover:shadow-[0_28px_80px_-32px_rgba(0,0,0,0.9)] focus-visible:ring-4 focus-visible:ring-brand-yellow/40 ${
-                      projectLayoutClasses[index % projectLayoutClasses.length]
-                    }`}
+                    className="reveal-item portfolio-project-frame group relative h-[500px] cursor-pointer snap-start overflow-hidden rounded-lg border border-brand-petrol/10 bg-brand-dark text-left text-white shadow-premium outline-none transition-all duration-500 hover:-translate-y-1 hover:border-brand-yellow/70 hover:shadow-[0_30px_80px_-36px_rgba(21,23,28,0.85)] focus-visible:ring-4 focus-visible:ring-brand-yellow/40"
                     data-gsap-mask
                     role="button"
                     tabIndex={0}
-                    onClick={() => setSelectedProject(project)}
+                    onClick={() => openProject(project)}
                     onKeyDown={(event) => {
                       if (event.key === 'Enter' || event.key === ' ') {
                         event.preventDefault();
-                        setSelectedProject(project);
+                        openProject(project);
                       }
                     }}
                   >
@@ -258,13 +300,13 @@ export default function Portfolio() {
                       project={project}
                       className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.075]"
                     />
-                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(12,14,17,0.1)_0%,rgba(12,14,17,0.42)_42%,rgba(12,14,17,0.96)_100%)]" />
-                    <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(12,14,17,0.74)_0%,transparent_52%)] opacity-80 transition-opacity duration-500 group-hover:opacity-55" />
-                    <div className="portfolio-technical-grid absolute inset-0 opacity-25 transition-opacity duration-500 group-hover:opacity-75" />
+                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(12,14,17,0.08)_0%,rgba(12,14,17,0.42)_38%,rgba(12,14,17,0.97)_100%)]" />
+                    <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,92,0,0.2)_0%,transparent_34%,rgba(45,91,55,0.34)_100%)] opacity-80 transition-opacity duration-500 group-hover:opacity-95" />
+                    <div className="portfolio-technical-grid absolute inset-0 opacity-20 transition-opacity duration-500 group-hover:opacity-55" />
                     <div className="absolute left-4 top-4 h-10 w-10 border-l border-t border-brand-yellow/80 transition-all duration-500 group-hover:left-3 group-hover:top-3" />
                     <div className="absolute bottom-4 right-4 h-10 w-10 border-b border-r border-brand-yellow/80 transition-all duration-500 group-hover:bottom-3 group-hover:right-3" />
 
-                    <div className="relative z-10 flex h-full min-h-[inherit] flex-col justify-between p-5 sm:p-6">
+                    <div className="relative z-10 flex h-full flex-col justify-between p-5 sm:p-6">
                       <div className="flex items-start justify-between gap-4">
                         <span className="border-l border-brand-yellow bg-brand-petrol-dark/60 px-3 py-2 text-[10px] font-extrabold uppercase tracking-[0.24em] text-brand-yellow backdrop-blur-sm">
                           PR-{String(index + 1).padStart(2, '0')}
@@ -285,7 +327,7 @@ export default function Portfolio() {
                             </span>
                           ))}
                         </div>
-                        <h3 className="line-clamp-2 max-w-2xl font-outfit text-2xl font-extrabold leading-tight text-white md:text-3xl">
+                        <h3 className="line-clamp-2 max-w-2xl font-outfit text-2xl font-extrabold leading-tight text-white">
                           {project.title}
                         </h3>
                         <p className="mt-3 line-clamp-2 max-w-xl text-sm leading-relaxed text-gray-300 transition-colors duration-300 group-hover:text-white">
@@ -319,7 +361,11 @@ export default function Portfolio() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.98 }}
               transition={{ type: 'spring', stiffness: 260, damping: 28 }}
-              className="relative max-h-[92dvh] w-full max-w-5xl overflow-hidden rounded-sm border border-white/15 bg-white shadow-2xl"
+              className={`relative grid max-h-[92dvh] w-full overflow-hidden rounded-sm border border-white/15 shadow-2xl ${
+                isSelectedMediaVertical
+                  ? 'max-w-6xl bg-brand-petrol-dark lg:grid-cols-[minmax(280px,0.88fr)_minmax(330px,0.55fr)]'
+                  : 'max-w-6xl bg-white'
+              }`}
               onClick={(event) => event.stopPropagation()}
             >
               <button
@@ -331,18 +377,40 @@ export default function Portfolio() {
                 <X className="h-5 w-5" />
               </button>
 
-              <div className="relative h-60 overflow-hidden bg-brand-dark sm:h-80">
+              <div
+                className={`relative overflow-hidden bg-brand-dark ${
+                  isSelectedMediaVertical
+                    ? 'min-h-[420px] lg:h-[92dvh] lg:max-h-[92dvh]'
+                    : 'h-[56dvh] min-h-[280px] max-h-[620px]'
+                }`}
+              >
                 {selectedProject.video ? (
                   <video
                     src={selectedProject.video}
                     poster={selectedProject.poster}
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-contain"
                     controls
                     autoPlay
                     playsInline
+                    onLoadedMetadata={(event) => {
+                      const video = event.currentTarget;
+                      setSelectedMediaOrientation(getMediaOrientation(video.videoWidth, video.videoHeight));
+                    }}
                   />
                 ) : (
-                  <ProjectMedia project={selectedProject} className="h-full w-full object-cover" />
+                  selectedProject.image ? (
+                    <img
+                      src={selectedProject.image}
+                      alt={selectedProject.title}
+                      className="h-full w-full object-contain"
+                      onLoad={(event) => {
+                        const image = event.currentTarget;
+                        setSelectedMediaOrientation(getMediaOrientation(image.naturalWidth, image.naturalHeight));
+                      }}
+                    />
+                  ) : (
+                    <div className={`h-full w-full bg-gradient-to-br ${selectedProject.color}`} />
+                  )
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-brand-petrol-dark via-brand-petrol-dark/45 to-transparent" />
                 <div className="portfolio-technical-grid absolute inset-0 opacity-30" />
@@ -356,7 +424,13 @@ export default function Portfolio() {
                 </div>
               </div>
 
-              <div className="max-h-[50dvh] overflow-y-auto p-5 sm:p-7">
+              <div
+                className={`overflow-y-auto p-5 sm:p-7 ${
+                  isSelectedMediaVertical
+                    ? 'max-h-[48dvh] bg-white text-brand-dark lg:max-h-[92dvh]'
+                    : 'max-h-[36dvh] text-brand-dark'
+                }`}
+              >
                 <div className="mb-5 flex flex-wrap items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.16em] text-brand-petrol">
                   <MapPin className="h-4 w-4 text-brand-yellow" />
                   {getProjectTags(selectedProject).map((tag, tagIndex) => (
@@ -368,7 +442,7 @@ export default function Portfolio() {
 
                 <p className="text-base leading-relaxed text-gray-600">{selectedProject.specs}</p>
 
-                <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                <div className={`mt-6 grid gap-3 ${isSelectedMediaVertical ? 'grid-cols-1' : 'sm:grid-cols-3'}`}>
                   {getProjectBenefits(selectedProject).map((benefit) => (
                     <div key={benefit} className="rounded-sm border border-gray-200 bg-brand-light p-4">
                       <Check className="mb-3 h-5 w-5 text-brand-yellow" />

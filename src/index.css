@@ -208,6 +208,41 @@
   animation: whatsapp-pulse 4s ease-in-out infinite;
 }
 
+.whatsapp-float {
+  isolation: isolate;
+  box-shadow:
+    0 18px 42px -18px rgba(37, 211, 102, 0.95),
+    0 0 0 1px rgba(255, 255, 255, 0.16) inset;
+}
+
+.whatsapp-float::before,
+.whatsapp-float::after {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  z-index: -1;
+  border-radius: 999px;
+  background: rgba(37, 211, 102, 0.22);
+  animation: whatsapp-ring 2.8s ease-out infinite;
+}
+
+.whatsapp-float::after {
+  inset: -13px;
+  animation-delay: 1.4s;
+}
+
+@keyframes whatsapp-ring {
+  0% {
+    opacity: 0.7;
+    transform: scale(0.88);
+  }
+  80%,
+  100% {
+    opacity: 0;
+    transform: scale(1.18);
+  }
+}
+
 .project-carousel-viewport {
   touch-action: pan-x;
   scrollbar-gutter: stable;
