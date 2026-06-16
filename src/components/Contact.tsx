@@ -169,6 +169,7 @@ export default function Contact() {
             viewport={{ once: true, margin: '-100px' }}
             transition={{ delay: 0.1 }}
             className="font-outfit text-3xl font-extrabold text-white sm:text-4xl md:text-5xl"
+            data-gsap-title
           >
             Solicita tu cotización técnica sin compromiso
           </motion.h2>
@@ -185,7 +186,7 @@ export default function Contact() {
 
         <div className="grid grid-cols-1 items-stretch gap-12 lg:grid-cols-12">
           <div className="flex flex-col justify-between space-y-8 lg:col-span-5">
-            <div className="flex h-full flex-col justify-center space-y-6 rounded-3xl border border-brand-green/20 bg-brand-petrol-dark/50 p-8 backdrop-blur-sm">
+            <div className="flex h-full flex-col justify-center space-y-6 rounded-3xl border border-brand-green/20 bg-brand-petrol-dark/50 p-8 backdrop-blur-sm" data-gsap-mask>
               <h3 className="font-outfit text-2xl font-bold text-white">Canales directos</h3>
               <p className="text-sm leading-relaxed text-gray-300">
                 ¿Tienes una urgencia o un requerimiento inmediato? Comunícate por nuestros canales oficiales de atención.
@@ -248,7 +249,7 @@ export default function Contact() {
             </div>
           </div>
 
-          <div className="relative rounded-3xl bg-white p-8 text-brand-dark shadow-2xl sm:p-10 lg:col-span-7">
+          <div className="relative rounded-3xl bg-white p-8 text-brand-dark shadow-2xl sm:p-10 lg:col-span-7" data-gsap-mask>
             <AnimatePresence mode="wait">
               {!isSuccess ? (
                 <motion.form

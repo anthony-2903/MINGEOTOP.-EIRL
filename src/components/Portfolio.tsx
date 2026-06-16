@@ -1,15 +1,37 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Compass, MapPin, Pause, Play, ShieldCheck, X } from 'lucide-react';
+import {
+  Check,
+  ChevronRight,
+  Compass,
+  Layers,
+  MapPin,
+  MessageCircle,
+  Play,
+  Ruler,
+  ShieldCheck,
+  X,
+} from 'lucide-react';
 
 import { getPublishedProjects, type Project } from '../lib/projects';
 
 const categories = [
   { id: 'todos', name: 'Todos' },
-  { id: 'mineria', name: 'Mineria' },
-  { id: 'construccion', name: 'Construccion' },
+  { id: 'mineria', name: 'Minería' },
+  { id: 'construccion', name: 'Construcción' },
   { id: 'vias', name: 'Carreteras' },
   { id: 'dron', name: 'Drones & Catastro' },
+];
+
+const projectLayoutClasses = [
+  'md:col-span-2 lg:col-span-2 lg:row-span-2 min-h-[520px]',
+  'lg:col-span-1 min-h-[360px]',
+  'lg:col-span-1 min-h-[360px]',
+  'lg:col-span-1 min-h-[420px]',
+  'md:col-span-2 lg:col-span-2 min-h-[420px]',
+  'lg:col-span-1 min-h-[360px]',
+  'lg:col-span-1 min-h-[360px]',
+  'md:col-span-2 lg:col-span-2 min-h-[460px]',
 ];
 
 function ProjectMedia({ project, className }: { project: Project; className: string }) {
@@ -19,6 +41,7 @@ function ProjectMedia({ project, className }: { project: Project; className: str
         src={project.video}
         poster={project.poster}
         className={className}
+        data-gsap-parallax="10"
         muted
         playsInline
         preload="metadata"
@@ -27,7 +50,7 @@ function ProjectMedia({ project, className }: { project: Project; className: str
   }
 
   if (project.image) {
-    return <img src={project.image} alt={project.title} className={className} loading="lazy" />;
+    return <img src={project.image} alt={project.title} className={className} data-gsap-parallax="10" loading="lazy" />;
   }
 
   return <div className={`${className} bg-gradient-to-br ${project.color}`} />;
@@ -35,18 +58,46 @@ function ProjectMedia({ project, className }: { project: Project; className: str
 
 function ProjectMasonrySkeleton() {
   return (
-    <div className="grid h-[720px] auto-cols-[90vw] grid-flow-col-dense grid-rows-3 gap-2 pb-6 sm:h-[560px] sm:auto-cols-[320px] sm:gap-2.5 lg:h-[620px] lg:auto-cols-[360px] xl:h-[680px] xl:auto-cols-[410px]">
-      {Array.from({ length: 10 }).map((_, index) => (
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:auto-rows-[180px] lg:grid-cols-3">
+      {Array.from({ length: 8 }).map((_, index) => (
         <div
           key={index}
-          className="relative size-full overflow-hidden rounded-md border border-gray-200 bg-gray-100 nth-[1]:row-span-2 nth-[3n+2]:col-span-2 nth-[6]:row-span-2 nth-[13]:row-span-2"
+          className={`relative overflow-hidden rounded-sm border border-white/10 bg-white/[0.06] ${
+            projectLayoutClasses[index % projectLayoutClasses.length]
+          }`}
         >
-          <div className="skeleton-shimmer absolute inset-0 bg-gray-100" />
-          <div className="absolute left-3 top-3 h-7 w-24 rounded-md bg-white/75" />
+          <div className="skeleton-shimmer absolute inset-0 bg-white/10" />
+          <div className="absolute bottom-5 left-5 h-5 w-3/5 rounded-sm bg-white/20" />
+          <div className="absolute bottom-12 left-5 h-4 w-24 rounded-sm bg-brand-yellow/40" />
         </div>
       ))}
     </div>
   );
+}
+
+function getProjectIcon(category: string) {
+  if (category === 'dron' || category === 'catastro') return <Layers className="h-6 w-6" />;
+  if (category === 'vias') return <Ruler className="h-6 w-6" />;
+  if (category === 'mineria') return <ShieldCheck className="h-6 w-6" />;
+  return <Compass className="h-6 w-6" />;
+}
+
+function getProjectTags(project: Project) {
+  return [project.catName, project.location, project.precision].filter(Boolean).slice(0, 3);
+}
+
+function getProjectBenefits(project: Project) {
+  return [
+    `Especialidad: ${project.catName}`,
+    `Ubicación: ${project.location}`,
+    `Control técnico: ${project.precision}`,
+  ];
+}
+
+function buildWhatsappUrl(project: Project) {
+  return `https://wa.me/51913386354?text=${encodeURIComponent(
+    `Hola MINGEOTOP, deseo consultar por el proyecto "${project.title}" y un servicio similar.`,
+  )}`;
 }
 
 export default function Portfolio() {
@@ -54,10 +105,6 @@ export default function Portfolio() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoadingProjects, setIsLoadingProjects] = useState(true);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [selectedLayoutId, setSelectedLayoutId] = useState('');
-  const [isAutoScrollEnabled, setIsAutoScrollEnabled] = useState(true);
-  const carouselRef = useRef<HTMLDivElement | null>(null);
-  const isUserInteractingRef = useRef(false);
 
   useEffect(() => {
     let mounted = true;
@@ -83,55 +130,7 @@ export default function Portfolio() {
     filter === 'todos'
       ? projects
       : projects.filter((project) => project.category === filter);
-  const carouselProjects =
-    filteredProjects.length > 0 ? [...filteredProjects, ...filteredProjects] : [];
   const hasProjects = filteredProjects.length > 0;
-
-  useEffect(() => {
-    const carousel = carouselRef.current;
-    if (!carousel || filteredProjects.length < 2) return;
-
-    let animationFrame = 0;
-    let lastTimestamp = performance.now();
-    const speed = 42;
-
-    const animate = (timestamp: number) => {
-      const delta = timestamp - lastTimestamp;
-      lastTimestamp = timestamp;
-
-      if (isAutoScrollEnabled && !isUserInteractingRef.current && !selectedProject) {
-        const halfScrollWidth = carousel.scrollWidth / 2;
-        carousel.scrollLeft += (speed * delta) / 1000;
-
-        if (halfScrollWidth > 0 && carousel.scrollLeft >= halfScrollWidth) {
-          carousel.scrollLeft -= halfScrollWidth;
-        }
-      }
-
-      animationFrame = requestAnimationFrame(animate);
-    };
-
-    carousel.scrollLeft = 0;
-    animationFrame = requestAnimationFrame(animate);
-
-    return () => cancelAnimationFrame(animationFrame);
-  }, [filter, filteredProjects.length, isAutoScrollEnabled, selectedProject]);
-
-  const scrollCarousel = (direction: 'previous' | 'next') => {
-    const carousel = carouselRef.current;
-    if (!carousel) return;
-
-    isUserInteractingRef.current = true;
-    const distance = Math.min(carousel.clientWidth * 0.86, 720);
-    carousel.scrollBy({
-      left: direction === 'next' ? distance : -distance,
-      behavior: 'smooth',
-    });
-
-    window.setTimeout(() => {
-      isUserInteractingRef.current = false;
-    }, 1100);
-  };
 
   useEffect(() => {
     if (!selectedProject) return;
@@ -153,50 +152,59 @@ export default function Portfolio() {
 
   return (
     <>
-      <section id="proyectos" className="relative overflow-hidden bg-white bg-topo-contour py-24 lg:py-28">
-        <div className="absolute left-0 right-0 top-0 h-[1px] bg-gray-200/60 -z-10" />
+      <section id="proyectos" className="relative overflow-hidden bg-brand-petrol-dark py-24 text-white lg:py-32">
+        <div className="absolute inset-0 bg-topo-grid opacity-20" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(255,92,0,0.16),transparent_34%),radial-gradient(circle_at_80%_34%,rgba(63,122,74,0.14),transparent_30%)]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-white/10" />
+        <div className="absolute inset-x-0 bottom-0 h-px bg-white/10" />
 
-        <div className="mx-auto max-w-[1500px] px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto mb-10 max-w-3xl text-center sm:mb-12">
-            <motion.h3
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-100px' }}
-              className="mb-3 text-xs font-extrabold uppercase tracking-[0.25em] text-brand-yellow sm:text-sm"
-            >
-              Nuestro portafolio
-            </motion.h3>
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-100px' }}
-              transition={{ delay: 0.1 }}
-              className="font-outfit text-3xl font-extrabold text-brand-petrol sm:text-4xl md:text-5xl"
-            >
-              Experiencia comprobada en campo
-            </motion.h2>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-100px' }}
-              transition={{ delay: 0.2 }}
-              className="mt-4 text-base text-gray-500 sm:text-lg"
-            >
-              Una muestra visual de trabajos realizados en mineria, infraestructura vial,
-              construccion y saneamiento tecnico de terrenos. Cada proyecto documenta
-              entregables reales: planos, control de campo, cubicaciones, modelos y registro tecnico.
-            </motion.p>
+        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-12 grid gap-8 border-b border-white/10 pb-10 lg:grid-cols-12 lg:items-end">
+            <div className="lg:col-span-8">
+              <motion.p
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-100px' }}
+                className="reveal-item mb-4 text-xs font-extrabold uppercase tracking-[0.34em] text-brand-yellow sm:text-sm"
+                data-gsap-title
+              >
+                Nuestro portafolio
+              </motion.p>
+              <motion.h2
+                initial={{ opacity: 0, y: 22 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-100px' }}
+                transition={{ delay: 0.08 }}
+                className="max-w-4xl font-outfit text-4xl font-extrabold leading-[0.98] text-white sm:text-5xl lg:text-6xl"
+                data-gsap-title
+              >
+                Cinco capacidades. Una sola visión.
+              </motion.h2>
+            </div>
+            <div className="lg:col-span-4">
+              <motion.p
+                initial={{ opacity: 0, y: 22 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-100px' }}
+                transition={{ delay: 0.16 }}
+                className="reveal-item border-l border-brand-yellow/60 pl-5 text-sm leading-relaxed text-gray-300 sm:text-base"
+              >
+                Cada proyecto funciona como evidencia independiente, pero gana valor cuando se lee
+                como parte de una visión integrada: campo, georreferenciación, control de obra,
+                fotogrametría y documentación técnica al servicio de decisiones precisas.
+              </motion.p>
+            </div>
           </div>
 
-          <div className="mx-auto mb-8 flex max-w-2xl flex-wrap items-center justify-center gap-2 sm:mb-10">
+          <div className="mb-8 flex flex-wrap items-center gap-2 border-y border-white/10 py-3">
             {categories.map((category) => (
               <button
                 key={category.id}
                 onClick={() => setFilter(category.id)}
-                className={`rounded-full px-5 py-2.5 font-outfit text-xs font-semibold transition-all duration-300 sm:text-sm ${
+                className={`rounded-sm px-4 py-2.5 font-outfit text-xs font-extrabold uppercase tracking-[0.14em] transition-all duration-300 sm:text-sm ${
                   filter === category.id
-                    ? 'bg-brand-petrol text-white shadow-premium'
-                    : 'border border-gray-200 bg-brand-light text-brand-petrol hover:bg-brand-petrol/5'
+                    ? 'bg-brand-yellow text-brand-dark shadow-[0_14px_30px_-18px_rgba(255,92,0,0.9)]'
+                    : 'border border-white/10 bg-white/[0.04] text-gray-300 hover:border-brand-yellow/50 hover:bg-white/[0.08] hover:text-white'
                 }`}
               >
                 {category.name}
@@ -204,257 +212,181 @@ export default function Portfolio() {
             ))}
           </div>
 
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-gray-400">
-              {isLoadingProjects ? 'Cargando portafolio' : 'Desliza para explorar'}
-            </p>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                disabled={isLoadingProjects || !hasProjects}
-                onClick={() => setIsAutoScrollEnabled((current) => !current)}
-                className="inline-flex h-10 items-center gap-2 rounded-md border border-gray-200 bg-white px-3 text-xs font-bold uppercase tracking-wider text-brand-petrol shadow-sm transition hover:border-brand-yellow hover:bg-brand-light disabled:cursor-not-allowed disabled:opacity-50"
-                aria-label={isAutoScrollEnabled ? 'Pausar carrusel' : 'Reproducir carrusel'}
-              >
-                {isAutoScrollEnabled ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                <span className="hidden sm:inline">{isAutoScrollEnabled ? 'Pausar' : 'Reproducir'}</span>
-              </button>
-              <button
-                type="button"
-                disabled={isLoadingProjects || !hasProjects}
-                onClick={() => scrollCarousel('previous')}
-                className="flex h-10 w-10 items-center justify-center rounded-md border border-gray-200 bg-white text-brand-petrol shadow-sm transition hover:border-brand-yellow hover:bg-brand-light disabled:cursor-not-allowed disabled:opacity-50"
-                aria-label="Ver proyectos anteriores"
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </button>
-              <button
-                type="button"
-                disabled={isLoadingProjects || !hasProjects}
-                onClick={() => scrollCarousel('next')}
-                className="flex h-10 w-10 items-center justify-center rounded-md border border-gray-200 bg-white text-brand-petrol shadow-sm transition hover:border-brand-yellow hover:bg-brand-light disabled:cursor-not-allowed disabled:opacity-50"
-                aria-label="Ver siguientes proyectos"
-              >
-                <ChevronRight className="h-5 w-5" />
-              </button>
-            </div>
-          </div>
-
-          <div
-            ref={carouselRef}
-            className="project-carousel-viewport relative overflow-x-auto overflow-y-hidden overscroll-x-contain"
-            onPointerDown={() => {
-              isUserInteractingRef.current = true;
-            }}
-            onPointerUp={() => {
-              window.setTimeout(() => {
-                isUserInteractingRef.current = false;
-              }, 900);
-            }}
-            onPointerCancel={() => {
-              isUserInteractingRef.current = false;
-            }}
-            onTouchStart={() => {
-              isUserInteractingRef.current = true;
-            }}
-            onTouchEnd={() => {
-              window.setTimeout(() => {
-                isUserInteractingRef.current = false;
-              }, 900);
-            }}
-            onWheel={() => {
-              isUserInteractingRef.current = true;
-              window.setTimeout(() => {
-                isUserInteractingRef.current = false;
-              }, 900);
-            }}
-          >
           {isLoadingProjects ? (
             <ProjectMasonrySkeleton />
           ) : !hasProjects ? (
-            <div className="flex min-h-[320px] items-center justify-center rounded-md border border-dashed border-gray-200 bg-white/75 px-6 text-center">
+            <div className="flex min-h-[320px] items-center justify-center rounded-sm border border-dashed border-white/20 bg-white/[0.04] px-6 text-center">
               <div className="max-w-md">
-                <p className="font-outfit text-xl font-extrabold text-brand-petrol">
+                <p className="font-outfit text-xl font-extrabold text-white">
                   No hay proyectos publicados
                 </p>
-                <p className="mt-2 text-sm leading-relaxed text-gray-500">
-                  Los proyectos creados desde el panel apareceran aqui cuando tengan estado published.
+                <p className="mt-2 text-sm leading-relaxed text-gray-400">
+                  Los proyectos creados desde el panel aparecerán aquí cuando tengan estado published.
                 </p>
               </div>
             </div>
           ) : (
-          <motion.div
-            key={filter}
-            layout
-            className="project-carousel-track grid h-[720px] w-max auto-cols-[90vw] grid-flow-col-dense grid-rows-3 gap-2 pb-6 sm:h-[560px] sm:auto-cols-[320px] sm:gap-2.5 lg:h-[620px] lg:auto-cols-[360px] xl:h-[680px] xl:auto-cols-[410px]"
-          >
-            <AnimatePresence mode="popLayout">
-              {carouselProjects.map((project, index) => {
-                const layoutId = `project-card-${project.id}-${index}`;
+            <motion.div
+              key={filter}
+              layout
+              className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:auto-rows-[180px] lg:grid-cols-3"
+            >
+              <AnimatePresence mode="popLayout">
+                {filteredProjects.map((project, index) => (
+                  <motion.article
+                    key={`${project.id}-${index}`}
+                    layout
+                    initial={{ opacity: 0, y: 30, clipPath: 'inset(12% 0 0 0)' }}
+                    animate={{ opacity: 1, y: 0, clipPath: 'inset(0% 0 0 0)' }}
+                    exit={{ opacity: 0, scale: 0.96 }}
+                    transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: index * 0.035 }}
+                    className={`reveal-item portfolio-project-frame group relative cursor-pointer overflow-hidden rounded-sm border border-white/10 bg-brand-dark text-left text-white outline-none transition-all duration-500 hover:-translate-y-1 hover:border-brand-yellow/70 hover:shadow-[0_28px_80px_-32px_rgba(0,0,0,0.9)] focus-visible:ring-4 focus-visible:ring-brand-yellow/40 ${
+                      projectLayoutClasses[index % projectLayoutClasses.length]
+                    }`}
+                    data-gsap-mask
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setSelectedProject(project)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        setSelectedProject(project);
+                      }
+                    }}
+                  >
+                    <ProjectMedia
+                      project={project}
+                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.075]"
+                    />
+                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(12,14,17,0.1)_0%,rgba(12,14,17,0.42)_42%,rgba(12,14,17,0.96)_100%)]" />
+                    <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(12,14,17,0.74)_0%,transparent_52%)] opacity-80 transition-opacity duration-500 group-hover:opacity-55" />
+                    <div className="portfolio-technical-grid absolute inset-0 opacity-25 transition-opacity duration-500 group-hover:opacity-75" />
+                    <div className="absolute left-4 top-4 h-10 w-10 border-l border-t border-brand-yellow/80 transition-all duration-500 group-hover:left-3 group-hover:top-3" />
+                    <div className="absolute bottom-4 right-4 h-10 w-10 border-b border-r border-brand-yellow/80 transition-all duration-500 group-hover:bottom-3 group-hover:right-3" />
 
-                return (
-                <motion.div
-                  key={`${project.id}-${index}`}
-                  layout
-                  layoutId={layoutId}
-                  initial={{ opacity: 0, scale: 0.94 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.94 }}
-                  transition={{ duration: 0.35 }}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => {
-                    setSelectedLayoutId(layoutId);
-                    setSelectedProject(project);
-                  }}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                      event.preventDefault();
-                      setSelectedLayoutId(layoutId);
-                      setSelectedProject(project);
-                    }
-                  }}
-                  className="group relative size-full cursor-pointer snap-start overflow-hidden rounded-md border border-brand-green/20 bg-brand-dark text-left text-white shadow-premium outline-none transition-all duration-300 hover:border-brand-yellow/45 hover:shadow-premium-hover nth-[1]:row-span-2 nth-[3n+2]:col-span-2 nth-[4n+1]:snap-center nth-[6]:row-span-2 nth-[13]:row-span-2 focus-visible:ring-4 focus-visible:ring-brand-yellow/40"
-                >
-                  <ProjectMedia
-                    project={project}
-                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.035]"
-                  />
+                    <div className="relative z-10 flex h-full min-h-[inherit] flex-col justify-between p-5 sm:p-6">
+                      <div className="flex items-start justify-between gap-4">
+                        <span className="border-l border-brand-yellow bg-brand-petrol-dark/60 px-3 py-2 text-[10px] font-extrabold uppercase tracking-[0.24em] text-brand-yellow backdrop-blur-sm">
+                          PR-{String(index + 1).padStart(2, '0')}
+                        </span>
+                        <div className="flex h-11 w-11 items-center justify-center rounded-sm border border-brand-yellow/40 bg-brand-petrol-dark/60 text-brand-yellow backdrop-blur-sm transition-transform duration-500 group-hover:rotate-6 group-hover:scale-110">
+                          {project.video ? <Play className="h-6 w-6 fill-current" /> : getProjectIcon(project.category)}
+                        </div>
+                      </div>
 
-                  <div className="absolute inset-0 bg-gradient-to-t from-brand-dark/50 via-transparent to-transparent" />
-                  <div className="absolute inset-0 bg-topo-grid opacity-10 pointer-events-none" />
-
-                  <div className="absolute left-3 right-3 top-3 z-10 flex items-center justify-between gap-2">
-                    <span className="inline-flex min-w-0 items-center gap-1.5 rounded-md border border-white/10 bg-brand-dark/65 px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-widest text-brand-yellow backdrop-blur-md">
-                      <Compass className="h-3 w-3" />
-                      <span className="truncate">{project.catName}</span>
-                    </span>
-                    {project.video && (
-                      <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/15 text-white backdrop-blur-md">
-                        <Play className="h-4 w-4 fill-current" />
-                      </span>
-                    )}
-                  </div>
-                </motion.div>
-                );
-              })}
-            </AnimatePresence>
-          </motion.div>
+                      <div>
+                        <div className="mb-4 flex flex-wrap gap-2">
+                          {getProjectTags(project).map((tag, tagIndex) => (
+                            <span
+                              key={`${tag}-${tagIndex}`}
+                              className="max-w-[10rem] truncate rounded-sm border border-white/15 bg-white/10 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.16em] text-white/80 backdrop-blur-sm"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                        <h3 className="line-clamp-2 max-w-2xl font-outfit text-2xl font-extrabold leading-tight text-white md:text-3xl">
+                          {project.title}
+                        </h3>
+                        <p className="mt-3 line-clamp-2 max-w-xl text-sm leading-relaxed text-gray-300 transition-colors duration-300 group-hover:text-white">
+                          {project.specs}
+                        </p>
+                        <span className="mt-5 inline-flex items-center gap-2 rounded-sm border border-brand-yellow bg-brand-yellow px-4 py-2.5 font-outfit text-sm font-bold text-brand-dark shadow-lg shadow-brand-yellow/20 transition-all duration-300 group-hover:bg-transparent group-hover:text-brand-yellow">
+                          Ver detalles
+                          <ChevronRight className="h-4 w-4" />
+                        </span>
+                      </div>
+                    </div>
+                  </motion.article>
+                ))}
+              </AnimatePresence>
+            </motion.div>
           )}
-          </div>
         </div>
       </section>
 
       <AnimatePresence>
         {selectedProject && (
           <motion.div
-            className="fixed inset-0 z-[80] flex items-center justify-center bg-brand-dark/75 px-3 py-4 backdrop-blur-md sm:px-4 sm:py-6"
+            className="fixed inset-0 z-[80] flex items-center justify-center bg-brand-petrol-dark/80 px-3 py-4 backdrop-blur-md sm:px-4 sm:py-6"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setSelectedProject(null)}
           >
             <motion.div
-              layoutId={selectedLayoutId}
-              className="relative flex max-h-[92dvh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-white/15 bg-brand-dark text-white shadow-2xl"
+              initial={{ opacity: 0, y: 30, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.98 }}
               transition={{ type: 'spring', stiffness: 260, damping: 28 }}
+              className="relative max-h-[92dvh] w-full max-w-5xl overflow-hidden rounded-sm border border-white/15 bg-white shadow-2xl"
               onClick={(event) => event.stopPropagation()}
             >
               <button
                 type="button"
                 onClick={() => setSelectedProject(null)}
-                className="absolute right-4 top-4 z-20 flex h-10 w-10 items-center justify-center rounded-lg bg-brand-dark/70 text-white backdrop-blur-md transition-colors duration-300 hover:bg-brand-yellow hover:text-brand-dark"
+                className="absolute right-4 top-4 z-20 flex h-10 w-10 items-center justify-center rounded-sm bg-brand-petrol-dark/75 text-white backdrop-blur-md transition-colors duration-300 hover:bg-brand-yellow hover:text-brand-dark"
                 aria-label="Cerrar proyecto"
               >
                 <X className="h-5 w-5" />
               </button>
 
-              <div className="relative flex h-[52dvh] min-h-0 items-center justify-center overflow-hidden bg-brand-dark sm:h-[58dvh] lg:h-[76dvh]">
+              <div className="relative h-60 overflow-hidden bg-brand-dark sm:h-80">
                 {selectedProject.video ? (
                   <video
                     src={selectedProject.video}
                     poster={selectedProject.poster}
-                    className="h-full w-full object-contain"
+                    className="h-full w-full object-cover"
                     controls
                     autoPlay
                     playsInline
                   />
                 ) : (
-                  <motion.div
-                    initial={{ scale: 1.04 }}
-                    animate={{ scale: 1 }}
-                    exit={{ scale: 1.02 }}
-                    transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                    className="flex h-full w-full items-center justify-center"
-                  >
-                    <ProjectMedia project={selectedProject} className="h-full w-full object-contain" />
-                  </motion.div>
+                  <ProjectMedia project={selectedProject} className="h-full w-full object-cover" />
                 )}
-
-                <div className="absolute inset-0 bg-topo-grid opacity-10 pointer-events-none" />
-
-                <motion.div
-                  className="pointer-events-none absolute inset-x-0 bottom-0 hidden p-5 sm:p-8 lg:block"
-                  initial={{ opacity: 0, y: 24 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 16 }}
-                  transition={{ delay: 0.12, duration: 0.35 }}
-                >
-                  <div className="max-w-3xl space-y-4 rounded-xl border border-white/15 bg-brand-dark/35 p-5 backdrop-blur-sm sm:p-6">
-                    <div className="flex flex-wrap items-center gap-3 text-[11px] font-bold uppercase tracking-[0.16em] text-brand-green-light">
-                      <span className="inline-flex items-center gap-1.5 text-brand-yellow">
-                        <Compass className="h-3.5 w-3.5" />
-                        {selectedProject.catName}
-                      </span>
-                      <span className="inline-flex items-center gap-1.5">
-                        <MapPin className="h-3.5 w-3.5 text-brand-yellow" />
-                        {selectedProject.location}
-                      </span>
-                    </div>
-                    <h3 className="font-outfit text-2xl font-extrabold leading-tight text-white sm:text-4xl">
-                      {selectedProject.title}
-                    </h3>
-                    <p className="text-sm leading-relaxed text-gray-100 sm:text-base">
-                      {selectedProject.specs}
-                    </p>
-                    <div className="flex items-center gap-2 border-t border-white/10 pt-3 text-[11px] font-bold uppercase tracking-wider text-brand-green-light">
-                      <ShieldCheck className="h-4 w-4" />
-                      <span>Precision: {selectedProject.precision}</span>
-                    </div>
-                  </div>
-                </motion.div>
-              </div>
-
-              <motion.div
-                className="max-h-[38dvh] overflow-y-auto border-t border-white/10 bg-brand-dark px-4 py-4 sm:px-5 lg:hidden"
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 12 }}
-                transition={{ delay: 0.08, duration: 0.3 }}
-              >
-                <div className="space-y-3">
-                  <div className="flex flex-wrap items-center gap-3 text-[10px] font-bold uppercase tracking-[0.14em] text-brand-green-light">
-                    <span className="inline-flex items-center gap-1.5 text-brand-yellow">
-                      <Compass className="h-3.5 w-3.5" />
-                      {selectedProject.catName}
-                    </span>
-                    <span className="inline-flex items-center gap-1.5">
-                      <MapPin className="h-3.5 w-3.5 text-brand-yellow" />
-                      {selectedProject.location}
-                    </span>
-                  </div>
-                  <h3 className="font-outfit text-2xl font-extrabold leading-tight text-white">
+                <div className="absolute inset-0 bg-gradient-to-t from-brand-petrol-dark via-brand-petrol-dark/45 to-transparent" />
+                <div className="portfolio-technical-grid absolute inset-0 opacity-30" />
+                <div className="absolute bottom-5 left-5 right-16 text-white sm:bottom-7 sm:left-7">
+                  <span className="text-xs font-extrabold uppercase tracking-[0.24em] text-brand-yellow">
+                    Proyecto destacado
+                  </span>
+                  <h3 className="mt-2 font-outfit text-3xl font-extrabold leading-tight sm:text-4xl">
                     {selectedProject.title}
                   </h3>
-                  <p className="text-sm leading-relaxed text-gray-100">
-                    {selectedProject.specs}
-                  </p>
-                  <div className="flex items-center gap-2 border-t border-white/10 pt-3 text-[11px] font-bold uppercase tracking-wider text-brand-green-light">
-                    <ShieldCheck className="h-4 w-4" />
-                    <span>Precision: {selectedProject.precision}</span>
-                  </div>
                 </div>
-              </motion.div>
+              </div>
+
+              <div className="max-h-[50dvh] overflow-y-auto p-5 sm:p-7">
+                <div className="mb-5 flex flex-wrap items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.16em] text-brand-petrol">
+                  <MapPin className="h-4 w-4 text-brand-yellow" />
+                  {getProjectTags(selectedProject).map((tag, tagIndex) => (
+                    <span key={`${tag}-${tagIndex}`} className="rounded-sm bg-brand-light px-2.5 py-1">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+
+                <p className="text-base leading-relaxed text-gray-600">{selectedProject.specs}</p>
+
+                <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                  {getProjectBenefits(selectedProject).map((benefit) => (
+                    <div key={benefit} className="rounded-sm border border-gray-200 bg-brand-light p-4">
+                      <Check className="mb-3 h-5 w-5 text-brand-yellow" />
+                      <p className="text-sm font-semibold leading-relaxed text-brand-petrol">{benefit}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <a
+                  href={buildWhatsappUrl(selectedProject)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-sm bg-brand-yellow px-5 py-3.5 font-outfit text-sm font-extrabold text-brand-dark shadow-lg shadow-brand-yellow/20 transition-all duration-300 hover:bg-brand-yellow-light sm:w-auto"
+                >
+                  <MessageCircle className="h-5 w-5" />
+                  Consultar por WhatsApp
+                </a>
+              </div>
             </motion.div>
           </motion.div>
         )}

@@ -65,6 +65,7 @@ export default function Benefits() {
             viewport={{ once: true, margin: '-100px' }}
             transition={{ delay: 0.1 }}
             className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white font-outfit"
+            data-gsap-title
           >
             ¿Por Qué Elegir a MINGEOTOP E.I.R.L.?
           </motion.h2>
@@ -89,6 +90,7 @@ export default function Benefits() {
               viewport={{ once: true, margin: '-100px' }}
               transition={{ delay: index * 0.1 }}
               className="bg-brand-dark/40 border border-brand-green/20 hover:border-brand-yellow/40 p-8 rounded-3xl transition-all duration-300 group flex flex-col sm:flex-row gap-6 items-start backdrop-blur-sm"
+              data-gsap-mask
             >
               {/* Icon Holder */}
               <div className="w-14 h-14 rounded-2xl bg-brand-green text-white flex items-center justify-center flex-shrink-0 group-hover:bg-brand-yellow group-hover:text-brand-dark transition-colors duration-300 shadow-md">

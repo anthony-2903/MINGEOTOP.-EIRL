@@ -75,6 +75,7 @@ export default function AboutUs() {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ delay: 0.1 }}
             className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-brand-petrol font-outfit"
+            data-gsap-title
           >
             Comprometidos con la Precisión, Tecnología y Experiencia en Campo
           </motion.h2>
@@ -102,6 +103,7 @@ export default function AboutUs() {
               transition={{ delay: index * 0.1, type: "spring", stiffness: 100 }}
               whileHover={{ y: -8, scale: 1.02, transition: { duration: 0.2 } }}
               className="bg-brand-light border border-gray-200/60 p-8 rounded-2xl hover:border-brand-yellow/30 hover:bg-white hover:shadow-premium hover-glow-yellow transition-all duration-300 group flex flex-col items-center text-center md:items-start md:text-left relative overflow-hidden"
+              data-gsap-mask
             >
               <div className="absolute inset-0 bg-gradient-to-br from-brand-yellow/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
               <div className="bg-brand-petrol p-4 rounded-xl text-white mb-6 group-hover:scale-110 transition-transform duration-300">

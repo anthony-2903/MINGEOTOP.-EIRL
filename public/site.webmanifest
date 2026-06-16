@@ -1,0 +1,25 @@
+{
+  "name": "MINGEOTOP E.I.R.L.",
+  "short_name": "MINGEOTOP",
+  "description": "Servicios topográficos, geodesia GNSS, fotogrametría con drones y control de obra en Perú.",
+  "lang": "es-PE",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#15171C",
+  "theme_color": "#15171C",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.webp",
+      "sizes": "512x512",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    }
+  ]
+}

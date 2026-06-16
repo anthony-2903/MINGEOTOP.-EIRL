@@ -87,6 +87,7 @@ export default function Sectors() {
             viewport={{ once: true, margin: '-100px' }}
             transition={{ delay: 0.1 }}
             className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white font-outfit"
+            data-gsap-title
           >
             Presencia Técnica en las Industrias Clave
           </motion.h2>
@@ -111,6 +112,7 @@ export default function Sectors() {
               viewport={{ once: true, margin: '-100px' }}
               transition={{ delay: index * 0.05 }}
               className="bg-brand-dark/40 border border-brand-green/20 hover:border-brand-yellow/40 rounded-2xl p-6 transition-all duration-300 group relative overflow-hidden backdrop-blur-sm"
+              data-gsap-mask
             >
               {/* Soft decorative background gradient on hover */}
               <div className="absolute inset-0 bg-gradient-to-tr from-brand-petrol/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />

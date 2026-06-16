@@ -56,6 +56,7 @@ export default function Process() {
               viewport={{ once: true, margin: '-100px' }}
               transition={{ delay: 0.1 }}
               className="font-outfit text-3xl font-extrabold leading-tight sm:text-4xl md:text-5xl"
+              data-gsap-title
             >
               Metodología técnica de campo a gabinete
             </motion.h2>
@@ -81,6 +82,7 @@ export default function Process() {
             viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.55 }}
             className="relative min-h-[460px] overflow-hidden rounded-lg border border-white/10 bg-brand-dark"
+            data-gsap-mask
           >
             <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.06)_1px,transparent_1px)] bg-[size:36px_36px]" />
             <div className="absolute inset-0 bg-gradient-to-br from-brand-green/20 via-transparent to-brand-yellow/10" />
@@ -167,6 +169,7 @@ export default function Process() {
                 viewport={{ once: true, margin: '-80px' }}
                 transition={{ delay: index * 0.08, duration: 0.45 }}
                 className="group grid gap-4 border border-white/10 bg-white/[0.04] p-4 transition-colors duration-300 hover:border-brand-yellow/40 hover:bg-white/[0.07] sm:grid-cols-[88px_1fr] sm:p-5"
+                data-gsap-mask
               >
                 <div className="flex items-center gap-3 sm:block">
                   <span className="flex h-12 w-12 items-center justify-center border border-brand-yellow/50 bg-brand-yellow text-sm font-black text-brand-dark">

@@ -8,10 +8,12 @@ import Sectors from './components/Sectors';
 import Equipment from './components/Equipment';
 import Process from './components/Process';
 import Benefits from './components/Benefits';
+import SeoFaq from './components/SeoFaq';
 import Portfolio from './components/Portfolio';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
 import AdminPanel from './components/AdminPanel';
+import GsapScrollEffects from './components/GsapScrollEffects';
 import { ArrowUp, MessageCircle } from 'lucide-react';
 
 export default function App() {
@@ -45,6 +47,7 @@ export default function App() {
     <div className="relative min-h-screen flex flex-col justify-between overflow-x-hidden antialiased bg-brand-light font-sans selection:bg-brand-yellow selection:text-brand-dark">
       {/* Header / Navbar */}
       <Navbar />
+      <GsapScrollEffects />
 
       <motion.div
         className="fixed left-0 top-0 z-[60] h-1 w-full origin-left bg-brand-yellow shadow-[0_0_18px_rgba(255,92,0,0.45)]"
@@ -61,6 +64,7 @@ export default function App() {
         <Equipment />
         <Process />
         <Benefits />
+        <SeoFaq />
         <Contact />
       </main>
 
@@ -69,7 +73,7 @@ export default function App() {
 
       {/* Floating Action Button: WhatsApp Widget */}
       <a
-        href="https://wa.me/51913386354?text=Hola%20MINGEOTOP,%20estoy%20visitando%20su%20p%C3%A1gina%20web%20y%20deseo%20realizar%20una%20consulta%20técnica."
+        href="https://wa.me/51913386354?text=Hola%20MINGEOTOP,%20estoy%20visitando%20su%20p%C3%A1gina%20web%20y%20deseo%20realizar%20una%20consulta%20t%C3%A9cnica."
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-6 right-6 z-40 bg-[#25D366] hover:bg-[#128C7E] text-white p-4 rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center animate-whatsapp-pulse hover-glow-green cursor-pointer"

@@ -3,32 +3,43 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/logo.webp" />
+    <link rel="manifest" href="/site.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>MINGEOTOP E.I.R.L. | Topografía, Geodesia y Drones en Perú</title>
+    <title>MINGEOTOP E.I.R.L. | Servicios topográficos, geodesia y drones en Perú</title>
     <meta
       name="description"
-      content="MINGEOTOP E.I.R.L. brinda levantamientos topográficos, georreferenciación GNSS, replanteo de obras, cubicación, topografía minera, fotogrametría con drones y control topográfico en Perú."
+      content="Empresa peruana de topografía, geodesia GNSS, replanteo de obras, cubicación, fotogrametría con drones y control topográfico para minería, construcción e infraestructura."
     />
     <meta
       name="keywords"
       content="MINGEOTOP, MINGEOTOP EIRL, topografía en Perú, servicios topográficos, levantamiento topográfico, geodesia, GNSS, fotogrametría con drones, replanteo de obras, cubicación, topografía minera, estación total, ortomosaicos, planos topográficos, control topográfico"
     />
     <meta name="author" content="MINGEOTOP E.I.R.L." />
-    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow" />
+    <meta name="geo.region" content="PE" />
+    <meta name="geo.placename" content="Lima, Perú" />
+    <meta name="format-detection" content="telephone=yes" />
     <meta name="theme-color" content="#15171C" />
     <link rel="canonical" href="https://mingeotop.com/" />
+    <link rel="alternate" href="https://mingeotop.com/" hreflang="es-PE" />
+    <link rel="alternate" href="https://mingeotop.com/" hreflang="x-default" />
 
-    <meta property="og:title" content="MINGEOTOP E.I.R.L. | Topografía, Geodesia y Drones en Perú" />
+    <meta property="og:title" content="MINGEOTOP E.I.R.L. | Servicios topográficos en Perú" />
     <meta
       property="og:description"
-      content="Servicios topográficos para minería, construcción, infraestructura, catastro y control de obra. Planos DWG/PDF, cubicaciones, ortomosaicos y reportes técnicos."
+      content="Levantamientos topográficos, georreferenciación GNSS, fotogrametría con drones, replanteo, cubicación y control de obra para proyectos en Perú."
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://mingeotop.com/" />
     <meta property="og:site_name" content="MINGEOTOP E.I.R.L." />
     <meta property="og:locale" content="es_PE" />
     <meta property="og:image" content="https://mingeotop.com/logo.webp" />
+    <meta property="og:image:secure_url" content="https://mingeotop.com/logo.webp" />
+    <meta property="og:image:type" content="image/webp" />
+    <meta property="og:image:alt" content="Logo de MINGEOTOP E.I.R.L., empresa de topografía y geodesia en Perú" />
     <meta property="article:publisher" content="https://www.facebook.com/gimatc.2023" />
 
     <meta name="twitter:card" content="summary_large_image" />
@@ -38,11 +49,13 @@
       content="Topografía, geodesia, fotogrametría con drones, replanteo, cubicación y control topográfico para proyectos en Perú."
     />
     <meta name="twitter:image" content="https://mingeotop.com/logo.webp" />
+    <meta name="twitter:image:alt" content="Logo de MINGEOTOP E.I.R.L." />
 
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "ProfessionalService",
+        "@type": ["LocalBusiness", "ProfessionalService"],
+        "@id": "https://mingeotop.com/#empresa",
         "name": "MINGEOTOP E.I.R.L.",
         "alternateName": ["MINGEOTOP", "MINGEOTOP EIRL"],
         "url": "https://mingeotop.com/",
@@ -50,9 +63,11 @@
         "image": "https://mingeotop.com/logo.webp",
         "email": "mingeotop@gmail.com",
         "telephone": "+51 913 386 354",
+        "priceRange": "$$",
         "address": {
           "@type": "PostalAddress",
           "addressLocality": "Lima",
+          "addressRegion": "Lima",
           "addressCountry": "PE"
         },
         "areaServed": {
@@ -75,14 +90,57 @@
           "@type": "OfferCatalog",
           "name": "Servicios topográficos MINGEOTOP",
           "itemListElement": [
-            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Levantamientos topográficos" } },
-            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Georreferenciación GNSS" } },
-            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Fotogrametría con drones" } },
-            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Replanteo de obras" } },
-            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Cubicación y movimiento de tierras" } },
-            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Topografía minera" } }
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Levantamientos topográficos", "areaServed": "Perú" } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Georreferenciación GNSS", "areaServed": "Perú" } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Fotogrametría con drones", "areaServed": "Perú" } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Replanteo de obras", "areaServed": "Perú" } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Cubicación y movimiento de tierras", "areaServed": "Perú" } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Topografía minera", "areaServed": "Perú" } }
           ]
         }
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "@id": "https://mingeotop.com/#website",
+        "url": "https://mingeotop.com/",
+        "name": "MINGEOTOP E.I.R.L.",
+        "inLanguage": "es-PE",
+        "publisher": { "@id": "https://mingeotop.com/#empresa" }
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "¿Qué servicios topográficos ofrece MINGEOTOP E.I.R.L.?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Ofrece levantamientos topográficos, georreferenciación GNSS, replanteo de obras, control topográfico, cubicación, movimiento de tierras, topografía minera y fotogrametría con drones."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "¿En qué zonas atiende MINGEOTOP E.I.R.L.?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "La empresa atiende proyectos en Perú para minería, construcción, infraestructura, catastro, saneamiento, agricultura, energía y geotecnia."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "¿Cómo solicitar una cotización topográfica?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Puede solicitar una cotización desde el formulario de contacto, por WhatsApp al +51 913 386 354 o por correo a mingeotop@gmail.com."
+            }
+          }
+        ]
       }
     </script>
 

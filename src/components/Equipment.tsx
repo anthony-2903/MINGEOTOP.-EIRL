@@ -79,6 +79,7 @@ export default function Equipment() {
               viewport={{ once: true, margin: '-100px' }}
               transition={{ delay: 0.1 }}
               className="font-outfit text-3xl font-extrabold leading-tight text-brand-petrol sm:text-4xl md:text-5xl"
+              data-gsap-title
             >
               Instrumental técnico y procesamiento digital
             </motion.h2>
@@ -103,6 +104,7 @@ export default function Equipment() {
             viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.5 }}
             className="overflow-hidden border border-gray-200 bg-brand-light"
+            data-gsap-mask
           >
             <div className="grid min-h-[520px] lg:grid-cols-[0.9fr_1.1fr]">
               <div className="relative min-h-[300px] bg-brand-petrol">
@@ -110,6 +112,7 @@ export default function Equipment() {
                   src={featured.image}
                   alt={featured.name}
                   className="h-full w-full object-cover"
+                  data-gsap-parallax="12"
                   loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-brand-petrol/70 via-transparent to-transparent" />
@@ -164,8 +167,9 @@ export default function Equipment() {
                 viewport={{ once: true, margin: '-100px' }}
                 transition={{ delay: index * 0.08, duration: 0.42 }}
                 className="grid grid-cols-[116px_1fr] overflow-hidden border border-gray-200 bg-white transition-colors duration-300 hover:border-brand-yellow/50 sm:grid-cols-[150px_1fr]"
+                data-gsap-mask
               >
-                <img src={item.image} alt={item.name} className="h-full min-h-[150px] w-full object-cover" loading="lazy" />
+                <img src={item.image} alt={item.name} className="h-full min-h-[150px] w-full object-cover" data-gsap-parallax="10" loading="lazy" />
                 <div className="p-4 sm:p-5">
                   <div className="mb-2 flex flex-wrap items-center gap-2">
                     <span className="bg-brand-petrol px-2 py-1 text-[10px] font-black tracking-wider text-white">

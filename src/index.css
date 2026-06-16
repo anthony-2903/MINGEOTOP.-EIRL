@@ -136,6 +136,18 @@
   text-shadow: 0 0 10px rgba(255, 107, 0, 0.3);
 }
 
+.gsap-title-word-wrap {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+}
+
+.gsap-title-word {
+  display: inline-block;
+  transform-style: preserve-3d;
+  will-change: opacity, transform;
+}
+
 /* Custom animations */
 @keyframes float {
   0%, 100% { transform: translate3d(0, 0, 0); }
@@ -218,6 +230,44 @@
 
 .project-carousel-viewport::-webkit-scrollbar-thumb:hover {
   background: rgba(21, 23, 28, 0.52);
+}
+
+.portfolio-technical-grid {
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(255, 92, 0, 0.16) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 92, 0, 0.12) 1px, transparent 1px),
+    radial-gradient(circle at 18% 24%, rgba(255, 92, 0, 0.26) 0 1px, transparent 2px),
+    radial-gradient(circle at 72% 66%, rgba(255, 255, 255, 0.22) 0 1px, transparent 2px);
+  background-size: 34px 34px, 34px 34px, 120px 120px, 150px 150px;
+  mix-blend-mode: screen;
+}
+
+.portfolio-project-frame::before,
+.portfolio-project-frame::after {
+  content: "";
+  position: absolute;
+  inset-inline: 18px;
+  z-index: 8;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255, 92, 0, 0.75), transparent);
+  opacity: 0;
+  transition: opacity 300ms ease, inset-inline 300ms ease;
+}
+
+.portfolio-project-frame::before {
+  top: 18px;
+}
+
+.portfolio-project-frame::after {
+  bottom: 18px;
+}
+
+.portfolio-project-frame:hover::before,
+.portfolio-project-frame:hover::after {
+  inset-inline: 12px;
+  opacity: 1;
 }
 
 @keyframes skeleton-shimmer {
@@ -313,9 +363,9 @@
 
 @supports (animation-timeline: view()) {
   .cinematic-scroll > section:not(:first-child):not(#contacto) {
-    animation: cinematic-section-reveal linear both;
-    animation-timeline: view();
-    animation-range: entry 0% cover 34%;
+    animation: none;
+    animation-timeline: auto;
+    animation-range: normal;
     transform-origin: center top;
     will-change: opacity, transform, filter, clip-path;
   }
@@ -329,9 +379,9 @@
   }
 
   .cinematic-scroll > section:first-child {
-    animation: cinematic-fade-out linear both;
-    animation-timeline: view();
-    animation-range: exit -10% exit 70%;
+    animation: none;
+    animation-timeline: auto;
+    animation-range: normal;
     transform-origin: center center;
     will-change: opacity, transform, filter;
   }

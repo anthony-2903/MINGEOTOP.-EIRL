@@ -88,6 +88,7 @@ export default function Services() {
             viewport={{ once: true, margin: '-100px' }}
             transition={{ delay: 0.1 }}
             className="font-outfit text-3xl font-extrabold text-brand-petrol sm:text-4xl md:text-5xl"
+            data-gsap-title
           >
             Servicios topográficos con entregables listos para obra
           </motion.h2>
@@ -113,6 +114,7 @@ export default function Services() {
               transition={{ type: 'spring', stiffness: 105, damping: 20, delay: index * 0.04 }}
               whileHover={{ y: -4, transition: { duration: 0.2 } }}
               className="group relative flex flex-col justify-between overflow-hidden rounded-lg border border-gray-200 bg-white p-6 shadow-premium transition-all duration-300 hover:border-brand-yellow/40 hover:shadow-premium-hover sm:p-7"
+              data-gsap-mask
             >
               <div className="absolute inset-x-0 top-0 h-1 bg-brand-petrol transition-colors duration-300 group-hover:bg-brand-yellow" />
               <div className="space-y-4">
