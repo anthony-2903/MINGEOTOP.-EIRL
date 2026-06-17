@@ -305,6 +305,38 @@
   opacity: 1;
 }
 
+.portfolio-modal-frame {
+  box-shadow:
+    0 46px 110px -42px rgba(0, 0, 0, 0.96),
+    0 0 0 1px rgba(255, 92, 0, 0.18) inset,
+    0 0 42px rgba(255, 92, 0, 0.08);
+}
+
+.portfolio-modal-frame::before,
+.portfolio-modal-frame::after {
+  content: "";
+  position: absolute;
+  z-index: 35;
+  width: 54px;
+  height: 54px;
+  pointer-events: none;
+  border-color: rgba(255, 92, 0, 0.78);
+}
+
+.portfolio-modal-frame::before {
+  left: 14px;
+  top: 14px;
+  border-left-width: 1px;
+  border-top-width: 1px;
+}
+
+.portfolio-modal-frame::after {
+  right: 14px;
+  bottom: 14px;
+  border-right-width: 1px;
+  border-bottom-width: 1px;
+}
+
 @keyframes skeleton-shimmer {
   0% {
     background-position: 120% 0;
