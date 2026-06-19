@@ -17,17 +17,14 @@ import {
 } from 'lucide-react';
 
 import { getPublishedProjects, type Project } from '../lib/projects';
+import {
+  getFallbackProjectSectors,
+  getProjectSectors,
+  type ProjectSector,
+} from '../lib/projectSectors';
 
 type MediaOrientation = 'unknown' | 'vertical' | 'horizontal';
 type PortfolioViewMode = 'carousel' | 'gallery';
-
-const categories = [
-  { id: 'todos', name: 'Todos los sectores' },
-  { id: 'mineria', name: 'Mineria' },
-  { id: 'construccion', name: 'Construccion' },
-  { id: 'vias', name: 'Carreteras' },
-  { id: 'dron', name: 'Drones & Catastro' },
-];
 
 function ProjectMedia({ project, className }: { project: Project; className: string }) {
   if (project.video) {
@@ -150,14 +147,16 @@ export default function Portfolio() {
   const [selectedMediaOrientation, setSelectedMediaOrientation] = useState<MediaOrientation>('unknown');
   const [viewMode, setViewMode] = useState<PortfolioViewMode>('carousel');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [categories, setCategories] = useState<ProjectSector[]>(() => getFallbackProjectSectors());
 
   useEffect(() => {
     let mounted = true;
 
-    getPublishedProjects()
-      .then((supabaseProjects) => {
+    Promise.all([getPublishedProjects(), getProjectSectors()])
+      .then(([supabaseProjects, supabaseSectors]) => {
         if (mounted) {
           setProjects(supabaseProjects);
+          setCategories(supabaseSectors);
         }
       })
       .finally(() => {
@@ -176,7 +175,7 @@ export default function Portfolio() {
       ? projects
       : projects.filter((project) => project.category === filter);
   const hasProjects = filteredProjects.length > 0;
-  const activeCategory = categories.find((category) => category.id === filter) ?? categories[0];
+  const activeCategory = categories.find((category) => category.slug === filter) ?? categories[0];
 
   const openProject = (project: Project) => {
     setSelectedMediaOrientation('unknown');
@@ -230,7 +229,7 @@ export default function Portfolio() {
           </h2>
         </div>
 
-        <div className="relative z-10 mb-12 flex flex-col items-center justify-center gap-3 px-4 sm:flex-row">
+        <div className="relative z-[80] mb-16 flex flex-col items-center justify-center gap-3 px-4 sm:flex-row">
           <div className="flex rounded-2xl border border-brand-petrol/10 bg-brand-light p-1 shadow-sm">
             <button
               type="button"
@@ -274,9 +273,9 @@ export default function Portfolio() {
                   {categories.map((category) => (
                     <button
                       key={category.id}
-                      onClick={() => selectCategory(category.id)}
+                      onClick={() => selectCategory(category.slug)}
                       className={`block w-full rounded-xl px-4 py-3 text-left text-[11px] font-extrabold uppercase tracking-[0.16em] transition-colors duration-200 ${
-                        filter === category.id
+                        filter === category.slug
                           ? 'bg-brand-yellow text-brand-dark'
                           : 'text-brand-petrol hover:bg-brand-light'
                       }`}
@@ -290,7 +289,7 @@ export default function Portfolio() {
           </div>
         </div>
 
-        <div className="relative z-10">
+        <div className="relative z-20">
           {isLoadingProjects ? (
             <ProjectCarouselSkeleton />
           ) : !hasProjects ? (

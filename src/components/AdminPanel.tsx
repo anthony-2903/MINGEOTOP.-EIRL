@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import {
+  AlertTriangle,
   Check,
   ChevronRight,
   Eye,
@@ -37,9 +38,19 @@ import {
   deleteProject,
   type Project,
 } from '../lib/projects';
+import {
+  createProjectSector,
+  deleteProjectSector,
+  getFallbackProjectSectors,
+  getProjectSectors,
+  normalizeSectorSlug,
+  updateProjectSector,
+  type ProjectSector,
+} from '../lib/projectSectors';
 import { uploadImageToCloudinary, uploadVideoToCloudinary } from '../lib/cloudinary';
 
 type AdminSectionId = 'servicios' | 'proyectos' | 'contacto';
+type AdminToastType = 'success' | 'error' | 'warning' | 'info';
 
 type EditableItem = {
   title: string;
@@ -158,6 +169,7 @@ export default function AdminPanel() {
   const [loginData, setLoginData] = useState({ email: ADMIN_EMAIL, password: '' });
   const [loginError, setLoginError] = useState('');
   const [activeSection, setActiveSection] = useState<AdminSectionId>('proyectos');
+  const [projectAdminTab, setProjectAdminTab] = useState<'projects' | 'sectors'>('projects');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [content, setContent] = useState(initialContent);
   const [saved, setSaved] = useState(false);
@@ -190,13 +202,41 @@ export default function AdminPanel() {
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
   const [isDeletingProject, setIsDeletingProject] = useState(false);
   const [isMediaDragging, setIsMediaDragging] = useState(false);
+  const [sectorToDelete, setSectorToDelete] = useState<ProjectSector | null>(null);
+  const [toast, setToast] = useState<{ type: AdminToastType; message: string } | null>(null);
+  const [projectSectors, setProjectSectors] = useState<ProjectSector[]>(() => getFallbackProjectSectors(true));
+  const [sectorForm, setSectorForm] = useState({
+    id: '',
+    name: '',
+    slug: '',
+    sort_order: 0,
+    is_active: true,
+  });
+  const [isSavingSector, setIsSavingSector] = useState(false);
   const uploadProgressTimer = useRef<number | null>(null);
+  const toastTimer = useRef<number | null>(null);
+
+  const showToast = (type: AdminToastType, message: string) => {
+    if (toastTimer.current) {
+      window.clearTimeout(toastTimer.current);
+    }
+
+    setToast({ type, message });
+    toastTimer.current = window.setTimeout(() => {
+      setToast(null);
+      toastTimer.current = null;
+    }, 4200);
+  };
 
   const loadProjects = async () => {
     setIsLoadingProjects(true);
     try {
-      const list = await getAllProjects();
+      const [list, sectors] = await Promise.all([
+        getAllProjects(),
+        getProjectSectors(true),
+      ]);
       setDbProjects(list);
+      setProjectSectors(sectors);
     } catch (err) {
       console.error('Error loading projects:', err);
     } finally {
@@ -241,7 +281,7 @@ export default function AdminPanel() {
       finishUploadFeedback('Imagen subida con exito.');
     } catch (err: any) {
       console.error('Error uploading image:', err);
-      alert('Error al subir la imagen: ' + err.message);
+      showToast('error', 'Error al subir la imagen: ' + err.message);
       finishUploadFeedback('Error al subir imagen.', 0);
     } finally {
       setIsUploading(false);
@@ -261,7 +301,7 @@ export default function AdminPanel() {
       finishUploadFeedback('Video subido con exito.');
     } catch (err: any) {
       console.error('Error uploading video:', err);
-      alert('Error al subir el video: ' + err.message);
+      showToast('error', 'Error al subir el video: ' + err.message);
       finishUploadFeedback('Error al subir video.', 0);
     } finally {
       setIsUploading(false);
@@ -279,7 +319,7 @@ export default function AdminPanel() {
       return;
     }
 
-    alert('Por favor, selecciona una imagen o un video valido.');
+    showToast('warning', 'Por favor, selecciona una imagen o un video valido.');
   };
 
   const handleMediaUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -309,10 +349,12 @@ export default function AdminPanel() {
   };
 
   const openAddProjectModal = () => {
+    const firstProjectSector = projectSectors.find((sector) => sector.is_active && sector.slug !== 'todos');
+
     setEditingProject(null);
     setProjectForm({
       title: '',
-      category: 'mineria',
+      category: firstProjectSector?.slug ?? 'mineria',
       location: '',
       description: '',
       precision_label: '',
@@ -327,6 +369,106 @@ export default function AdminPanel() {
     setUploadProgress('');
     setUploadPercent(0);
     setProjectModalOpen(true);
+  };
+
+  const resetSectorForm = () => {
+    setSectorForm({
+      id: '',
+      name: '',
+      slug: '',
+      sort_order: Math.max(0, ...projectSectors.map((sector) => sector.sort_order ?? 0)) + 1,
+      is_active: true,
+    });
+  };
+
+  const handleEditSector = (sector: ProjectSector) => {
+    setSectorForm({
+      id: sector.id,
+      name: sector.name,
+      slug: sector.slug,
+      sort_order: sector.sort_order ?? 0,
+      is_active: sector.is_active,
+    });
+  };
+
+  const handleSaveSector = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    if (!sectorForm.name.trim()) {
+      showToast('warning', 'Ingresa el nombre del sector.');
+      return;
+    }
+
+    const nextSlug = normalizeSectorSlug(sectorForm.slug || sectorForm.name);
+
+    if (!nextSlug) {
+      showToast('warning', 'Ingresa un slug valido para el sector.');
+      return;
+    }
+
+    setIsSavingSector(true);
+    try {
+      const payload = {
+        name: sectorForm.name.trim(),
+        slug: nextSlug,
+        sort_order: Number(sectorForm.sort_order) || 0,
+        is_active: sectorForm.is_active,
+      };
+
+      if (sectorForm.id) {
+        await updateProjectSector(sectorForm.id, payload);
+      } else {
+        await createProjectSector(payload);
+      }
+
+      const sectors = await getProjectSectors(true);
+      setProjectSectors(sectors);
+      setSectorForm({
+        id: '',
+        name: '',
+        slug: '',
+        sort_order: Math.max(0, ...sectors.map((sector) => sector.sort_order ?? 0)) + 1,
+        is_active: true,
+      });
+      showToast('success', sectorForm.id ? 'Sector actualizado correctamente.' : 'Sector creado correctamente.');
+    } catch (err: any) {
+      console.error('Error saving sector:', err);
+      showToast('error', 'Error al guardar el sector: ' + err.message);
+    } finally {
+      setIsSavingSector(false);
+    }
+  };
+
+  const handleDeleteSector = async (sector: ProjectSector) => {
+    if (sector.slug === 'todos') {
+      showToast('warning', 'El sector "Todos los sectores" no se debe eliminar porque controla el filtro general.');
+      return;
+    }
+
+    const isUsed = dbProjects.some((project) => project.category === sector.slug);
+    if (isUsed) {
+      showToast('warning', 'Este sector esta asignado a uno o mas proyectos. Cambia esos proyectos antes de eliminarlo.');
+      return;
+    }
+
+    setSectorToDelete(sector);
+  };
+
+  const handleConfirmDeleteSector = async () => {
+    if (!sectorToDelete) return;
+    try {
+      await deleteProjectSector(sectorToDelete.id);
+      const sectors = await getProjectSectors(true);
+      setProjectSectors(sectors);
+      if (sectorForm.id === sectorToDelete.id) {
+        resetSectorForm();
+      }
+      setSectorToDelete(null);
+      showToast('success', 'Sector eliminado correctamente.');
+    } catch (err: any) {
+      console.error('Error deleting sector:', err);
+      showToast('error', 'Error al eliminar el sector: ' + err.message);
+    }
   };
 
   const openEditProjectModal = (project: Project) => {
@@ -353,7 +495,7 @@ export default function AdminPanel() {
   const handleSaveProject = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!projectForm.title) {
-      alert('Por favor ingrese un título.');
+      showToast('warning', 'Por favor ingrese un titulo.');
       return;
     }
 
@@ -387,9 +529,10 @@ export default function AdminPanel() {
       await loadProjects();
       setProjectModalOpen(false);
       setEditingProject(null);
+      showToast('success', editingProject ? 'Proyecto actualizado correctamente.' : 'Proyecto creado correctamente.');
     } catch (err: any) {
       console.error('Error saving project:', err);
-      alert('Error al guardar el proyecto: ' + err.message);
+      showToast('error', 'Error al guardar el proyecto: ' + err.message);
     } finally {
       setIsSavingProject(false);
     }
@@ -408,9 +551,10 @@ export default function AdminPanel() {
       await loadProjects();
       setDeleteConfirmOpen(false);
       setProjectToDelete(null);
+      showToast('success', 'Proyecto eliminado correctamente.');
     } catch (err: any) {
       console.error('Error deleting project:', err);
-      alert('Error al eliminar el proyecto: ' + err.message);
+      showToast('error', 'Error al eliminar el proyecto: ' + err.message);
     } finally {
       setIsDeletingProject(false);
     }
@@ -427,6 +571,9 @@ export default function AdminPanel() {
       if (uploadProgressTimer.current) {
         window.clearInterval(uploadProgressTimer.current);
       }
+      if (toastTimer.current) {
+        window.clearTimeout(toastTimer.current);
+      }
     };
   }, []);
 
@@ -440,6 +587,7 @@ export default function AdminPanel() {
       value.toLowerCase().includes(search),
     );
   });
+  const activeProjectSectors = projectSectors.filter((sector) => sector.is_active && sector.slug !== 'todos');
 
   useEffect(() => {
     if (!supabase) {
@@ -561,23 +709,60 @@ export default function AdminPanel() {
                   Portafolio de Proyectos
                 </p>
                 <h2 className="mt-2 text-2xl font-extrabold text-brand-petrol font-outfit">
-                  Gestión de Proyectos en Supabase
+                  Gestión de Proyectos
                 </h2>
                 <p className="mt-2 text-sm text-gray-500">
                   Agrega, edita y elimina los proyectos que se muestran en el portafolio de la landing page.
                 </p>
               </div>
+              {projectAdminTab === 'projects' ? (
+                <button
+                  type="button"
+                  onClick={openAddProjectModal}
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-petrol px-4 py-3 text-sm font-bold text-white shadow-lg hover:bg-brand-petrol-dark transition duration-300 cursor-pointer"
+                >
+                  <Plus className="h-5 w-5" />
+                  Agregar Proyecto
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={resetSectorForm}
+                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-bold text-brand-petrol transition hover:border-brand-yellow hover:bg-brand-light"
+                >
+                  <Plus className="h-5 w-5" />
+                  Nuevo sector
+                </button>
+              )}
+            </div>
+
+            <div className="mt-5 flex w-fit rounded-xl border border-gray-200 bg-brand-light p-1">
               <button
                 type="button"
-                onClick={openAddProjectModal}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-petrol px-4 py-3 text-sm font-bold text-white shadow-lg hover:bg-brand-petrol-dark transition duration-300 cursor-pointer"
+                onClick={() => setProjectAdminTab('projects')}
+                className={`rounded-lg px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] transition ${
+                  projectAdminTab === 'projects'
+                    ? 'bg-brand-petrol text-white shadow-sm'
+                    : 'text-gray-500 hover:text-brand-petrol'
+                }`}
               >
-                <Plus className="h-5 w-5" />
-                Agregar Proyecto
+                Proyectos
+              </button>
+              <button
+                type="button"
+                onClick={() => setProjectAdminTab('sectors')}
+                className={`rounded-lg px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] transition ${
+                  projectAdminTab === 'sectors'
+                    ? 'bg-brand-petrol text-white shadow-sm'
+                    : 'text-gray-500 hover:text-brand-petrol'
+                }`}
+              >
+                Sectores
               </button>
             </div>
 
-            {isLoadingProjects ? (
+            {projectAdminTab === 'projects' ? (
+              isLoadingProjects ? (
               <AdminProjectRowsSkeleton />
             ) : dbProjects.length === 0 ? (
               <div className="py-12 text-center text-gray-500">
@@ -655,8 +840,146 @@ export default function AdminPanel() {
                   </div>
                 ))}
               </div>
-            )}
+              )
+            ) : null}
           </div>
+
+          {projectAdminTab === 'sectors' && (
+          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+            <div className="flex flex-col gap-4 border-b border-gray-100 pb-5 lg:flex-row lg:items-start lg:justify-between">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-yellow-dark font-outfit">
+                  Filtro exterior del portafolio
+                </p>
+                <h2 className="mt-2 text-2xl font-extrabold text-brand-petrol font-outfit">
+                  Sectores de Proyectos
+                </h2>
+                <p className="mt-2 max-w-2xl text-sm text-gray-500">
+                  Administra las opciones que aparecen en el selector publico y en el formulario de proyectos.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={resetSectorForm}
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-bold text-brand-petrol transition hover:border-brand-yellow hover:bg-brand-light"
+              >
+                <Plus className="h-5 w-5" />
+                Nuevo sector
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveSector} className="mt-5 grid gap-4 lg:grid-cols-[1fr_1fr_120px_auto] lg:items-end">
+              <label className="space-y-1">
+                <span className="text-xs font-bold uppercase tracking-wider text-gray-500">Nombre visible</span>
+                <input
+                  value={sectorForm.name}
+                  onChange={(event) => {
+                    const name = event.target.value;
+                    setSectorForm((current) => ({
+                      ...current,
+                      name,
+                      slug: current.id ? current.slug : normalizeSectorSlug(name),
+                    }));
+                  }}
+                  className={fieldClasses}
+                  placeholder="Ej. Obras urbanas"
+                />
+              </label>
+
+              <label className="space-y-1">
+                <span className="text-xs font-bold uppercase tracking-wider text-gray-500">Slug</span>
+                <input
+                  value={sectorForm.slug}
+                  onChange={(event) => setSectorForm((current) => ({ ...current, slug: normalizeSectorSlug(event.target.value) }))}
+                  className={fieldClasses}
+                  placeholder="obras-urbanas"
+                />
+              </label>
+
+              <label className="space-y-1">
+                <span className="text-xs font-bold uppercase tracking-wider text-gray-500">Orden</span>
+                <input
+                  type="number"
+                  value={sectorForm.sort_order}
+                  onChange={(event) => setSectorForm((current) => ({ ...current, sort_order: Number(event.target.value) }))}
+                  className={fieldClasses}
+                />
+              </label>
+
+              <div className="flex flex-col gap-2">
+                <label className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-500">
+                  <input
+                    type="checkbox"
+                    checked={sectorForm.is_active}
+                    onChange={(event) => setSectorForm((current) => ({ ...current, is_active: event.target.checked }))}
+                    className="h-4 w-4 rounded border-gray-300 text-brand-yellow focus:ring-brand-yellow"
+                  />
+                  Activo
+                </label>
+                <button
+                  type="submit"
+                  disabled={isSavingSector}
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-yellow px-4 py-3 text-sm font-bold text-brand-dark shadow-lg shadow-brand-yellow/20 transition hover:bg-brand-yellow-light disabled:opacity-50"
+                >
+                  <Save className="h-4 w-4" />
+                  {isSavingSector ? 'Guardando' : sectorForm.id ? 'Actualizar' : 'Crear'}
+                </button>
+              </div>
+            </form>
+
+            <div className="mt-6 overflow-hidden rounded-lg border border-gray-200">
+              <div className="grid grid-cols-[1fr_120px_100px] gap-3 bg-gray-50 px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-gray-500 sm:grid-cols-[1fr_1fr_100px_140px]">
+                <span>Sector</span>
+                <span className="hidden sm:block">Slug</span>
+                <span>Estado</span>
+                <span className="text-right">Acciones</span>
+              </div>
+              <div className="divide-y divide-gray-100">
+                {projectSectors.map((sector) => {
+                  const usedCount = dbProjects.filter((project) => project.category === sector.slug).length;
+
+                  return (
+                    <div key={sector.id} className="grid grid-cols-[1fr_120px_100px] gap-3 px-4 py-4 text-sm sm:grid-cols-[1fr_1fr_100px_140px] sm:items-center">
+                      <div className="min-w-0">
+                        <p className="truncate font-bold text-brand-petrol">{sector.name}</p>
+                        <p className="mt-1 text-xs text-gray-400">{usedCount} proyecto(s)</p>
+                      </div>
+                      <span className="hidden truncate font-mono text-xs text-gray-500 sm:block">{sector.slug}</span>
+                      <span className={`w-fit rounded-full border px-2 py-1 text-[10px] font-bold uppercase tracking-wider ${
+                        sector.is_active
+                          ? 'border-brand-green/20 bg-brand-green/10 text-brand-green'
+                          : 'border-gray-200 bg-gray-100 text-gray-500'
+                      }`}>
+                        {sector.is_active ? 'Activo' : 'Oculto'}
+                      </span>
+                      <div className="flex justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleEditSector(sector)}
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-brand-petrol transition hover:border-brand-yellow hover:bg-brand-light"
+                          title="Editar sector"
+                          aria-label="Editar sector"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteSector(sector)}
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-red-600 transition hover:border-red-300 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40"
+                          disabled={sector.slug === 'todos' || usedCount > 0}
+                          title="Eliminar sector"
+                          aria-label="Eliminar sector"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+          )}
         </div>
       );
     }
@@ -1222,6 +1545,50 @@ export default function AdminPanel() {
         />
       )}
 
+      {toast && (
+        <div className="fixed right-4 top-4 z-[140] w-[calc(100%-2rem)] max-w-sm sm:right-6 sm:top-6">
+          <div
+            className={`flex items-start gap-3 rounded-2xl border bg-white p-4 shadow-2xl shadow-brand-petrol/15 ${
+              toast.type === 'success'
+                ? 'border-brand-green/25'
+                : toast.type === 'error'
+                ? 'border-red-200'
+                : toast.type === 'warning'
+                ? 'border-brand-yellow/30'
+                : 'border-gray-200'
+            }`}
+          >
+            <div
+              className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${
+                toast.type === 'success'
+                  ? 'bg-brand-green/10 text-brand-green'
+                  : toast.type === 'error'
+                  ? 'bg-red-50 text-red-600'
+                  : toast.type === 'warning'
+                  ? 'bg-brand-yellow/12 text-brand-yellow-dark'
+                  : 'bg-brand-light text-brand-petrol'
+              }`}
+            >
+              {toast.type === 'success' ? <Check className="h-5 w-5" /> : <AlertTriangle className="h-5 w-5" />}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-extrabold text-brand-petrol">
+                {toast.type === 'success' ? 'Operacion completada' : toast.type === 'error' ? 'No se pudo completar' : 'Atencion'}
+              </p>
+              <p className="mt-1 text-sm leading-relaxed text-gray-600">{toast.message}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setToast(null)}
+              className="rounded-lg p-1 text-gray-400 transition hover:bg-gray-100 hover:text-brand-petrol"
+              aria-label="Cerrar alerta"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="lg:pl-72">
         <header className="sticky top-0 z-30 border-b border-gray-200 bg-white/90 backdrop-blur">
           <div className="flex min-h-16 items-center justify-between gap-3 px-3 py-3 sm:px-5 lg:px-6 xl:px-8">
@@ -1239,7 +1606,7 @@ export default function AdminPanel() {
                   Panel administrativo
                 </p>
                 <h1 className="truncate text-base font-extrabold text-brand-petrol sm:text-xl lg:text-2xl">
-                  Administración de landing page
+                  Administración
                 </h1>
               </div>
             </div>
@@ -1289,21 +1656,67 @@ export default function AdminPanel() {
       </div>
       {/* Project Form Modal */}
       {projectModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm overflow-y-auto">
-          <div className="relative w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl border border-gray-100 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-black/60 p-2 backdrop-blur-sm sm:p-4">
+          <div className="relative flex max-h-[94dvh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl">
             <button
               type="button"
               onClick={() => setProjectModalOpen(false)}
-              className="absolute right-4 top-4 text-gray-400 hover:text-brand-petrol hover:bg-gray-100 p-2 rounded-lg transition"
+              className="absolute right-4 top-4 z-20 rounded-lg p-2 text-gray-400 transition hover:bg-gray-100 hover:text-brand-petrol"
               aria-label="Cerrar modal"
             >
               <X className="h-5 w-5" />
             </button>
-            <h3 className="font-outfit text-2xl font-extrabold text-brand-petrol mb-6">
-              {editingProject ? 'Editar Proyecto' : 'Agregar Nuevo Proyecto'}
-            </h3>
+            <div className="shrink-0 border-b border-gray-100 px-5 py-4 pr-16 sm:px-6">
+              <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-brand-yellow-dark">Portafolio</p>
+              <h3 className="mt-1 font-outfit text-xl font-extrabold text-brand-petrol sm:text-2xl">
+                {editingProject ? 'Editar Proyecto' : 'Agregar Nuevo Proyecto'}
+              </h3>
+            </div>
             
-            <form onSubmit={handleSaveProject} className="space-y-4">
+            <form onSubmit={handleSaveProject} className="min-h-0 flex-1 overflow-y-auto">
+              <div className="grid gap-0 lg:grid-cols-[minmax(300px,0.9fr)_minmax(420px,1.1fr)]">
+                <div className="bg-brand-petrol-dark p-4 text-white sm:p-5 lg:sticky lg:top-0 lg:h-[calc(94dvh-89px)]">
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-brand-yellow">Vista previa</p>
+                      <p className="mt-1 text-xs text-white/55">Imagen o video completo del proyecto</p>
+                    </div>
+                    {(projectForm.image_url || projectForm.video_url) && (
+                      <span className="rounded-full bg-brand-green/15 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.14em] text-brand-green-light">
+                        Cargado
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex h-[min(52dvh,520px)] min-h-[260px] items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-black/30 lg:h-[calc(100%-58px)] lg:min-h-0">
+                    {projectForm.video_url ? (
+                      <video
+                        src={projectForm.video_optimized_url || projectForm.video_url}
+                        poster={projectForm.video_poster_url || projectForm.image_webp_url || projectForm.image_url}
+                        className="h-full w-full object-contain"
+                        controls
+                        playsInline
+                      />
+                    ) : projectForm.image_url ? (
+                      <img
+                        src={projectForm.image_webp_url || projectForm.image_url}
+                        className="h-full w-full object-contain"
+                        alt="Vista completa del proyecto"
+                      />
+                    ) : (
+                      <div className="px-6 text-center">
+                        <Image className="mx-auto h-12 w-12 text-white/25" />
+                        <p className="mt-3 text-sm font-bold text-white/80">Sin archivo multimedia</p>
+                        <p className="mt-1 text-xs leading-relaxed text-white/45">Sube una imagen o video para verlo aqui completo.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-4 bg-white p-4 shadow-sm sm:p-5">
+                  <div className="border-b border-gray-100 pb-3">
+                    <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-brand-yellow-dark">Datos del proyecto</p>
+                    <p className="mt-1 text-sm text-gray-500">Completa la informacion visible en el portafolio.</p>
+                  </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="space-y-1 block sm:col-span-2">
                   <span className="text-xs font-bold uppercase tracking-wider text-gray-500">Título del Proyecto</span>
@@ -1324,10 +1737,11 @@ export default function AdminPanel() {
                     onChange={e => setProjectForm(prev => ({ ...prev, category: e.target.value }))}
                     className={fieldClasses}
                   >
-                    <option value="mineria">Minería</option>
-                    <option value="construccion">Construcción Civil</option>
-                    <option value="vias">Carreteras</option>
-                    <option value="dron">Drones & Catastro</option>
+                    {activeProjectSectors.map((sector) => (
+                      <option key={sector.id} value={sector.slug}>
+                        {sector.name}
+                      </option>
+                    ))}
                   </select>
                 </label>
 
@@ -1347,7 +1761,7 @@ export default function AdminPanel() {
                   <span className="text-xs font-bold uppercase tracking-wider text-gray-500 block">Descripcion / Detalles Tecnicos</span>
                   <textarea
                     required
-                    rows={3}
+                    rows={4}
                     value={projectForm.description}
                     onChange={e => setProjectForm(prev => ({ ...prev, description: e.target.value }))}
                     className={fieldClasses}
@@ -1362,25 +1776,16 @@ export default function AdminPanel() {
                   </div>
 
                   {(projectForm.image_url || projectForm.video_url) && (
-                    <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="flex flex-wrap gap-2">
                       {projectForm.image_url && (
-                        <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-                          <div className="h-32 w-full">
-                            <img src={projectForm.image_url} className="h-full w-full object-cover" alt="Vista previa" />
-                          </div>
-                          <div className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-brand-green">
-                            <Check className="h-4 w-4" /> Imagen cargada
-                          </div>
-                        </div>
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-semibold text-brand-green">
+                          <Check className="h-4 w-4" /> Imagen cargada
+                        </span>
                       )}
-
                       {projectForm.video_url && (
-                        <div className="rounded-lg border border-gray-200 bg-white px-3 py-3 text-xs font-semibold text-brand-green">
-                          <div className="flex items-center gap-1.5">
-                            <Check className="h-4 w-4" /> Video cargado
-                          </div>
-                          <p className="mt-2 truncate text-gray-500">{projectForm.video_url.split('/').pop()}</p>
-                        </div>
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-semibold text-brand-green">
+                          <Check className="h-4 w-4" /> Video cargado
+                        </span>
                       )}
                     </div>
                   )}
@@ -1390,7 +1795,7 @@ export default function AdminPanel() {
                     onDragLeave={handleMediaDragLeave}
                     onDrop={handleMediaDrop}
                     className={[
-                      'flex min-h-36 flex-col items-center justify-center rounded-lg border-2 border-dashed bg-white p-5 text-center transition',
+                      'flex min-h-28 flex-col items-center justify-center rounded-lg border-2 border-dashed bg-white p-4 text-center transition',
                       isMediaDragging ? 'border-brand-yellow bg-brand-yellow/5' : 'border-gray-300 hover:bg-gray-50',
                       isUploading ? 'cursor-wait opacity-80' : 'cursor-pointer',
                     ].join(' ')}
@@ -1433,7 +1838,7 @@ export default function AdminPanel() {
 
               </div>
 
-              <div className="flex justify-end gap-3 border-t border-gray-100 pt-4">
+              <div className="sticky bottom-0 -mx-4 flex justify-end gap-3 border-t border-gray-100 bg-white/95 px-4 py-4 backdrop-blur sm:-mx-5 sm:px-5">
                 <button
                   type="button"
                   onClick={() => setProjectModalOpen(false)}
@@ -1449,7 +1854,48 @@ export default function AdminPanel() {
                   {isSavingProject ? 'Guardando...' : 'Guardar Proyecto'}
                 </button>
               </div>
+                </div>
+              </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {sectorToDelete && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl">
+            <div className="border-b border-gray-100 bg-brand-light px-6 py-5">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-red-600">
+                  <AlertTriangle className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-red-600">Confirmar eliminacion</p>
+                  <h3 className="font-outfit text-xl font-extrabold text-brand-petrol">Eliminar sector</h3>
+                </div>
+              </div>
+            </div>
+            <div className="px-6 py-5">
+              <p className="text-sm leading-relaxed text-gray-600">
+                Vas a eliminar el sector <strong className="text-brand-petrol">"{sectorToDelete.name}"</strong>. Esta accion no se puede deshacer.
+              </p>
+              <div className="mt-5 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setSectorToDelete(null)}
+                  className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-bold text-brand-petrol transition hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmDeleteSector}
+                  className="rounded-lg bg-red-600 px-4 py-2 text-sm font-bold text-white shadow-lg shadow-red-600/20 transition hover:bg-red-700"
+                >
+                  Eliminar sector
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

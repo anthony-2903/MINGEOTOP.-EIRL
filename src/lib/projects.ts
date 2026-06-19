@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { getProjectSectorLabelMap } from './projectSectors';
 
 export type Project = {
   id: string;
@@ -59,14 +60,14 @@ function normalizeCategory(category: string) {
   return category.toLowerCase().trim();
 }
 
-function mapProject(row: ProjectRow): Project {
+function mapProject(row: ProjectRow, sectorLabels: Record<string, string> = categoryLabels): Project {
   const category = normalizeCategory(row.category);
 
   return {
     id: row.id,
     title: row.title,
     category,
-    catName: categoryLabels[category] ?? row.category,
+    catName: sectorLabels[category] ?? categoryLabels[category] ?? row.category,
     location: row.location ?? 'Perú',
     specs: row.description,
     precision: row.precision_label ?? 'Alta precisión',
@@ -102,7 +103,8 @@ export async function getPublishedProjects() {
     return [];
   }
 
-  return (data ?? []).map((project) => mapProject(project as ProjectRow));
+  const sectorLabels = await getProjectSectorLabelMap();
+  return (data ?? []).map((project) => mapProject(project as ProjectRow, sectorLabels));
 }
 
 export async function getAllProjects() {
@@ -121,7 +123,8 @@ export async function getAllProjects() {
     return [];
   }
 
-  return (data ?? []).map((project) => mapProject(project as ProjectRow));
+  const sectorLabels = await getProjectSectorLabelMap();
+  return (data ?? []).map((project) => mapProject(project as ProjectRow, sectorLabels));
 }
 
 export async function createProject(projectData: Omit<ProjectRow, 'id'>) {
