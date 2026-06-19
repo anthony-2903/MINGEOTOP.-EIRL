@@ -73,16 +73,12 @@ export default function Equipment() {
             >
               Equipos y tecnología
             </motion.h3>
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-100px' }}
-              transition={{ delay: 0.1 }}
+            <h2
               className="font-outfit text-3xl font-extrabold leading-tight text-brand-petrol sm:text-4xl md:text-5xl"
               data-gsap-title
             >
               Instrumental técnico y procesamiento digital
-            </motion.h2>
+            </h2>
           </div>
 
           <motion.p
@@ -98,11 +94,7 @@ export default function Equipment() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-          <motion.div
-            initial={{ opacity: 0, x: -26 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: '-100px' }}
-            transition={{ duration: 0.5 }}
+          <div
             className="overflow-hidden border border-gray-200 bg-brand-light"
             data-gsap-mask
           >
@@ -156,16 +148,12 @@ export default function Equipment() {
                 </div>
               </div>
             </div>
-          </motion.div>
+          </div>
 
           <div className="grid gap-3">
-            {instruments.slice(1).map((item, index) => (
-              <motion.article
+            {instruments.slice(1).map((item) => (
+              <article
                 key={item.code}
-                initial={{ opacity: 0, y: 22 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-100px' }}
-                transition={{ delay: index * 0.08, duration: 0.42 }}
                 className="grid grid-cols-[116px_1fr] overflow-hidden border border-gray-200 bg-white transition-colors duration-300 hover:border-brand-yellow/50 sm:grid-cols-[150px_1fr]"
                 data-gsap-mask
               >
@@ -184,7 +172,7 @@ export default function Equipment() {
                   </h3>
                   <p className="mt-2 text-sm leading-relaxed text-gray-600">{item.use}</p>
                 </div>
-              </motion.article>
+              </article>
             ))}
           </div>
         </div>

@@ -1,9 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   Check,
   ChevronDown,
-  ChevronLeft,
   ChevronRight,
   Compass,
   Grid3X3,
@@ -53,7 +52,7 @@ function ProjectMedia({ project, className }: { project: Project; className: str
 
 function ProjectCarouselSkeleton() {
   return (
-    <div className="flex gap-7 overflow-hidden px-[max(1rem,calc((100vw-1120px)/2))] py-4">
+    <div className="flex gap-7 overflow-hidden px-6 py-4">
       {Array.from({ length: 4 }).map((_, index) => (
         <div
           key={index}
@@ -91,6 +90,53 @@ function buildWhatsappUrl(project: Project) {
   )}`;
 }
 
+function ProjectCardContent({ project }: { project: Project }) {
+  return (
+    <>
+      <ProjectMedia
+        project={project}
+        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.065]"
+      />
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(12,14,17,0.04)_0%,rgba(12,14,17,0.16)_32%,rgba(12,14,17,0.92)_100%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,92,0,0.18)_0%,transparent_34%,rgba(45,91,55,0.3)_100%)]" />
+      <div className="portfolio-technical-grid absolute inset-0 opacity-18 transition-opacity duration-500 group-hover:opacity-45" />
+
+      <div className="absolute left-6 top-6 flex items-center gap-2 rounded-full bg-white/88 px-3 py-2 text-[10px] font-extrabold uppercase tracking-[0.14em] text-brand-petrol shadow-sm backdrop-blur-sm">
+        <span className="text-brand-yellow">{getProjectIcon(project.category)}</span>
+        {project.catName}
+      </div>
+      {project.video && (
+        <div className="absolute right-6 top-6 flex h-11 w-11 items-center justify-center rounded-full bg-brand-yellow text-brand-dark shadow-lg">
+          <Play className="h-5 w-5 fill-current" />
+        </div>
+      )}
+
+      <div className="absolute inset-x-0 bottom-0 p-6 sm:p-7">
+        <div className="mb-4 flex flex-wrap gap-2">
+          {getProjectTags(project).slice(1).map((tag, tagIndex) => (
+            <span
+              key={`${tag}-${tagIndex}`}
+              className="max-w-[10rem] truncate rounded-full bg-white/16 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.14em] text-white backdrop-blur-sm"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+        <h3 className="font-outfit text-3xl font-extrabold italic leading-[0.98] text-white sm:text-4xl">
+          {project.title}
+        </h3>
+        <p className="mt-4 line-clamp-2 text-sm leading-relaxed text-gray-200">
+          {project.specs}
+        </p>
+        <span className="mt-5 inline-flex items-center gap-2 font-outfit text-sm font-extrabold text-brand-yellow underline decoration-brand-yellow/50 underline-offset-4">
+          Ver proyecto
+          <ChevronRight className="h-4 w-4" />
+        </span>
+      </div>
+    </>
+  );
+}
+
 function getMediaOrientation(width: number, height: number): MediaOrientation {
   if (!width || !height) return 'unknown';
   return height > width ? 'vertical' : 'horizontal';
@@ -104,12 +150,6 @@ export default function Portfolio() {
   const [selectedMediaOrientation, setSelectedMediaOrientation] = useState<MediaOrientation>('unknown');
   const [viewMode, setViewMode] = useState<PortfolioViewMode>('carousel');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [visibleCards, setVisibleCards] = useState(3);
-  const carouselRef = useRef<HTMLDivElement | null>(null);
-  const carouselViewportRef = useRef<HTMLDivElement | null>(null);
-  const isCarouselPausedRef = useRef(false);
-  const [carouselStep, setCarouselStep] = useState(0);
 
   useEffect(() => {
     let mounted = true;
@@ -137,8 +177,6 @@ export default function Portfolio() {
       : projects.filter((project) => project.category === filter);
   const hasProjects = filteredProjects.length > 0;
   const activeCategory = categories.find((category) => category.id === filter) ?? categories[0];
-  const maxCarouselIndex = Math.max(filteredProjects.length - visibleCards, 0);
-  const safeCarouselIndex = Math.min(currentIndex, maxCarouselIndex);
 
   const openProject = (project: Project) => {
     setSelectedMediaOrientation('unknown');
@@ -147,18 +185,7 @@ export default function Portfolio() {
 
   const selectCategory = (categoryId: string) => {
     setFilter(categoryId);
-    setCurrentIndex(0);
     setIsFilterOpen(false);
-  };
-
-  const scrollCarousel = (direction: 'previous' | 'next') => {
-    setCurrentIndex((index) => {
-      if (direction === 'next') {
-        return index >= maxCarouselIndex ? 0 : index + 1;
-      }
-
-      return index <= 0 ? maxCarouselIndex : index - 1;
-    });
   };
 
   useEffect(() => {
@@ -179,97 +206,28 @@ export default function Portfolio() {
     };
   }, [selectedProject]);
 
-  useEffect(() => {
-    const updateVisibleCards = () => {
-      let nextVisibleCards = 3;
-
-      if (window.innerWidth <= 600) {
-        nextVisibleCards = 1;
-      } else if (window.innerWidth <= 900) {
-        nextVisibleCards = 2;
-      }
-
-      const gap = 24;
-      const viewportWidth = carouselViewportRef.current?.clientWidth ?? 0;
-      const cardWidth = viewportWidth > 0
-        ? (viewportWidth - gap * (nextVisibleCards - 1)) / nextVisibleCards
-        : 0;
-
-      setVisibleCards(nextVisibleCards);
-      setCarouselStep(cardWidth + gap);
-    };
-
-    updateVisibleCards();
-    window.addEventListener('resize', updateVisibleCards);
-
-    return () => window.removeEventListener('resize', updateVisibleCards);
-  }, []);
-
-  useEffect(() => {
-    if (viewMode !== 'carousel') return;
-
-    const measure = window.setTimeout(() => {
-      let nextVisibleCards = 3;
-
-      if (window.innerWidth <= 600) {
-        nextVisibleCards = 1;
-      } else if (window.innerWidth <= 900) {
-        nextVisibleCards = 2;
-      }
-
-      const gap = 24;
-      const viewportWidth = carouselViewportRef.current?.clientWidth ?? 0;
-      const cardWidth = viewportWidth > 0
-        ? (viewportWidth - gap * (nextVisibleCards - 1)) / nextVisibleCards
-        : 0;
-
-      setVisibleCards(nextVisibleCards);
-      setCarouselStep(cardWidth + gap);
-    }, 0);
-
-    return () => window.clearTimeout(measure);
-  }, [viewMode]);
-
-  useEffect(() => {
-    if (viewMode !== 'carousel' || !hasProjects || selectedProject) return;
-
-    const interval = window.setInterval(() => {
-      if (!isCarouselPausedRef.current) {
-        setCurrentIndex((index) => (index >= maxCarouselIndex ? 0 : index + 1));
-      }
-    }, 3600);
-
-    return () => window.clearInterval(interval);
-  }, [viewMode, hasProjects, maxCarouselIndex, selectedProject]);
-
   const isSelectedMediaVertical = selectedMediaOrientation === 'vertical';
 
   return (
     <>
-      <section id="proyectos" className="relative overflow-hidden bg-white py-24 text-brand-petrol lg:py-28">
-        <div className="absolute inset-0 bg-topo-grid opacity-25" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_12%,rgba(255,92,0,0.08),transparent_28%),radial-gradient(circle_at_86%_18%,rgba(45,91,55,0.08),transparent_30%)]" />
+      <section id="proyectos" className="relative overflow-hidden bg-brand-petrol-dark py-24 text-white lg:py-28">
+        <div className="absolute inset-0 bg-topo-grid opacity-10" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_12%,rgba(255,92,0,0.18),transparent_30%),radial-gradient(circle_at_82%_16%,rgba(63,122,74,0.22),transparent_32%),linear-gradient(180deg,rgba(21,23,28,0.88)_0%,rgba(12,14,17,1)_68%,rgba(21,23,28,0.96)_100%)]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand-yellow/45 to-transparent" />
 
         <div className="relative z-10 mx-auto mb-10 max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <motion.p
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-100px' }}
+          <p
             className="reveal-item mb-3 text-xs font-extrabold uppercase tracking-[0.32em] text-brand-yellow sm:text-sm"
             data-gsap-title
           >
             Nuestro portafolio
-          </motion.p>
-          <motion.h2
-            initial={{ opacity: 0, y: 22 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-100px' }}
-            transition={{ delay: 0.08 }}
-            className="mx-auto max-w-4xl font-outfit text-4xl font-light leading-[1.04] text-brand-petrol sm:text-5xl lg:text-6xl"
+          </p>
+          <h2
+            className="mx-auto max-w-4xl font-outfit text-4xl font-light leading-[1.04] text-white sm:text-5xl lg:text-6xl"
             data-gsap-title
           >
             Proyectos con <span className="font-extrabold">precision tecnica</span>
-          </motion.h2>
+          </h2>
         </div>
 
         <div className="relative z-10 mb-12 flex flex-col items-center justify-center gap-3 px-4 sm:flex-row">
@@ -333,25 +291,6 @@ export default function Portfolio() {
         </div>
 
         <div className="relative z-10">
-          <button
-            type="button"
-            onClick={() => scrollCarousel('previous')}
-            disabled={isLoadingProjects || !hasProjects}
-            className={`absolute left-4 top-1/2 z-20 h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-brand-petrol/10 bg-white/95 text-brand-petrol shadow-xl transition-all duration-300 hover:bg-brand-yellow hover:text-brand-dark disabled:opacity-30 ${viewMode === 'carousel' ? 'hidden lg:flex' : 'hidden'}`}
-            aria-label="Ver proyectos anteriores"
-          >
-            <ChevronLeft className="h-6 w-6" />
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollCarousel('next')}
-            disabled={isLoadingProjects || !hasProjects}
-            className={`absolute right-4 top-1/2 z-20 h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-brand-petrol/10 bg-white/95 text-brand-petrol shadow-xl transition-all duration-300 hover:bg-brand-yellow hover:text-brand-dark disabled:opacity-30 ${viewMode === 'carousel' ? 'hidden lg:flex' : 'hidden'}`}
-            aria-label="Ver siguientes proyectos"
-          >
-            <ChevronRight className="h-6 w-6" />
-          </button>
-
           {isLoadingProjects ? (
             <ProjectCarouselSkeleton />
           ) : !hasProjects ? (
@@ -366,94 +305,49 @@ export default function Portfolio() {
               </div>
             </div>
           ) : viewMode === 'carousel' ? (
-            <div
-              className="mx-auto max-w-6xl px-10 sm:px-12 lg:px-14"
-              onMouseEnter={() => {
-                isCarouselPausedRef.current = true;
-              }}
-              onMouseLeave={() => {
-                isCarouselPausedRef.current = false;
-              }}
-              onPointerDown={() => {
-                isCarouselPausedRef.current = true;
-              }}
-              onPointerUp={() => {
-                isCarouselPausedRef.current = false;
-              }}
-            >
-              <div ref={carouselViewportRef} className="overflow-hidden pb-10 pt-4">
+            <div className="w-full max-w-none px-0">
+              <div className="overflow-hidden pb-10 pt-4">
                 <motion.div
                   key={filter}
-                  ref={carouselRef}
                   layout
-                  className="flex gap-6 transition-transform duration-500 ease-out"
-                  style={{ transform: `translateX(-${safeCarouselIndex * carouselStep}px)` }}
+                  className="portfolio-marquee-track flex w-max animate-portfolio-marquee will-change-transform"
                 >
-                  {filteredProjects.map((project, index) => (
-                    <motion.article
-                      key={`${project.id}-${index}`}
-                      layout
-                      initial={{ opacity: 0, y: 30, clipPath: 'inset(10% 0 0 0)' }}
-                      animate={{ opacity: 1, y: 0, clipPath: 'inset(0% 0 0 0)' }}
-                      exit={{ opacity: 0, scale: 0.96 }}
-                      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1], delay: index * 0.035 }}
-                      className="group relative h-[520px] cursor-pointer overflow-hidden rounded-[2rem] bg-brand-petrol text-left text-white shadow-[0_24px_70px_-38px_rgba(21,23,28,0.85)] outline-none transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_34px_90px_-36px_rgba(21,23,28,0.95)] focus-visible:ring-4 focus-visible:ring-brand-yellow/40"
-                      style={{
-                        flex: `0 0 calc((100% - ${(visibleCards - 1) * 24}px) / ${visibleCards})`,
-                      }}
-                      data-gsap-mask
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => openProject(project)}
-                      onKeyDown={(event) => {
-                        if (event.key === 'Enter' || event.key === ' ') {
-                          event.preventDefault();
-                          openProject(project);
-                        }
-                      }}
-                  >
-                    <ProjectMedia
-                      project={project}
-                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.065]"
-                    />
-                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(12,14,17,0.04)_0%,rgba(12,14,17,0.16)_32%,rgba(12,14,17,0.92)_100%)]" />
-                    <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,92,0,0.18)_0%,transparent_34%,rgba(45,91,55,0.3)_100%)]" />
-                    <div className="portfolio-technical-grid absolute inset-0 opacity-18 transition-opacity duration-500 group-hover:opacity-45" />
-
-                    <div className="absolute left-6 top-6 flex items-center gap-2 rounded-full bg-white/88 px-3 py-2 text-[10px] font-extrabold uppercase tracking-[0.14em] text-brand-petrol shadow-sm backdrop-blur-sm">
-                      <span className="text-brand-yellow">{getProjectIcon(project.category)}</span>
-                      {project.catName}
-                    </div>
-                    {project.video && (
-                      <div className="absolute right-6 top-6 flex h-11 w-11 items-center justify-center rounded-full bg-brand-yellow text-brand-dark shadow-lg">
-                        <Play className="h-5 w-5 fill-current" />
+                  <div className="flex min-w-screen shrink-0 gap-6 pl-6 pr-0">
+                    {filteredProjects.map((project, index) => (
+                      <motion.article
+                        key={`${project.id}-${index}`}
+                        layout
+                        initial={{ opacity: 0, y: 30, clipPath: 'inset(10% 0 0 0)' }}
+                        animate={{ opacity: 1, y: 0, clipPath: 'inset(0% 0 0 0)' }}
+                        exit={{ opacity: 0, scale: 0.96 }}
+                        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1], delay: index * 0.035 }}
+                        className="group relative h-[520px] w-[78vw] max-w-[420px] shrink-0 cursor-pointer overflow-hidden rounded-[2rem] border border-white/14 bg-brand-petrol text-left text-white shadow-[0_24px_80px_-34px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,92,0,0.12)_inset] outline-none transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-2 hover:border-brand-yellow/55 hover:shadow-[0_34px_100px_-34px_rgba(0,0,0,1),0_0_0_1px_rgba(255,92,0,0.26)_inset] focus-visible:ring-4 focus-visible:ring-brand-yellow/40 sm:w-[380px]"
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => openProject(project)}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            openProject(project);
+                          }
+                        }}
+                      >
+                        <ProjectCardContent project={project} />
+                      </motion.article>
+                    ))}
+                  </div>
+                  <div className="flex min-w-screen shrink-0 gap-6 pl-6 pr-0" aria-hidden="true">
+                    {filteredProjects.map((project, index) => (
+                      <div
+                        key={`${project.id}-${index}-duplicate`}
+                        className="group relative h-[520px] w-[78vw] max-w-[420px] shrink-0 cursor-pointer overflow-hidden rounded-[2rem] border border-white/14 bg-brand-petrol text-left text-white shadow-[0_24px_80px_-34px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,92,0,0.12)_inset] outline-none transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-2 hover:border-brand-yellow/55 hover:shadow-[0_34px_100px_-34px_rgba(0,0,0,1),0_0_0_1px_rgba(255,92,0,0.26)_inset] sm:w-[380px]"
+                        tabIndex={-1}
+                        onClick={() => openProject(project)}
+                      >
+                        <ProjectCardContent project={project} />
                       </div>
-                    )}
-
-                    <div className="absolute inset-x-0 bottom-0 p-6 sm:p-7">
-                      <div className="mb-4 flex flex-wrap gap-2">
-                        {getProjectTags(project).slice(1).map((tag, tagIndex) => (
-                          <span
-                            key={`${tag}-${tagIndex}`}
-                            className="max-w-[10rem] truncate rounded-full bg-white/16 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.14em] text-white backdrop-blur-sm"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                      <h3 className="font-outfit text-3xl font-extrabold italic leading-[0.98] text-white sm:text-4xl">
-                        {project.title}
-                      </h3>
-                      <p className="mt-4 line-clamp-2 text-sm leading-relaxed text-gray-200">
-                        {project.specs}
-                      </p>
-                      <span className="mt-5 inline-flex items-center gap-2 font-outfit text-sm font-extrabold text-brand-yellow underline decoration-brand-yellow/50 underline-offset-4">
-                        Ver proyecto
-                        <ChevronRight className="h-4 w-4" />
-                      </span>
-                    </div>
-                    </motion.article>
-                  ))}
+                    ))}
+                  </div>
                 </motion.div>
               </div>
             </div>
@@ -472,8 +366,7 @@ export default function Portfolio() {
                     animate={{ opacity: 1, y: 0, clipPath: 'inset(0% 0 0 0)' }}
                     exit={{ opacity: 0, scale: 0.96 }}
                     transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1], delay: index * 0.035 }}
-                    className="group relative h-[520px] cursor-pointer overflow-hidden rounded-[2rem] bg-brand-petrol text-left text-white shadow-[0_24px_70px_-38px_rgba(21,23,28,0.85)] outline-none transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_34px_90px_-36px_rgba(21,23,28,0.95)] focus-visible:ring-4 focus-visible:ring-brand-yellow/40"
-                    data-gsap-mask
+                    className="group relative h-[520px] cursor-pointer overflow-hidden rounded-[2rem] border border-white/14 bg-brand-petrol text-left text-white shadow-[0_24px_80px_-34px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,92,0,0.12)_inset] outline-none transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-2 hover:border-brand-yellow/55 hover:shadow-[0_34px_100px_-34px_rgba(0,0,0,1),0_0_0_1px_rgba(255,92,0,0.26)_inset] focus-visible:ring-4 focus-visible:ring-brand-yellow/40"
                     role="button"
                     tabIndex={0}
                     onClick={() => openProject(project)}
@@ -484,46 +377,7 @@ export default function Portfolio() {
                       }
                     }}
                   >
-                    <ProjectMedia
-                      project={project}
-                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.065]"
-                    />
-                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(12,14,17,0.04)_0%,rgba(12,14,17,0.16)_32%,rgba(12,14,17,0.92)_100%)]" />
-                    <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,92,0,0.18)_0%,transparent_34%,rgba(45,91,55,0.3)_100%)]" />
-                    <div className="portfolio-technical-grid absolute inset-0 opacity-18 transition-opacity duration-500 group-hover:opacity-45" />
-
-                    <div className="absolute left-6 top-6 flex items-center gap-2 rounded-full bg-white/88 px-3 py-2 text-[10px] font-extrabold uppercase tracking-[0.14em] text-brand-petrol shadow-sm backdrop-blur-sm">
-                      <span className="text-brand-yellow">{getProjectIcon(project.category)}</span>
-                      {project.catName}
-                    </div>
-                    {project.video && (
-                      <div className="absolute right-6 top-6 flex h-11 w-11 items-center justify-center rounded-full bg-brand-yellow text-brand-dark shadow-lg">
-                        <Play className="h-5 w-5 fill-current" />
-                      </div>
-                    )}
-
-                    <div className="absolute inset-x-0 bottom-0 p-6 sm:p-7">
-                      <div className="mb-4 flex flex-wrap gap-2">
-                        {getProjectTags(project).slice(1).map((tag, tagIndex) => (
-                          <span
-                            key={`${tag}-${tagIndex}`}
-                            className="max-w-[10rem] truncate rounded-full bg-white/16 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.14em] text-white backdrop-blur-sm"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                      <h3 className="font-outfit text-3xl font-extrabold italic leading-[0.98] text-white sm:text-4xl">
-                        {project.title}
-                      </h3>
-                      <p className="mt-4 line-clamp-2 text-sm leading-relaxed text-gray-200">
-                        {project.specs}
-                      </p>
-                      <span className="mt-5 inline-flex items-center gap-2 font-outfit text-sm font-extrabold text-brand-yellow underline decoration-brand-yellow/50 underline-offset-4">
-                        Ver proyecto
-                        <ChevronRight className="h-4 w-4" />
-                      </span>
-                    </div>
+                    <ProjectCardContent project={project} />
                   </motion.article>
                 ))}
               </AnimatePresence>

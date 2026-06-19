@@ -82,16 +82,12 @@ export default function Services() {
           >
             Nuestros servicios
           </motion.h3>
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-100px' }}
-            transition={{ delay: 0.1 }}
+          <h2
             className="font-outfit text-3xl font-extrabold text-brand-petrol sm:text-4xl md:text-5xl"
             data-gsap-title
           >
             Servicios topográficos con entregables listos para obra
-          </motion.h2>
+          </h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -106,16 +102,11 @@ export default function Services() {
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {servicesList.map((service, index) => (
-            <motion.div
+            <div
               key={service.title}
-              initial={{ opacity: 0, y: 28 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-100px' }}
-              transition={{ type: 'spring', stiffness: 105, damping: 20, delay: index * 0.04 }}
-              whileHover={{ y: -4, transition: { duration: 0.2 } }}
-              className="group relative flex flex-col justify-between overflow-hidden rounded-lg border border-gray-200 bg-white p-6 shadow-premium transition-all duration-300 hover:border-brand-yellow/40 hover:shadow-premium-hover sm:p-7"
               data-gsap-mask
             >
+              <div className="h-full group relative flex flex-col justify-between overflow-hidden rounded-lg border border-gray-200 bg-white p-6 shadow-premium transition-all duration-300 hover:border-brand-yellow/40 hover:shadow-premium-hover sm:p-7 transform hover:-translate-y-1">
               <div className="absolute inset-x-0 top-0 h-1 bg-brand-petrol transition-colors duration-300 group-hover:bg-brand-yellow" />
               <div className="space-y-4">
                 <div className="relative z-10 flex h-12 w-12 items-center justify-center rounded-lg bg-brand-petrol/5 text-brand-petrol shadow-sm transition-all duration-300 group-hover:bg-brand-yellow group-hover:text-brand-dark">
@@ -139,7 +130,8 @@ export default function Services() {
                   <ChevronRight className="h-4 w-4" />
                 </a>
               </div>
-            </motion.div>
+              </div>
+            </div>
           ))}
         </div>
       </div>

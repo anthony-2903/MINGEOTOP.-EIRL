@@ -430,9 +430,9 @@
 
 @supports (animation-timeline: view()) {
   .cinematic-scroll > section:not(:first-child):not(#contacto) {
-    animation: none;
-    animation-timeline: auto;
-    animation-range: normal;
+    animation: cinematic-section-reveal both;
+    animation-timeline: view();
+    animation-range: entry 5% cover 30%;
     transform-origin: center top;
     will-change: opacity, transform, filter, clip-path;
   }
@@ -446,12 +446,26 @@
   }
 
   .cinematic-scroll > section:first-child {
-    animation: none;
-    animation-timeline: auto;
-    animation-range: normal;
+    animation: cinematic-fade-out both;
+    animation-timeline: view();
+    animation-range: exit 0% exit 80%;
     transform-origin: center center;
     will-change: opacity, transform, filter;
   }
+}
+
+@keyframes portfolio-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-portfolio-marquee {
+  animation: portfolio-marquee 36s linear infinite;
+  will-change: transform;
 }
 
 @media (prefers-reduced-motion: reduce) {

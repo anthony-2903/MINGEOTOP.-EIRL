@@ -81,16 +81,12 @@ export default function Sectors() {
           >
             SECTORES DE TRABAJO
           </motion.h3>
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-100px' }}
-            transition={{ delay: 0.1 }}
+          <h2
             className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white font-outfit"
             data-gsap-title
           >
             Presencia Técnica en las Industrias Clave
-          </motion.h2>
+          </h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -105,13 +101,9 @@ export default function Sectors() {
         {/* Sectors Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {sectorsList.map((sector, index) => (
-            <motion.div
+            <div
               key={index}
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true, margin: '-100px' }}
-              transition={{ delay: index * 0.05 }}
-              className="bg-brand-dark/40 border border-brand-green/20 hover:border-brand-yellow/40 rounded-2xl p-6 transition-all duration-300 group relative overflow-hidden backdrop-blur-sm"
+              className="bg-brand-dark/40 border border-brand-green/20 hover:border-brand-yellow/40 rounded-2xl p-6 transition-[border-color,background-color] duration-300 group relative overflow-hidden backdrop-blur-sm"
               data-gsap-mask
             >
               {/* Soft decorative background gradient on hover */}
@@ -135,7 +127,7 @@ export default function Sectors() {
               {/* Decorative crosshairs (topography theme) */}
               <div className="absolute -bottom-3 -right-3 w-10 h-10 border-r border-b border-brand-green/20 group-hover:border-brand-yellow/30 group-hover:scale-110 transition-all duration-300 rounded-br-lg" />
               <div className="absolute -top-3 -left-3 w-10 h-10 border-l border-t border-brand-green/20 group-hover:border-brand-yellow/30 group-hover:scale-110 transition-all duration-300 rounded-tl-lg" />
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>

@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { HelpCircle } from 'lucide-react';
 
 const faqs = [
@@ -27,25 +26,18 @@ export default function SeoFaq() {
 
       <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         <div className="mb-10 text-center">
-          <motion.h2
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-100px' }}
+          <h2
             className="font-outfit text-3xl font-extrabold text-brand-petrol sm:text-4xl"
             data-gsap-title
           >
             Preguntas frecuentes sobre servicios topográficos
-          </motion.h2>
+          </h2>
         </div>
 
         <div className="grid gap-4">
-          {faqs.map((faq, index) => (
-            <motion.article
+          {faqs.map((faq) => (
+            <article
               key={faq.question}
-              initial={{ opacity: 0, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-100px' }}
-              transition={{ delay: index * 0.06 }}
               className="rounded-lg border border-gray-200 bg-brand-light p-5 shadow-sm sm:p-6"
               data-gsap-mask
             >
@@ -60,7 +52,7 @@ export default function SeoFaq() {
                   </p>
                 </div>
               </div>
-            </motion.article>
+            </article>
           ))}
         </div>
       </div>

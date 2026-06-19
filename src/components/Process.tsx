@@ -50,16 +50,12 @@ export default function Process() {
             >
               Nuestro proceso
             </motion.h3>
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-100px' }}
-              transition={{ delay: 0.1 }}
+            <h2
               className="font-outfit text-3xl font-extrabold leading-tight sm:text-4xl md:text-5xl"
               data-gsap-title
             >
               Metodología técnica de campo a gabinete
-            </motion.h2>
+            </h2>
           </div>
 
           <motion.p
@@ -76,11 +72,7 @@ export default function Process() {
         </div>
 
         <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-stretch">
-          <motion.div
-            initial={{ opacity: 0, x: -28 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: '-100px' }}
-            transition={{ duration: 0.55 }}
+          <div
             className="relative min-h-[460px] overflow-hidden rounded-lg border border-white/10 bg-brand-dark"
             data-gsap-mask
           >
@@ -158,16 +150,12 @@ export default function Process() {
                 </div>
               ))}
             </div>
-          </motion.div>
+          </div>
 
           <div className="grid gap-3">
-            {steps.map((step, index) => (
-              <motion.article
+            {steps.map((step) => (
+              <article
                 key={step.num}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-80px' }}
-                transition={{ delay: index * 0.08, duration: 0.45 }}
                 className="group grid gap-4 border border-white/10 bg-white/[0.04] p-4 transition-colors duration-300 hover:border-brand-yellow/40 hover:bg-white/[0.07] sm:grid-cols-[88px_1fr] sm:p-5"
                 data-gsap-mask
               >
@@ -189,7 +177,7 @@ export default function Process() {
                   </div>
                   <p className="text-sm leading-relaxed text-gray-300">{step.desc}</p>
                 </div>
-              </motion.article>
+              </article>
             ))}
           </div>
         </div>

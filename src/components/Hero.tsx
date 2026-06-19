@@ -35,7 +35,6 @@ export default function Hero() {
             className={`absolute inset-0 bg-cover bg-center hero-bg-motion transition-opacity duration-[1400ms] ease-in-out ${
               index === activeImage ? 'opacity-100' : 'opacity-0'
             }`}
-            data-gsap-parallax="10"
             style={{ backgroundImage: `url(${image})` }}
             aria-hidden="true"
           />

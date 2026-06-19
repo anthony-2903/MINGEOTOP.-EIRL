@@ -163,16 +163,12 @@ export default function Contact() {
           >
             Contáctanos
           </motion.h3>
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-100px' }}
-            transition={{ delay: 0.1 }}
+          <h2
             className="font-outfit text-3xl font-extrabold text-white sm:text-4xl md:text-5xl"
             data-gsap-title
           >
             Solicita tu cotización técnica sin compromiso
-          </motion.h2>
+          </h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}

@@ -69,16 +69,12 @@ export default function AboutUs() {
           >
             SOBRE NOSOTROS
           </motion.h3>
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ delay: 0.1 }}
+          <h2
             className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-brand-petrol font-outfit"
             data-gsap-title
           >
             Comprometidos con la Precisión, Tecnología y Experiencia en Campo
-          </motion.h2>
+          </h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -95,27 +91,23 @@ export default function AboutUs() {
         {/* Brand pillars */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
           {pillars.map((item, index) => (
-            <motion.div
+            <div
               key={index}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ delay: index * 0.1, type: "spring", stiffness: 100 }}
-              whileHover={{ y: -8, scale: 1.02, transition: { duration: 0.2 } }}
-              className="bg-brand-light border border-gray-200/60 p-8 rounded-2xl hover:border-brand-yellow/30 hover:bg-white hover:shadow-premium hover-glow-yellow transition-all duration-300 group flex flex-col items-center text-center md:items-start md:text-left relative overflow-hidden"
               data-gsap-mask
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-brand-yellow/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-              <div className="bg-brand-petrol p-4 rounded-xl text-white mb-6 group-hover:scale-110 transition-transform duration-300">
-                {item.icon}
+              <div className="h-full bg-brand-light border border-gray-200/60 p-8 rounded-2xl hover:border-brand-yellow/30 hover:bg-white hover:shadow-premium hover-glow-yellow transition-all duration-300 group flex flex-col items-center text-center md:items-start md:text-left relative overflow-hidden transform hover:-translate-y-2 hover:scale-[1.02]">
+                <div className="absolute inset-0 bg-gradient-to-br from-brand-yellow/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                <div className="bg-brand-petrol p-4 rounded-xl text-white mb-6 group-hover:scale-110 transition-transform duration-300">
+                  {item.icon}
+                </div>
+                <h3 className="text-xl font-bold text-brand-petrol font-outfit mb-3">
+                  {item.title}
+                </h3>
+                <p className="text-gray-500 text-sm leading-relaxed">
+                  {item.desc}
+                </p>
               </div>
-              <h3 className="text-xl font-bold text-brand-petrol font-outfit mb-3">
-                {item.title}
-              </h3>
-              <p className="text-gray-500 text-sm leading-relaxed">
-                {item.desc}
-              </p>
-            </motion.div>
+            </div>
           ))}
         </div>
 

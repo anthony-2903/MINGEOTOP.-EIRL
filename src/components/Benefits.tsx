@@ -59,16 +59,12 @@ export default function Benefits() {
           >
             NUESTRAS VENTAJAS
           </motion.h3>
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-100px' }}
-            transition={{ delay: 0.1 }}
+          <h2
             className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white font-outfit"
             data-gsap-title
           >
             ¿Por Qué Elegir a MINGEOTOP E.I.R.L.?
-          </motion.h2>
+          </h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -83,13 +79,9 @@ export default function Benefits() {
         {/* Benefits Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {benefitsList.map((benefit, index) => (
-            <motion.div
+            <div
               key={index}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-100px' }}
-              transition={{ delay: index * 0.1 }}
-              className="bg-brand-dark/40 border border-brand-green/20 hover:border-brand-yellow/40 p-8 rounded-3xl transition-all duration-300 group flex flex-col sm:flex-row gap-6 items-start backdrop-blur-sm"
+              className="bg-brand-dark/40 border border-brand-green/20 hover:border-brand-yellow/40 p-8 rounded-3xl transition-[border-color] duration-300 group flex flex-col sm:flex-row gap-6 items-start backdrop-blur-sm"
               data-gsap-mask
             >
               {/* Icon Holder */}
@@ -110,7 +102,7 @@ export default function Benefits() {
                   {benefit.desc}
                 </p>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
