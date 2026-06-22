@@ -3,6 +3,15 @@
 
 create extension if not exists pgcrypto;
 
+alter table if exists public.projects
+add column if not exists show_on_login boolean not null default false;
+
+create index if not exists projects_show_on_login_idx
+on public.projects (show_on_login, sort_order)
+where status = 'published';
+
+notify pgrst, 'reload schema';
+
 create table if not exists public.project_sectors (
   id uuid primary key default gen_random_uuid(),
   slug text not null unique,

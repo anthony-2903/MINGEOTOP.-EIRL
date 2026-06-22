@@ -23,19 +23,21 @@ import {
   Search,
   Settings,
   ShieldCheck,
+  Star,
   Trash2,
   Upload,
   User,
   X,
 } from 'lucide-react';
 import Logo from './Logo';
-import LoginModel from './LoginModel';
+import LoginFeaturedProject from './LoginFeaturedProject';
 import { isSupabaseConfigured, supabase } from '../lib/supabase';
 import {
   getAllProjects,
   createProject,
   updateProject,
   deleteProject,
+  setLoginFeaturedProject,
   type Project,
 } from '../lib/projects';
 import {
@@ -115,8 +117,6 @@ const contactChannels = [
 const fieldClasses =
   'w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-brand-dark outline-none transition focus:border-brand-yellow focus:ring-4 focus:ring-brand-yellow/10';
 
-const ADMIN_EMAIL = 'admin@mingeotop.com';
-
 function isManagedSection(section: AdminSectionId) {
   return section === 'servicios' || section === 'proyectos' || section === 'contacto';
 }
@@ -166,7 +166,7 @@ export default function AdminPanel() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isCheckingSession, setIsCheckingSession] = useState(true);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [loginData, setLoginData] = useState({ email: ADMIN_EMAIL, password: '' });
+  const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [loginError, setLoginError] = useState('');
   const [activeSection, setActiveSection] = useState<AdminSectionId>('proyectos');
   const [projectAdminTab, setProjectAdminTab] = useState<'projects' | 'sectors'>('projects');
@@ -201,6 +201,7 @@ export default function AdminPanel() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
   const [isDeletingProject, setIsDeletingProject] = useState(false);
+  const [isSavingLoginProjectId, setIsSavingLoginProjectId] = useState<string | null>(null);
   const [isMediaDragging, setIsMediaDragging] = useState(false);
   const [sectorToDelete, setSectorToDelete] = useState<ProjectSector | null>(null);
   const [toast, setToast] = useState<{ type: AdminToastType; message: string } | null>(null);
@@ -560,6 +561,36 @@ export default function AdminPanel() {
     }
   };
 
+  const handleSetLoginProject = async (project: Project) => {
+    if (project.status !== 'published') {
+      showToast('warning', 'Solo puedes destacar en el login un proyecto publicado.');
+      return;
+    }
+
+    setIsSavingLoginProjectId(project.id);
+    try {
+      await setLoginFeaturedProject(project.id);
+      setDbProjects((current) =>
+        current.map((item) => ({
+          ...item,
+          show_on_login: item.id === project.id,
+        })),
+      );
+      showToast('success', 'Proyecto destacado actualizado para el login.');
+    } catch (err: any) {
+      console.error('Error setting login project:', err);
+      const isMissingColumn = err?.code === 'PGRST204' || String(err?.message ?? '').includes('show_on_login');
+      showToast(
+        'error',
+        isMissingColumn
+          ? 'Falta ejecutar el SQL de Supabase para crear show_on_login y recargar el esquema.'
+          : 'No se pudo actualizar el proyecto del login.',
+      );
+    } finally {
+      setIsSavingLoginProjectId(null);
+    }
+  };
+
   useEffect(() => {
     if (isAuthenticated) {
       loadProjects();
@@ -588,6 +619,7 @@ export default function AdminPanel() {
     );
   });
   const activeProjectSectors = projectSectors.filter((sector) => sector.is_active && sector.slug !== 'todos');
+  const selectedLoginProject = dbProjects.find((project) => project.show_on_login);
 
   useEffect(() => {
     if (!supabase) {
@@ -694,7 +726,7 @@ export default function AdminPanel() {
     }
 
     setIsAuthenticated(false);
-    setLoginData({ email: ADMIN_EMAIL, password: '' });
+    setLoginData({ email: '', password: '' });
     setActiveSection('proyectos');
   };
 
@@ -771,7 +803,27 @@ export default function AdminPanel() {
                 <p className="mt-2 text-sm text-gray-400">Usa el botón de arriba para registrar tu primer proyecto.</p>
               </div>
             ) : (
-              <div className="mt-6 divide-y divide-gray-100">
+              <div className="mt-6">
+                <div className="mb-5 rounded-lg border border-brand-yellow/25 bg-brand-yellow/10 p-4">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="min-w-0">
+                      <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-brand-yellow-dark">
+                        Proyecto visible en login
+                      </p>
+                      <h3 className="mt-1 truncate font-outfit text-lg font-extrabold text-brand-petrol">
+                        {selectedLoginProject?.title ?? 'Aun no seleccionaste un proyecto'}
+                      </h3>
+                      <p className="mt-1 text-sm leading-relaxed text-gray-600">
+                        Usa el boton con estrella de la lista para escoger que proyecto reemplaza al componente 3D.
+                      </p>
+                    </div>
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-white text-brand-yellow-dark shadow-sm">
+                      <Star className={`h-5 w-5 ${selectedLoginProject ? 'fill-current' : ''}`} />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="divide-y divide-gray-100">
                 {dbProjects.map((project) => (
                   <div key={project.id} className="flex flex-col gap-4 py-5 sm:flex-row sm:items-center sm:justify-between first:pt-0 last:pb-0">
                     <div className="flex items-start gap-4">
@@ -817,7 +869,21 @@ export default function AdminPanel() {
                         </p>
                       </div>
                     </div>
-                    <div className="flex gap-2 self-end sm:self-center">
+                    <div className="flex flex-wrap gap-2 self-end sm:self-center">
+                      <button
+                        type="button"
+                        onClick={() => handleSetLoginProject(project)}
+                        disabled={isSavingLoginProjectId === project.id || project.status !== 'published'}
+                        className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-bold transition duration-200 ${
+                          project.show_on_login
+                            ? 'border-brand-yellow bg-brand-yellow text-brand-dark shadow-sm'
+                            : 'border-gray-200 bg-white text-brand-petrol hover:border-brand-yellow hover:bg-brand-light'
+                        } disabled:cursor-not-allowed disabled:opacity-55`}
+                        title={project.status === 'published' ? 'Mostrar este proyecto en el login' : 'Publica el proyecto para destacarlo en el login'}
+                      >
+                        <Star className={`h-3.5 w-3.5 ${project.show_on_login ? 'fill-current' : ''}`} />
+                        {isSavingLoginProjectId === project.id ? 'Guardando' : project.show_on_login ? 'En login' : 'Login'}
+                      </button>
                       <button
                         type="button"
                         onClick={() => openEditProjectModal(project)}
@@ -839,6 +905,7 @@ export default function AdminPanel() {
                     </div>
                   </div>
                 ))}
+                </div>
               </div>
               )
             ) : null}
@@ -1358,51 +1425,37 @@ export default function AdminPanel() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-brand-petrol text-white">
-        <div className="grid min-h-screen lg:grid-cols-12">
-          <section className="relative hidden overflow-hidden bg-topo-grid bg-topo-contour px-8 py-8 lg:col-span-7 lg:flex lg:flex-col lg:justify-between xl:px-10 xl:py-12">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,183,77,0.18)_0%,rgba(45,91,55,0.12)_38%,transparent_70%)]" />
-            <div className="relative z-10">
-              <Logo textColor="light" />
-            </div>
-
-            <div className="relative z-10 flex flex-1 items-center justify-center">
-              <div className="relative h-[560px] w-full max-w-5xl xl:h-[680px]">
-                <div className="absolute inset-8 rounded-full bg-brand-yellow/10 blur-3xl xl:inset-14" />
-                <LoginModel className="relative h-full w-full" />
-              </div>
-            </div>
-
-            <div className="relative z-10 flex items-center gap-3 text-sm text-gray-400">
-              <ShieldCheck className="h-5 w-5 text-brand-green-light" />
-              <span>Base visual preparada para autenticacion real con backend.</span>
+      <div className="min-h-dvh bg-brand-petrol text-white">
+        <div className="grid min-h-dvh lg:grid-cols-12">
+          <section className="relative hidden h-dvh min-h-dvh overflow-hidden bg-brand-petrol-dark px-8 py-8 lg:col-span-7 lg:flex lg:flex-col xl:px-10 xl:py-12">
+            <LoginFeaturedProject className="absolute inset-0 h-full w-full" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,183,77,0.12)_0%,rgba(45,91,55,0.08)_38%,transparent_70%)]" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-48 bg-gradient-to-r from-transparent to-brand-petrol" />
+            <div className="absolute left-8 top-8 z-10 opacity-88 xl:left-10 xl:top-10">
+              <Logo textColor="light" className="scale-90 origin-top-left" />
             </div>
           </section>
 
-          <main className="flex min-h-screen items-center justify-center px-4 py-8 sm:px-6 lg:col-span-5 lg:px-8 xl:px-10">
-            <div className="w-full max-w-[460px]">
-              <div className="mb-8 flex justify-center lg:hidden">
+          <main className="relative flex min-h-dvh items-center justify-center overflow-hidden px-4 py-5 sm:px-6 sm:py-8 lg:col-span-5 lg:px-8 xl:px-10">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,92,0,0.18),transparent_34%),linear-gradient(180deg,rgba(21,23,28,0.92),rgba(15,31,36,1))] lg:hidden" />
+            <div className="relative z-10 w-full max-w-[440px] sm:max-w-[500px] lg:max-w-[440px]">
+              <div className="mb-5 flex justify-center lg:hidden">
                 <Logo textColor="light" />
               </div>
 
-              <form onSubmit={handleLogin} className="relative overflow-hidden rounded-2xl border border-white/80 bg-white p-6 text-brand-dark shadow-[0_28px_80px_rgba(9,20,31,0.22)] sm:p-8">
-                <div className="pointer-events-none absolute -right-20 -top-24 h-48 w-48 rounded-full bg-brand-yellow/15 blur-3xl" />
-                <div className="pointer-events-none absolute -bottom-24 -left-20 h-48 w-48 rounded-full bg-brand-green/10 blur-3xl" />
+              <div className="-mx-4 mb-5 h-[clamp(180px,42vw,320px)] overflow-hidden sm:-mx-6 lg:hidden">
+                <LoginFeaturedProject className="h-full w-full" />
+              </div>
 
-                <div className="relative mb-8 text-center">
+              <form onSubmit={handleLogin} className="relative overflow-hidden rounded-2xl border border-white/70 bg-white p-5 text-brand-dark shadow-[0_34px_90px_rgba(4,12,18,0.32)] sm:p-7">
+                <div className="pointer-events-none absolute -right-24 -top-24 h-52 w-52 rounded-full bg-brand-yellow/14 blur-3xl" />
+                <div className="pointer-events-none absolute -bottom-24 -left-24 h-52 w-52 rounded-full bg-brand-green/10 blur-3xl" />
+
+                <div className="relative mb-7 text-center">
                   <div className="mx-auto flex justify-center">
-                    <Logo className="h-auto w-64 max-w-full sm:w-72" />
+                    <Logo className="h-auto w-52 max-w-full sm:w-64" />
                   </div>
-                  <div className="mx-auto mt-5 inline-flex items-center gap-2 rounded-full border border-brand-yellow/20 bg-brand-yellow/10 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.22em] text-brand-yellow-dark">
-                    <LockKeyhole className="h-3.5 w-3.5" />
-                    Login seguro
-                  </div>
-                  <h2 className="mt-5 text-2xl font-extrabold leading-tight text-brand-petrol font-outfit sm:text-3xl">
-                    Panel administrativo
-                  </h2>
-                  <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-gray-500">
-                    Ingresa con tus credenciales para gestionar la landing.
-                  </p>
+                  
                 </div>
 
                 <div className="relative space-y-4">
@@ -1415,7 +1468,7 @@ export default function AdminPanel() {
                         value={loginData.email}
                         onChange={(event) => setLoginData((current) => ({ ...current, email: event.target.value }))}
                         className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3.5 pl-11 text-sm text-brand-dark outline-none transition placeholder:text-gray-400 focus:border-brand-yellow focus:ring-4 focus:ring-brand-yellow/10"
-                        placeholder="admin@mingeotop.com"
+                        placeholder="Insertar usuario"
                       />
                     </div>
                   </label>
@@ -1447,14 +1500,9 @@ export default function AdminPanel() {
                   className="relative mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-brand-yellow px-4 py-3.5 text-sm font-extrabold text-brand-dark shadow-[0_18px_34px_rgba(255,92,0,0.24)] transition hover:-translate-y-0.5 hover:bg-brand-yellow-light disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-70 cursor-pointer"
                 >
                   <LockKeyhole className="h-4 w-4" />
-                  {isLoggingIn ? 'Ingresando...' : 'Ingresar al panel'}
+                  {isLoggingIn ? 'Ingresando...' : 'Ingresar'}
                 </button>
-
-                <div className="relative mt-5 rounded-xl border border-gray-100 bg-brand-light/80 p-4 text-xs leading-relaxed text-gray-500">
-                  <strong className="text-brand-petrol">Usuario admin:</strong> {ADMIN_EMAIL}
-                  <br />
-                  La contrasena se valida directamente con Supabase Auth.
-                </div>
+              
               </form>
             </div>
           </main>
