@@ -1,6 +1,12 @@
 {
   "cleanUrls": true,
   "trailingSlash": false,
+  "crons": [
+    {
+      "path": "/api/keep-supabase-alive",
+      "schedule": "0 12 * * 1,4"
+    }
+  ],
   "rewrites": [
     {
       "source": "/admin",
