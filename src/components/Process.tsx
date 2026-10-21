@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { ClipboardList, Cpu, FileCheck, Navigation, Ruler, Satellite } from 'lucide-react';
 
 const steps = [
@@ -42,14 +42,14 @@ export default function Process() {
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-14 grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
           <div>
-            <motion.h3
+            <m.p
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-100px' }}
               className="mb-3 text-xs font-extrabold uppercase tracking-[0.25em] text-brand-yellow sm:text-sm"
             >
               Nuestro proceso
-            </motion.h3>
+            </m.p>
             <h2
               className="font-outfit text-3xl font-extrabold leading-tight sm:text-4xl md:text-5xl"
               data-gsap-title
@@ -58,7 +58,7 @@ export default function Process() {
             </h2>
           </div>
 
-          <motion.p
+          <m.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-100px' }}
@@ -68,7 +68,7 @@ export default function Process() {
             Cada proyecto se controla como una secuencia verificable: alcance, captura,
             procesamiento y entrega. Así mantenemos precisión, trazabilidad y orden documental
             desde el primer punto levantado hasta el expediente final.
-          </motion.p>
+          </m.p>
         </div>
 
         <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-stretch">
@@ -114,7 +114,7 @@ export default function Process() {
               { label: 'Zona trabajo', x: '60%', y: '43%' },
               { label: 'Entrega', x: '78%', y: '22%' },
             ].map((point, index) => (
-              <motion.div
+              <m.div
                 key={point.label}
                 initial={{ opacity: 0, scale: 0.8 }}
                 whileInView={{ opacity: 1, scale: 1 }}
@@ -132,7 +132,7 @@ export default function Process() {
                     {point.label}
                   </span>
                 </div>
-              </motion.div>
+              </m.div>
             ))}
 
             <div className="absolute bottom-5 left-5 right-5 grid grid-cols-2 gap-3 sm:grid-cols-3">

@@ -22,13 +22,13 @@ import {
   Save,
   Search,
   Settings,
-  ShieldCheck,
   Star,
   Trash2,
   Upload,
   User,
   X,
 } from 'lucide-react';
+import type { ProjectRow } from '../lib/projects';
 import Logo from './Logo';
 import LoginFeaturedProject from './LoginFeaturedProject';
 import { isSupabaseConfigured, supabase } from '../lib/supabase';
@@ -162,12 +162,18 @@ function AdminProjectRowsSkeleton() {
   );
 }
 
+function getErrorMessage(error: unknown) {
+  return error && typeof error === 'object' && 'message' in error
+    ? String(error.message)
+    : 'Error inesperado. Intenta nuevamente.';
+}
+
 export default function AdminPanel() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isCheckingSession, setIsCheckingSession] = useState(true);
+  const [isCheckingSession, setIsCheckingSession] = useState(Boolean(supabase));
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [loginData, setLoginData] = useState({ email: '', password: '' });
-  const [loginError, setLoginError] = useState('');
+  const [loginError, setLoginError] = useState(supabase ? '' : 'Supabase no está configurado. Revisa las variables de entorno.');
   const [activeSection, setActiveSection] = useState<AdminSectionId>('proyectos');
   const [projectAdminTab, setProjectAdminTab] = useState<'projects' | 'sectors'>('projects');
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -177,7 +183,7 @@ export default function AdminPanel() {
 
   // DB projects states
   const [dbProjects, setDbProjects] = useState<Project[]>([]);
-  const [isLoadingProjects, setIsLoadingProjects] = useState(false);
+  const [isLoadingProjects, setIsLoadingProjects] = useState(true);
   const [projectModalOpen, setProjectModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [projectForm, setProjectForm] = useState({
@@ -280,9 +286,9 @@ export default function AdminPanel() {
         image_webp_url: res.webpUrl
       }));
       finishUploadFeedback('Imagen subida con exito.');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error uploading image:', err);
-      showToast('error', 'Error al subir la imagen: ' + err.message);
+      showToast('error', 'Error al subir la imagen: ' + getErrorMessage(err));
       finishUploadFeedback('Error al subir imagen.', 0);
     } finally {
       setIsUploading(false);
@@ -300,9 +306,9 @@ export default function AdminPanel() {
         video_poster_url: res.posterUrl
       }));
       finishUploadFeedback('Video subido con exito.');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error uploading video:', err);
-      showToast('error', 'Error al subir el video: ' + err.message);
+      showToast('error', 'Error al subir el video: ' + getErrorMessage(err));
       finishUploadFeedback('Error al subir video.', 0);
     } finally {
       setIsUploading(false);
@@ -432,9 +438,9 @@ export default function AdminPanel() {
         is_active: true,
       });
       showToast('success', sectorForm.id ? 'Sector actualizado correctamente.' : 'Sector creado correctamente.');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error saving sector:', err);
-      showToast('error', 'Error al guardar el sector: ' + err.message);
+      showToast('error', 'Error al guardar el sector: ' + getErrorMessage(err));
     } finally {
       setIsSavingSector(false);
     }
@@ -466,9 +472,9 @@ export default function AdminPanel() {
       }
       setSectorToDelete(null);
       showToast('success', 'Sector eliminado correctamente.');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error deleting sector:', err);
-      showToast('error', 'Error al eliminar el sector: ' + err.message);
+      showToast('error', 'Error al eliminar el sector: ' + getErrorMessage(err));
     }
   };
 
@@ -481,7 +487,7 @@ export default function AdminPanel() {
       description: project.specs,
       precision_label: project.precision,
       sort_order: project.sort_order ?? 0,
-      status: (project.status as any) || 'draft',
+      status: project.status ?? 'draft',
       image_url: project.image_url || '',
       image_webp_url: project.image_webp_url || '',
       video_url: project.video_url || '',
@@ -506,7 +512,7 @@ export default function AdminPanel() {
         ? Number(editingProject.sort_order ?? projectForm.sort_order ?? 0)
         : Math.max(0, ...dbProjects.map(project => project.sort_order ?? 0)) + 1;
 
-      const payload: any = {
+      const payload: Omit<ProjectRow, 'id'> = {
         title: projectForm.title,
         category: projectForm.category,
         location: projectForm.location || null,
@@ -531,9 +537,9 @@ export default function AdminPanel() {
       setProjectModalOpen(false);
       setEditingProject(null);
       showToast('success', editingProject ? 'Proyecto actualizado correctamente.' : 'Proyecto creado correctamente.');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error saving project:', err);
-      showToast('error', 'Error al guardar el proyecto: ' + err.message);
+      showToast('error', 'Error al guardar el proyecto: ' + getErrorMessage(err));
     } finally {
       setIsSavingProject(false);
     }
@@ -553,9 +559,9 @@ export default function AdminPanel() {
       setDeleteConfirmOpen(false);
       setProjectToDelete(null);
       showToast('success', 'Proyecto eliminado correctamente.');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error deleting project:', err);
-      showToast('error', 'Error al eliminar el proyecto: ' + err.message);
+      showToast('error', 'Error al eliminar el proyecto: ' + getErrorMessage(err));
     } finally {
       setIsDeletingProject(false);
     }
@@ -577,9 +583,9 @@ export default function AdminPanel() {
         })),
       );
       showToast('success', 'Proyecto destacado actualizado para el login.');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error setting login project:', err);
-      const isMissingColumn = err?.code === 'PGRST204' || String(err?.message ?? '').includes('show_on_login');
+      const isMissingColumn = (typeof err === 'object' && err !== null && 'code' in err && err.code === 'PGRST204') || getErrorMessage(err).includes('show_on_login');
       showToast(
         'error',
         isMissingColumn
@@ -592,9 +598,17 @@ export default function AdminPanel() {
   };
 
   useEffect(() => {
-    if (isAuthenticated) {
-      loadProjects();
-    }
+    if (!isAuthenticated) return;
+    let active = true;
+    Promise.all([getAllProjects(), getProjectSectors(true)])
+      .then(([list, sectors]) => {
+        if (!active) return;
+        setDbProjects(list);
+        setProjectSectors(sectors);
+      })
+      .catch((error: unknown) => console.error('Error loading projects:', error))
+      .finally(() => { if (active) setIsLoadingProjects(false); });
+    return () => { active = false; };
   }, [isAuthenticated]);
 
   useEffect(() => {
@@ -622,11 +636,7 @@ export default function AdminPanel() {
   const selectedLoginProject = dbProjects.find((project) => project.show_on_login);
 
   useEffect(() => {
-    if (!supabase) {
-      setIsCheckingSession(false);
-      setLoginError('Supabase no está configurado. Revisa las variables VITE_SUPABASE_URL y VITE_SUPABASE_PUBLISHABLE_KEY.');
-      return;
-    }
+    if (!supabase) return;
 
     const supabaseClient = supabase;
 
@@ -1130,7 +1140,7 @@ export default function AdminPanel() {
                   </span>
                 </div>
                 <div className="divide-y divide-gray-100">
-                  {filteredServices.map((service, index) => (
+                  {filteredServices.map((service) => (
                     <div key={service.title} className="grid gap-3 px-4 py-4 sm:grid-cols-[auto_1fr_auto] sm:items-center">
                       <span className="inline-flex h-9 w-12 items-center justify-center rounded-lg bg-brand-petrol text-xs font-extrabold text-white">
                         MT-{String(serviceItems.findIndex(item => item.title === service.title) + 1).padStart(2, '0')}
@@ -1806,8 +1816,9 @@ export default function AdminPanel() {
                 </label>
 
                 <div className="space-y-1 block sm:col-span-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-gray-500 block">Descripcion / Detalles Tecnicos</span>
+                  <label htmlFor="project-description" className="text-xs font-bold uppercase tracking-wider text-gray-500 block">Descripcion / Detalles Tecnicos</label>
                   <textarea
+                    id="project-description"
                     required
                     rows={4}
                     value={projectForm.description}
@@ -1876,7 +1887,7 @@ export default function AdminPanel() {
                       </div>
                       <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/80">
                         <div
-                          className="h-full rounded-full bg-brand-yellow transition-all duration-300 ease-out"
+                          className="h-full rounded-full bg-brand-yellow transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 ease-out"
                           style={{ width: uploadPercent + '%' }}
                         />
                       </div>

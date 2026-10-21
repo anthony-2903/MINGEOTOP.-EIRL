@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { CheckCircle, Loader2, Mail, MapPin, Phone, Send } from 'lucide-react';
-import confetti from 'canvas-confetti';
+import { submitContactRequest } from '../lib/contact';
 
 const services = [
   'Levantamientos Topográficos',
@@ -94,27 +94,7 @@ export default function Contact() {
     setSubmitError('');
 
     try {
-      const response = await fetch('https://formsubmit.co/ajax/mingeotop@gmail.com', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-        body: JSON.stringify({
-          _subject: `Nueva solicitud de cotización - ${formData.service}`,
-          _template: 'table',
-          _captcha: 'false',
-          Nombre: formData.name,
-          Telefono: formData.phone,
-          Correo: formData.email,
-          Servicio: formData.service,
-          Mensaje: formData.message,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('No se pudo enviar el formulario.');
-      }
+      await submitContactRequest(formData);
 
       setIsSuccess(true);
       setFormData({
@@ -125,23 +105,16 @@ export default function Contact() {
         message: '',
       });
 
-      confetti({
+      void import('canvas-confetti').then(({ default: confetti }) => confetti({
         particleCount: 100,
         spread: 70,
         origin: { y: 0.6 },
         colors: ['#15171C', '#2D5B37', '#FF5C00'],
-      });
+        disableForReducedMotion: true,
+      })).catch(() => undefined);
     } catch {
-      window.open(buildContactEmailUrl(formData), '_blank', 'noopener,noreferrer');
-      setFormData({
-        name: '',
-        phone: '',
-        email: '',
-        service: '',
-        message: '',
-      });
       setSubmitError(
-        'El envío automático no respondió, así que abrimos Gmail con tu solicitud ya preparada para enviarla a mingeotop@gmail.com.'
+        'No pudimos confirmar el envío. Tus datos siguen en el formulario. Puedes intentarlo de nuevo o enviar tu solicitud desde tu correo.'
       );
     } finally {
       setIsSubmitting(false);
@@ -155,21 +128,21 @@ export default function Contact() {
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto mb-16 max-w-3xl text-center">
-          <motion.h3
+          <m.p
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-100px' }}
             className="mb-3 text-xs font-extrabold uppercase tracking-[0.25em] text-brand-yellow sm:text-sm"
           >
             Contáctanos
-          </motion.h3>
+          </m.p>
           <h2
             className="font-outfit text-3xl font-extrabold text-white sm:text-4xl md:text-5xl"
             data-gsap-title
           >
             Solicita tu cotización técnica sin compromiso
           </h2>
-          <motion.p
+          <m.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-100px' }}
@@ -177,7 +150,7 @@ export default function Contact() {
             className="mt-4 text-base text-gray-300 sm:text-lg"
           >
             Estamos listos para desplegar nuestro equipo y brindarte la precisión que tu proyecto necesita.
-          </motion.p>
+          </m.p>
         </div>
 
         <div className="grid grid-cols-1 items-stretch gap-12 lg:grid-cols-12">
@@ -193,7 +166,7 @@ export default function Contact() {
                   href="https://wa.me/51913386354?text=Hola%20MINGEOTOP,%20solicito%20cotizaci%C3%B3n%20para%20un%20proyecto%20topogr%C3%A1fico."
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-center space-x-4 rounded-2xl border border-brand-green/20 bg-white/5 p-4 transition-all duration-300 hover:border-brand-yellow/50"
+                  className="group flex items-center space-x-4 rounded-2xl border border-brand-green/20 bg-white/5 p-4 transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 hover:border-brand-yellow/50"
                 >
                   <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-brand-green text-white transition-transform duration-300 group-hover:scale-110">
                     <svg className="h-6 w-6 fill-current" viewBox="0 0 24 24" aria-hidden="true">
@@ -208,7 +181,7 @@ export default function Contact() {
 
                 <a
                   href="tel:+51913386354"
-                  className="group flex items-center space-x-4 rounded-2xl border border-brand-green/20 bg-white/5 p-4 transition-all duration-300 hover:border-brand-yellow/50"
+                  className="group flex items-center space-x-4 rounded-2xl border border-brand-green/20 bg-white/5 p-4 transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 hover:border-brand-yellow/50"
                 >
                   <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-brand-yellow text-brand-dark transition-transform duration-300 group-hover:scale-110">
                     <Phone className="h-5 w-5" />
@@ -221,7 +194,7 @@ export default function Contact() {
 
                 <a
                   href="mailto:mingeotop@gmail.com"
-                  className="group flex items-center space-x-4 rounded-2xl border border-brand-green/20 bg-white/5 p-4 transition-all duration-300 hover:border-brand-yellow/50"
+                  className="group flex items-center space-x-4 rounded-2xl border border-brand-green/20 bg-white/5 p-4 transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 hover:border-brand-yellow/50"
                 >
                   <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-brand-petrol text-white transition-transform duration-300 group-hover:scale-110">
                     <Mail className="h-5 w-5" />
@@ -248,28 +221,30 @@ export default function Contact() {
           <div className="relative rounded-3xl bg-white p-8 text-brand-dark shadow-2xl sm:p-10 lg:col-span-7" data-gsap-mask>
             <AnimatePresence mode="wait">
               {!isSuccess ? (
-                <motion.form
+                <m.form
                   key="contact-form"
                   initial={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   onSubmit={handleSubmit}
                   className="space-y-5"
+                  aria-busy={isSubmitting}
                 >
                   <h3 className="border-b border-gray-100 pb-2 font-outfit text-2xl font-bold text-brand-petrol">
                     Formulario de requerimiento
                   </h3>
 
                   <div className="space-y-1">
-                    <label className="block text-xs font-bold uppercase tracking-wider text-brand-petrol">
+                    <label htmlFor="contact-name" className="block text-xs font-bold uppercase tracking-wider text-brand-petrol">
                       Nombre completo
                     </label>
                     <input
                       type="text"
+                      id="contact-name"
                       name="name"
                       value={formData.name}
                       onChange={handleChange}
                       placeholder="Ej. Ing. Juan Pérez"
-                      className={`w-full rounded-xl border bg-brand-light px-4 py-3 text-sm transition-all focus:border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green/20 ${
+                      className={`w-full rounded-xl border bg-brand-light px-4 py-3 text-sm transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green/20 ${
                         errors.name ? 'border-red-500' : 'border-gray-200'
                       }`}
                     />
@@ -278,16 +253,17 @@ export default function Contact() {
 
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div className="space-y-1">
-                      <label className="block text-xs font-bold uppercase tracking-wider text-brand-petrol">
+                      <label htmlFor="contact-phone" className="block text-xs font-bold uppercase tracking-wider text-brand-petrol">
                         Celular / teléfono
                       </label>
                       <input
                         type="text"
+                        id="contact-phone"
                         name="phone"
                         value={formData.phone}
                         onChange={handleChange}
                         placeholder="Ej. 999888777"
-                        className={`w-full rounded-xl border bg-brand-light px-4 py-3 text-sm transition-all focus:border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green/20 ${
+                        className={`w-full rounded-xl border bg-brand-light px-4 py-3 text-sm transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green/20 ${
                           errors.phone ? 'border-red-500' : 'border-gray-200'
                         }`}
                       />
@@ -295,16 +271,17 @@ export default function Contact() {
                     </div>
 
                     <div className="space-y-1">
-                      <label className="block text-xs font-bold uppercase tracking-wider text-brand-petrol">
+                      <label htmlFor="contact-email" className="block text-xs font-bold uppercase tracking-wider text-brand-petrol">
                         Correo corporativo
                       </label>
                       <input
                         type="email"
+                        id="contact-email"
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
                         placeholder="nombre@empresa.com"
-                        className={`w-full rounded-xl border bg-brand-light px-4 py-3 text-sm transition-all focus:border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green/20 ${
+                        className={`w-full rounded-xl border bg-brand-light px-4 py-3 text-sm transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green/20 ${
                           errors.email ? 'border-red-500' : 'border-gray-200'
                         }`}
                       />
@@ -313,14 +290,15 @@ export default function Contact() {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="block text-xs font-bold uppercase tracking-wider text-brand-petrol">
+                    <label htmlFor="contact-service" className="block text-xs font-bold uppercase tracking-wider text-brand-petrol">
                       Servicio requerido
                     </label>
                     <select
+                      id="contact-service"
                       name="service"
                       value={formData.service}
                       onChange={handleChange}
-                      className={`w-full rounded-xl border bg-brand-light px-4 py-3 text-sm transition-all focus:border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green/20 ${
+                      className={`w-full rounded-xl border bg-brand-light px-4 py-3 text-sm transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green/20 ${
                         errors.service ? 'border-red-500' : 'border-gray-200'
                       }`}
                     >
@@ -335,16 +313,17 @@ export default function Contact() {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="block text-xs font-bold uppercase tracking-wider text-brand-petrol">
+                    <label htmlFor="contact-message" className="block text-xs font-bold uppercase tracking-wider text-brand-petrol">
                       Detalle del proyecto
                     </label>
                     <textarea
+                      id="contact-message"
                       name="message"
                       rows={4}
                       value={formData.message}
                       onChange={handleChange}
                       placeholder="Describe el alcance de la obra, ubicación, requerimientos técnicos, coordenadas o plazos estimados..."
-                      className={`w-full rounded-xl border bg-brand-light px-4 py-3 text-sm transition-all focus:border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green/20 ${
+                      className={`w-full rounded-xl border bg-brand-light px-4 py-3 text-sm transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green/20 ${
                         errors.message ? 'border-red-500' : 'border-gray-200'
                       }`}
                     />
@@ -352,15 +331,23 @@ export default function Contact() {
                   </div>
 
                   {submitError && (
-                    <div className="rounded-xl border border-brand-yellow/30 bg-brand-yellow/10 px-4 py-3 text-sm font-semibold text-brand-petrol">
-                      {submitError}
+                    <div role="alert" className="rounded-xl border border-brand-yellow/30 bg-brand-yellow/10 px-4 py-3 text-sm font-semibold text-brand-petrol">
+                      <p>{submitError}</p>
+                      <a
+                        href={buildContactEmailUrl(formData)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-2 inline-block underline underline-offset-4"
+                      >
+                        Abrir Gmail con mi solicitud (requiere enviarla manualmente)
+                      </a>
                     </div>
                   )}
 
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="flex w-full cursor-pointer items-center justify-center space-x-2 rounded-xl bg-brand-yellow py-4 font-outfit font-bold text-brand-dark shadow-lg shadow-brand-yellow/20 transition-all duration-300 hover:bg-brand-yellow-light hover:shadow-brand-yellow/30 hover-glow-yellow disabled:opacity-75"
+                    className="flex w-full cursor-pointer items-center justify-center space-x-2 rounded-xl bg-brand-yellow py-4 font-outfit font-bold text-brand-dark shadow-lg shadow-brand-yellow/20 transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 hover:bg-brand-yellow-light hover:shadow-brand-yellow/30 hover-glow-yellow disabled:opacity-75"
                   >
                     {isSubmitting ? (
                       <>
@@ -374,9 +361,9 @@ export default function Contact() {
                       </>
                     )}
                   </button>
-                </motion.form>
+                </m.form>
               ) : (
-                <motion.div
+                <m.div
                   key="success-card"
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -389,18 +376,18 @@ export default function Contact() {
                   <div className="space-y-2">
                     <h3 className="font-outfit text-3xl font-extrabold text-brand-petrol">¡Solicitud enviada!</h3>
                     <p className="max-w-sm text-sm leading-relaxed text-gray-500">
-                      Hemos recibido los detalles de tu proyecto. Un especialista de MINGEOTOP E.I.R.L. se comunicará contigo para revisar la propuesta técnica.
+                      El servicio de correo aceptó tu solicitud para su envío a MINGEOTOP E.I.R.L. Si necesitas atención inmediata, contáctanos por WhatsApp.
                     </p>
                   </div>
 
                   <button
                     type="button"
                     onClick={() => setIsSuccess(false)}
-                    className="cursor-pointer rounded-xl border border-brand-petrol bg-brand-light px-6 py-2.5 font-outfit text-sm font-semibold text-brand-petrol transition-all duration-300 hover:bg-brand-petrol hover:text-white"
+                    className="cursor-pointer rounded-xl border border-brand-petrol bg-brand-light px-6 py-2.5 font-outfit text-sm font-semibold text-brand-petrol transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 hover:bg-brand-petrol hover:text-white"
                   >
                     Enviar otro mensaje
                   </button>
-                </motion.div>
+                </m.div>
               )}
             </AnimatePresence>
           </div>

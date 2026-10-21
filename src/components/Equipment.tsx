@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { CheckCircle2, ClipboardCheck, Database, FileDigit, Map, Ruler, Satellite } from 'lucide-react';
 
 import totalStationImg from '../assets/equipment_total_station_real.jpg';
@@ -65,14 +65,14 @@ export default function Equipment() {
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-12 grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-end">
           <div>
-            <motion.h3
+            <m.p
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-100px' }}
               className="mb-3 text-xs font-extrabold uppercase tracking-[0.25em] text-brand-yellow sm:text-sm"
             >
               Equipos y tecnología
-            </motion.h3>
+            </m.p>
             <h2
               className="font-outfit text-3xl font-extrabold leading-tight text-brand-petrol sm:text-4xl md:text-5xl"
               data-gsap-title
@@ -81,7 +81,7 @@ export default function Equipment() {
             </h2>
           </div>
 
-          <motion.p
+          <m.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-100px' }}
@@ -90,7 +90,7 @@ export default function Equipment() {
           >
             Trabajamos con instrumental topográfico, control geodésico y gabinete digital para
             convertir datos de campo en planos, modelos, metrados y documentación técnica verificable.
-          </motion.p>
+          </m.p>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
@@ -177,7 +177,7 @@ export default function Equipment() {
           </div>
         </div>
 
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 26 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-100px' }}
@@ -203,7 +203,7 @@ export default function Equipment() {
               </div>
             ))}
           </div>
-        </motion.div>
+        </m.div>
       </div>
     </section>
   );

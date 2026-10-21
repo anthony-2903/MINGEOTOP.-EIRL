@@ -47,7 +47,7 @@ export default function Footer() {
                 href="https://www.facebook.com/gimatc.2023"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-9 h-9 rounded-lg bg-white/5 text-gray-400 hover:bg-brand-green hover:text-white flex items-center justify-center transition-all"
+                className="w-9 h-9 rounded-lg bg-white/5 text-gray-400 hover:bg-brand-green hover:text-white flex items-center justify-center transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                 aria-label="Ir a Facebook"
               >
                 <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24">
@@ -58,7 +58,7 @@ export default function Footer() {
                 href="https://linkedin.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-9 h-9 rounded-lg bg-white/5 text-gray-400 hover:bg-brand-green hover:text-white flex items-center justify-center transition-all"
+                className="w-9 h-9 rounded-lg bg-white/5 text-gray-400 hover:bg-brand-green hover:text-white flex items-center justify-center transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                 aria-label="Ir a LinkedIn"
               >
                 <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24">
@@ -69,7 +69,7 @@ export default function Footer() {
                 href="https://www.tiktok.com/@mingeotop"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-9 h-9 rounded-lg bg-white/5 text-gray-400 hover:bg-brand-green hover:text-white flex items-center justify-center transition-all"
+                className="w-9 h-9 rounded-lg bg-white/5 text-gray-400 hover:bg-brand-green hover:text-white flex items-center justify-center transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                 aria-label="Ir a TikTok"
               >
                 <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24">

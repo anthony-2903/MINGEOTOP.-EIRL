@@ -1,5 +1,5 @@
 import React from "react";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import {
   Shield,
   Target,
@@ -61,21 +61,21 @@ export default function AboutUs() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <motion.h3
+          <m.p
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             className="text-xs sm:text-sm font-extrabold tracking-[0.25em] text-brand-yellow uppercase mb-3"
           >
             SOBRE NOSOTROS
-          </motion.h3>
+          </m.p>
           <h2
             className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-brand-petrol font-outfit"
             data-gsap-title
           >
             Comprometidos con la Precisión, Tecnología y Experiencia en Campo
           </h2>
-          <motion.p
+          <m.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
@@ -85,17 +85,17 @@ export default function AboutUs() {
             En MINGEOTOP E.I.R.L aportamos soluciones de ingeniería e
             instrumental topográfico de última generación para proyectos de alta
             complejidad técnica y logística.
-          </motion.p>
+          </m.p>
         </div>
 
         {/* Brand pillars */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
-          {pillars.map((item, index) => (
+          {pillars.map((item) => (
             <div
-              key={index}
+              key={item.title}
               data-gsap-mask
             >
-              <div className="h-full bg-brand-light border border-gray-200/60 p-8 rounded-2xl hover:border-brand-yellow/30 hover:bg-white hover:shadow-premium hover-glow-yellow transition-all duration-300 group flex flex-col items-center text-center md:items-start md:text-left relative overflow-hidden transform hover:-translate-y-2 hover:scale-[1.02]">
+              <div className="h-full bg-brand-light border border-gray-200/60 p-8 rounded-2xl hover:border-brand-yellow/30 hover:bg-white hover:shadow-premium hover-glow-yellow transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 group flex flex-col items-center text-center md:items-start md:text-left relative overflow-hidden transform hover:-translate-y-2 hover:scale-[1.02]">
                 <div className="absolute inset-0 bg-gradient-to-br from-brand-yellow/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                 <div className="bg-brand-petrol p-4 rounded-xl text-white mb-6 group-hover:scale-110 transition-transform duration-300">
                   {item.icon}
@@ -128,8 +128,8 @@ export default function AboutUs() {
             </p>
 
             <div className="space-y-4 pt-4">
-              {sectors.map((sec, idx) => (
-                <div key={idx} className="flex items-start space-x-3 group">
+              {sectors.map((sec) => (
+                <div key={sec.name} className="flex items-start space-x-3 group">
                   <div className="mt-1 bg-brand-green/10 text-brand-green p-1 rounded-md group-hover:bg-brand-yellow group-hover:text-brand-dark transition-colors duration-300">
                     <CheckCircle2 className="h-4 w-4" />
                   </div>
@@ -153,11 +153,11 @@ export default function AboutUs() {
             <div className="gradient-petrol-green text-white p-8 rounded-3xl shadow-xl relative overflow-hidden border border-brand-green/30 group">
               {/* Pattern curves */}
               <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-white/5 rounded-full blur-xl" />
-              
+
               {/* Animated Radar Scanning Overlay */}
-              <motion.div 
-                initial={{ top: '-50%' }}
-                animate={{ top: '150%' }}
+              <m.div
+                initial={{ y: '-100%' }}
+                animate={{ y: '400%' }}
                 transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
                 className="absolute left-0 right-0 h-32 bg-gradient-to-b from-transparent via-brand-yellow/10 to-transparent blur-md pointer-events-none"
               />

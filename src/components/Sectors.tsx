@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import {
   Mountain,
   Building,
@@ -73,21 +73,21 @@ export default function Sectors() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <motion.h3
+          <m.p
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-100px' }}
             className="text-xs sm:text-sm font-extrabold tracking-[0.25em] text-brand-yellow uppercase mb-3"
           >
             SECTORES DE TRABAJO
-          </motion.h3>
+          </m.p>
           <h2
             className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white font-outfit"
             data-gsap-title
           >
             Presencia Técnica en las Industrias Clave
           </h2>
-          <motion.p
+          <m.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-100px' }}
@@ -95,14 +95,14 @@ export default function Sectors() {
             className="mt-4 text-base sm:text-lg text-gray-300 font-sans"
           >
             Desplegamos nuestros equipos y especialistas en los entornos operacionales más exigentes del país para garantizar precisión en cada fase de obra.
-          </motion.p>
+          </m.p>
         </div>
 
         {/* Sectors Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {sectorsList.map((sector, index) => (
+          {sectorsList.map((sector) => (
             <div
-              key={index}
+              key={sector.title}
               className="bg-brand-dark/40 border border-brand-green/20 hover:border-brand-yellow/40 rounded-2xl p-6 transition-[border-color,background-color] duration-300 group relative overflow-hidden backdrop-blur-sm"
               data-gsap-mask
             >
@@ -125,8 +125,8 @@ export default function Sectors() {
               </div>
 
               {/* Decorative crosshairs (topography theme) */}
-              <div className="absolute -bottom-3 -right-3 w-10 h-10 border-r border-b border-brand-green/20 group-hover:border-brand-yellow/30 group-hover:scale-110 transition-all duration-300 rounded-br-lg" />
-              <div className="absolute -top-3 -left-3 w-10 h-10 border-l border-t border-brand-green/20 group-hover:border-brand-yellow/30 group-hover:scale-110 transition-all duration-300 rounded-tl-lg" />
+              <div className="absolute -bottom-3 -right-3 w-10 h-10 border-r border-b border-brand-green/20 group-hover:border-brand-yellow/30 group-hover:scale-110 transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 rounded-br-lg" />
+              <div className="absolute -top-3 -left-3 w-10 h-10 border-l border-t border-brand-green/20 group-hover:border-brand-yellow/30 group-hover:scale-110 transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 rounded-tl-lg" />
             </div>
           ))}
         </div>

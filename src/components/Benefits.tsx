@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { ShieldAlert, Award, Clock, Users } from 'lucide-react';
 
 export default function Benefits() {
@@ -51,21 +51,21 @@ export default function Benefits() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <motion.h3
+          <m.p
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-100px' }}
             className="text-xs sm:text-sm font-extrabold tracking-[0.25em] text-brand-yellow uppercase mb-3"
           >
             NUESTRAS VENTAJAS
-          </motion.h3>
+          </m.p>
           <h2
             className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white font-outfit"
             data-gsap-title
           >
             ¿Por Qué Elegir a MINGEOTOP E.I.R.L.?
           </h2>
-          <motion.p
+          <m.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-100px' }}
@@ -73,14 +73,14 @@ export default function Benefits() {
             className="mt-4 text-base sm:text-lg text-gray-300 font-sans"
           >
             Garantizamos confianza, respaldo de ingeniería e informes precisos para dar solidez estructural a sus inversiones.
-          </motion.p>
+          </m.p>
         </div>
 
         {/* Benefits Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {benefitsList.map((benefit, index) => (
+          {benefitsList.map((benefit) => (
             <div
-              key={index}
+              key={benefit.title}
               className="bg-brand-dark/40 border border-brand-green/20 hover:border-brand-yellow/40 p-8 rounded-3xl transition-[border-color] duration-300 group flex flex-col sm:flex-row gap-6 items-start backdrop-blur-sm"
               data-gsap-mask
             >
@@ -115,7 +115,7 @@ export default function Benefits() {
           <a
             id="btn-beneficios-cotizar"
             href="#contacto"
-            className="w-full md:w-auto bg-brand-yellow hover:bg-brand-yellow-light text-brand-dark px-8 py-3.5 rounded-xl font-outfit font-bold transition-all duration-300 transform hover:-translate-y-0.5 hover-glow-yellow text-sm sm:text-base flex items-center justify-center"
+            className="w-full md:w-auto bg-brand-yellow hover:bg-brand-yellow-light text-brand-dark px-8 py-3.5 rounded-xl font-outfit font-bold transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 transform hover:-translate-y-0.5 hover-glow-yellow text-sm sm:text-base flex items-center justify-center"
           >
             Solicitar Presupuesto Gratis
           </a>

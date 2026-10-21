@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import Logo from './Logo';
 import estacionTotalImg from '../assets/estacion-total-.webp';
@@ -14,9 +14,12 @@ const heroImages = [
 
 export default function Hero() {
   const [activeImage, setActiveImage] = useState(0);
+  const [loadSlides, setLoadSlides] = useState(false);
 
   useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const slideTimer = window.setInterval(() => {
+      setLoadSlides(true);
       setActiveImage((current) => (current + 1) % heroImages.length);
     }, 3000);
 
@@ -32,10 +35,10 @@ export default function Hero() {
         {heroImages.map((image, index) => (
           <div
             key={image}
-            className={`absolute inset-0 bg-cover bg-center hero-bg-motion transition-opacity duration-[1400ms] ease-in-out ${
+            className={`absolute inset-0 bg-cover bg-center hero-bg-m transition-opacity duration-[1400ms] ease-in-out ${
               index === activeImage ? 'opacity-100' : 'opacity-0'
             }`}
-            style={{ backgroundImage: `url(${image})` }}
+            style={{ backgroundImage: index === 0 || loadSlides ? `url(${image})` : undefined }}
             aria-hidden="true"
           />
         ))}
@@ -51,7 +54,7 @@ export default function Hero() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-7 flex flex-col justify-center space-y-8 text-center lg:text-left">
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
@@ -61,13 +64,11 @@ export default function Hero() {
               <span className="text-xs sm:text-sm font-bold tracking-wider text-brand-yellow uppercase">
                 Topografía, geodesia y control de obra
               </span>
-            </motion.div>
+            </m.div>
 
             <div className="space-y-4">
-              <motion.h1
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
+              <m.h1
+                initial={false}
                 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-[1.1] font-outfit"
               >
                 <span className="block text-white tracking-wider uppercase">
@@ -77,19 +78,19 @@ export default function Hero() {
                 <span className="block text-white text-3xl sm:text-4xl md:text-5xl mt-3 font-light leading-snug">
                   Medición en campo y entregables técnicos para obra
                 </span>
-              </motion.h1>
+              </m.h1>
 
-              <motion.p
+              <m.p
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.4 }}
                 className="text-base sm:text-lg md:text-xl text-gray-300 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-sans"
               >
                 Levantamientos, replanteos, cubicaciones, planos DWG/PDF, ortomosaicos y control topográfico para minería, construcción e infraestructura en todo el Perú.
-              </motion.p>
+              </m.p>
             </div>
 
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.6 }}
@@ -98,7 +99,7 @@ export default function Hero() {
               <a
                 id="btn-hero-cotizar"
                 href="#contacto"
-                className="w-full sm:w-auto flex items-center justify-center space-x-2 bg-brand-yellow hover:bg-brand-yellow-light text-brand-dark px-8 py-4 rounded-xl font-outfit font-bold transition-all duration-300 transform hover:-translate-y-1 hover-glow-yellow"
+                className="w-full sm:w-auto flex items-center justify-center space-x-2 bg-brand-yellow hover:bg-brand-yellow-light text-brand-dark px-8 py-4 rounded-xl font-outfit font-bold transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 transform hover:-translate-y-1 hover-glow-yellow"
               >
                 <span>Solicitar Cotización</span>
                 <ArrowRight className="h-5 w-5" />
@@ -106,13 +107,13 @@ export default function Hero() {
               <a
                 id="btn-hero-servicios"
                 href="#proyectos"
-                className="w-full sm:w-auto flex items-center justify-center space-x-2 bg-transparent hover:bg-white/5 text-white border-2 border-brand-green/80 hover:border-brand-green px-8 py-3.5 rounded-xl font-outfit font-semibold transition-all duration-300 transform hover:-translate-y-1"
+                className="w-full sm:w-auto flex items-center justify-center space-x-2 bg-transparent hover:bg-white/5 text-white border-2 border-brand-green/80 hover:border-brand-green px-8 py-3.5 rounded-xl font-outfit font-semibold transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 transform hover:-translate-y-1"
               >
                 <span>Ver Proyectos</span>
               </a>
-            </motion.div>
+            </m.div>
 
-            <motion.div
+            <m.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 1, delay: 0.8 }}
@@ -130,7 +131,7 @@ export default function Hero() {
                 <span className="text-2xl sm:text-3xl font-extrabold text-brand-yellow font-outfit">100%</span>
                 <span className="text-[10px] sm:text-xs text-gray-400 font-semibold tracking-wider uppercase mt-1">Garantía en Plazos</span>
               </div>
-            </motion.div>
+            </m.div>
           </div>
 
           <div className="hidden lg:block lg:col-span-5" />

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import React, { useEffect, useRef, useState } from 'react';
+import { AnimatePresence, m } from 'framer-motion';
 import {
   Check,
   ChevronDown,
@@ -23,25 +23,15 @@ import {
   type ProjectSector,
 } from '../lib/projectSectors';
 
+import { getCloudinaryThumbnailUrl } from '../lib/cloudinary';
+
 type MediaOrientation = 'unknown' | 'vertical' | 'horizontal';
 type PortfolioViewMode = 'carousel' | 'gallery';
 
 function ProjectMedia({ project, className }: { project: Project; className: string }) {
-  if (project.video) {
-    return (
-      <video
-        src={project.video}
-        poster={project.poster}
-        className={className}
-        muted
-        playsInline
-        preload="metadata"
-      />
-    );
-  }
-
-  if (project.image) {
-    return <img src={project.image} alt={project.title} className={className} loading="lazy" />;
+  const image = project.video ? project.poster : project.image;
+  if (image) {
+    return <img src={getCloudinaryThumbnailUrl(image)} alt={project.title} className={className} loading="lazy" decoding="async" />;
   }
 
   return <div className={`${className} bg-gradient-to-br ${project.color}`} />;
@@ -140,6 +130,7 @@ function getMediaOrientation(width: number, height: number): MediaOrientation {
 }
 
 export default function Portfolio() {
+  const dialogRef = useRef<HTMLDivElement>(null);
   const [filter, setFilter] = useState('todos');
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoadingProjects, setIsLoadingProjects] = useState(true);
@@ -196,11 +187,29 @@ export default function Portfolio() {
       }
     };
 
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+    dialogRef.current?.focus();
+    const trapFocus = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab') return;
+      const controls = dialogRef.current?.querySelectorAll<HTMLElement>('button, a[href], video[controls], [tabindex="0"]');
+      if (!controls?.length) return;
+      const first = controls[0];
+      const last = controls[controls.length - 1];
+      if (event.shiftKey && (document.activeElement === first || document.activeElement === dialogRef.current)) {
+        event.preventDefault(); last.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || document.activeElement === dialogRef.current)) {
+        event.preventDefault(); first.focus();
+      }
+    };
+    window.addEventListener('keydown', trapFocus);
     window.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      document.body.style.overflow = '';
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', trapFocus);
+      previousFocus?.focus();
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [selectedProject]);
@@ -234,7 +243,7 @@ export default function Portfolio() {
             <button
               type="button"
               onClick={() => setViewMode('carousel')}
-              className={`inline-flex items-center gap-2 rounded-xl px-5 py-3 text-[10px] font-extrabold uppercase tracking-[0.16em] transition-all duration-300 ${
+              className={`inline-flex items-center gap-2 rounded-xl px-5 py-3 text-[10px] font-extrabold uppercase tracking-[0.16em] transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 ${
                 viewMode === 'carousel'
                   ? 'bg-brand-petrol text-white shadow-lg shadow-brand-petrol/20'
                   : 'text-gray-400 hover:text-brand-petrol'
@@ -246,7 +255,7 @@ export default function Portfolio() {
             <button
               type="button"
               onClick={() => setViewMode('gallery')}
-              className={`inline-flex items-center gap-2 rounded-xl px-5 py-3 text-[10px] font-extrabold uppercase tracking-[0.16em] transition-all duration-300 ${
+              className={`inline-flex items-center gap-2 rounded-xl px-5 py-3 text-[10px] font-extrabold uppercase tracking-[0.16em] transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 ${
                 viewMode === 'gallery'
                   ? 'bg-brand-petrol text-white shadow-lg shadow-brand-petrol/20'
                   : 'text-gray-400 hover:text-brand-petrol'
@@ -306,15 +315,15 @@ export default function Portfolio() {
           ) : viewMode === 'carousel' ? (
             <div className="w-full max-w-none px-0">
               <div className="overflow-hidden pb-10 pt-4">
-                <motion.div
+                <m.div
                   key={filter}
                   layout
-                  className="portfolio-marquee-track flex w-max animate-portfolio-marquee will-change-transform"
+                  className="portfolio-marquee-track flex w-max animate-portfolio-marquee"
                 >
                   <div className="flex min-w-screen shrink-0 gap-6 pl-6 pr-0">
                     {filteredProjects.map((project, index) => (
-                      <motion.article
-                        key={`${project.id}-${index}`}
+                      <m.div
+                        key={project.id}
                         layout
                         initial={{ opacity: 0, y: 30, clipPath: 'inset(10% 0 0 0)' }}
                         animate={{ opacity: 1, y: 0, clipPath: 'inset(0% 0 0 0)' }}
@@ -332,34 +341,34 @@ export default function Portfolio() {
                         }}
                       >
                         <ProjectCardContent project={project} />
-                      </motion.article>
+                      </m.div>
                     ))}
                   </div>
                   <div className="flex min-w-screen shrink-0 gap-6 pl-6 pr-0" aria-hidden="true">
-                    {filteredProjects.map((project, index) => (
-                      <div
-                        key={`${project.id}-${index}-duplicate`}
+                    {filteredProjects.map((project) => (
+                      <button
+                        type="button"
+                        key={`${project.id}-duplicate`}
                         className="group relative h-[520px] w-[78vw] max-w-[420px] shrink-0 cursor-pointer overflow-hidden rounded-[2rem] border border-white/14 bg-brand-petrol text-left text-white shadow-[0_24px_80px_-34px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,92,0,0.12)_inset] outline-none transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-2 hover:border-brand-yellow/55 hover:shadow-[0_34px_100px_-34px_rgba(0,0,0,1),0_0_0_1px_rgba(255,92,0,0.26)_inset] sm:w-[380px]"
                         tabIndex={-1}
                         onClick={() => openProject(project)}
                       >
                         <ProjectCardContent project={project} />
-                      </div>
+                      </button>
                     ))}
                   </div>
-                </motion.div>
+                </m.div>
               </div>
             </div>
           ) : (
-            <motion.div
-              key={`${filter}-gallery`}
+            <m.div
               layout
               className="mx-auto grid max-w-7xl grid-cols-1 gap-7 px-4 sm:px-6 md:grid-cols-2 lg:grid-cols-3 lg:px-8"
             >
               <AnimatePresence mode="popLayout">
                 {filteredProjects.map((project, index) => (
-                  <motion.article
-                    key={`${project.id}-${index}-gallery`}
+                  <m.div
+                    key={project.id}
                     layout
                     initial={{ opacity: 0, y: 30, clipPath: 'inset(10% 0 0 0)' }}
                     animate={{ opacity: 1, y: 0, clipPath: 'inset(0% 0 0 0)' }}
@@ -377,28 +386,33 @@ export default function Portfolio() {
                     }}
                   >
                     <ProjectCardContent project={project} />
-                  </motion.article>
+                  </m.div>
                 ))}
               </AnimatePresence>
-            </motion.div>
+            </m.div>
           )}
         </div>
       </section>
 
       <AnimatePresence>
         {selectedProject && (
-          <motion.div
+          <m.div
             className="fixed inset-0 z-[80] flex items-center justify-center bg-brand-petrol-dark/86 px-3 py-4 backdrop-blur-lg sm:px-4 sm:py-6"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setSelectedProject(null)}
           >
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: 30, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.98 }}
               transition={{ type: 'spring', stiffness: 260, damping: 28 }}
+              ref={dialogRef}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="project-dialog-title"
+              tabIndex={-1}
               className={`portfolio-modal-frame relative grid max-h-[92dvh] w-full overflow-hidden rounded-lg border border-brand-yellow/35 shadow-[0_40px_100px_-40px_rgba(0,0,0,0.95)] ${
                 isSelectedMediaVertical
                   ? 'max-w-6xl bg-brand-petrol-dark lg:grid-cols-[minmax(280px,0.9fr)_minmax(330px,0.55fr)]'
@@ -410,7 +424,7 @@ export default function Portfolio() {
               <button
                 type="button"
                 onClick={() => setSelectedProject(null)}
-                className="absolute right-4 top-4 z-40 flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-brand-petrol-dark/80 text-white shadow-lg backdrop-blur-md transition-all duration-300 hover:border-brand-yellow hover:bg-brand-yellow hover:text-brand-dark"
+                className="absolute right-4 top-4 z-40 flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-brand-petrol-dark/80 text-white shadow-lg backdrop-blur-md transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 hover:border-brand-yellow hover:bg-brand-yellow hover:text-brand-dark"
                 aria-label="Cerrar proyecto"
               >
                 <X className="h-5 w-5" />
@@ -430,7 +444,7 @@ export default function Portfolio() {
                     poster={selectedProject.poster}
                     className="h-full w-full object-contain"
                     controls
-                    autoPlay
+                    preload="metadata"
                     playsInline
                     onLoadedMetadata={(event) => {
                       const video = event.currentTarget;
@@ -458,7 +472,7 @@ export default function Portfolio() {
                   <span className="text-[10px] font-extrabold uppercase tracking-[0.26em] text-brand-yellow sm:text-xs">
                     Proyecto destacado
                   </span>
-                  <h3 className="mt-2 font-outfit text-2xl font-extrabold leading-tight sm:text-4xl">
+                  <h3 id="project-dialog-title" className="mt-2 font-outfit text-2xl font-extrabold leading-tight sm:text-4xl">
                     {selectedProject.title}
                   </h3>
                 </div>
@@ -502,14 +516,14 @@ export default function Portfolio() {
                   href={buildWhatsappUrl(selectedProject)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-md bg-brand-yellow px-5 py-3.5 font-outfit text-sm font-extrabold text-brand-dark shadow-lg shadow-brand-yellow/25 transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-yellow-light sm:w-auto"
+                  className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-md bg-brand-yellow px-5 py-3.5 font-outfit text-sm font-extrabold text-brand-dark shadow-lg shadow-brand-yellow/25 transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 hover:-translate-y-0.5 hover:bg-brand-yellow-light sm:w-auto"
                 >
                   <MessageCircle className="h-5 w-5" />
                   Consultar por WhatsApp
                 </a>
               </div>
-            </motion.div>
-          </motion.div>
+            </m.div>
+          </m.div>
         )}
       </AnimatePresence>
     </>

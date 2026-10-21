@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { motion, useScroll, useSpring } from 'framer-motion';
+import React, { lazy, Suspense, useState, useEffect } from 'react';
+import { m, useScroll, useSpring } from 'framer-motion';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import AboutUs from './components/AboutUs';
@@ -12,9 +12,23 @@ import SeoFaq from './components/SeoFaq';
 import Portfolio from './components/Portfolio';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
-import AdminPanel from './components/AdminPanel';
-import GsapScrollEffects from './components/GsapScrollEffects';
 import { ArrowUp } from 'lucide-react';
+
+const AdminPanel = lazy(() => import('./components/AdminPanel'));
+const GsapScrollEffects = lazy(() => import('./components/GsapScrollEffects'));
+
+function DeferredScrollEffects() {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    if ('requestIdleCallback' in window) {
+      const id = window.requestIdleCallback(() => setReady(true), { timeout: 2000 });
+      return () => window.cancelIdleCallback(id);
+    }
+    const id = setTimeout(() => setReady(true), 200);
+    return () => clearTimeout(id);
+  }, []);
+  return ready ? <Suspense fallback={null}><GsapScrollEffects /></Suspense> : null;
+}
 
 function WhatsAppIcon({ className = '' }: { className?: string }) {
   return (
@@ -25,9 +39,16 @@ function WhatsAppIcon({ className = '' }: { className?: string }) {
 }
 
 export default function App() {
+  const isAdminRoute = window.location.pathname.replace(/\/$/, '') === '/admin';
+  return isAdminRoute ? (
+    <Suspense fallback={<main className="grid min-h-screen place-items-center" role="status">Cargando administrador...</main>}>
+      <AdminPanel />
+    </Suspense>
+  ) : <PublicSite />;
+}
+
+function PublicSite() {
   const [showBackToTop, setShowBackToTop] = useState(false);
-  const normalizedPath = window.location.pathname.replace(/\/$/, '');
-  const isAdminRoute = normalizedPath === '/admin';
   const { scrollYProgress } = useScroll();
   const smoothScrollProgress = useSpring(scrollYProgress, {
     stiffness: 90,
@@ -43,21 +64,17 @@ export default function App() {
         setShowBackToTop(false);
       }
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  if (isAdminRoute) {
-    return <AdminPanel />;
-  }
 
   return (
     <div className="relative min-h-screen flex flex-col justify-between overflow-x-hidden antialiased bg-brand-light font-sans selection:bg-brand-yellow selection:text-brand-dark">
       {/* Header / Navbar */}
       <Navbar />
-      <GsapScrollEffects />
+      <DeferredScrollEffects />
 
-      <motion.div
+      <m.div
         className="fixed left-0 top-0 z-[60] h-1 w-full origin-left bg-brand-yellow shadow-[0_0_18px_rgba(255,92,0,0.45)]"
         style={{ scaleX: smoothScrollProgress }}
       />
@@ -84,7 +101,7 @@ export default function App() {
         href="https://wa.me/51913386354?text=Hola%20MINGEOTOP,%20estoy%20visitando%20su%20p%C3%A1gina%20web%20y%20deseo%20realizar%20una%20consulta%20t%C3%A9cnica."
         target="_blank"
         rel="noopener noreferrer"
-        className="whatsapp-float fixed bottom-5 right-5 z-40 flex items-center gap-3 rounded-full border border-white/25 bg-[#25D366] px-4 py-3 text-white shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:scale-105 hover:bg-[#1ebe5d] active:scale-95 sm:bottom-6 sm:right-6 sm:px-5"
+        className="whatsapp-float fixed bottom-5 right-5 z-40 flex items-center gap-3 rounded-full border border-white/25 bg-[#25D366] px-4 py-3 text-white shadow-2xl transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 hover:-translate-y-1 hover:scale-105 hover:bg-[#1ebe5d] active:scale-95 sm:bottom-6 sm:right-6 sm:px-5"
         title="Chatear por WhatsApp"
         aria-label="Chatear por WhatsApp"
       >
@@ -103,7 +120,7 @@ export default function App() {
       {showBackToTop && (
         <a
           href="#inicio"
-          className="fixed bottom-6 left-6 z-40 bg-brand-petrol/90 hover:bg-brand-petrol text-white p-3.5 rounded-xl shadow-xl hover:scale-115 active:scale-95 transition-all duration-300 flex items-center justify-center border border-brand-green/30 backdrop-blur-xs cursor-pointer"
+          className="fixed bottom-6 left-6 z-40 bg-brand-petrol/90 hover:bg-brand-petrol text-white p-3.5 rounded-xl shadow-xl hover:scale-115 active:scale-95 transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 flex items-center justify-center border border-brand-green/30 backdrop-blur-xs cursor-pointer"
           title="Subir al inicio"
         >
           <ArrowUp className="h-5 w-5 stroke-[2.5]" />

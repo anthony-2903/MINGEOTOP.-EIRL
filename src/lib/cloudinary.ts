@@ -33,6 +33,19 @@ export type UploadedCloudinaryVideo = {
 const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
 const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
+export function getCloudinaryThumbnailUrl(url: string) {
+  if (!url.startsWith('https://res.cloudinary.com/')) return url;
+  const marker = '/upload/';
+  const offset = url.indexOf(marker);
+  if (offset < 0) return url;
+  const prefix = url.slice(0, offset + marker.length);
+  const resource = url.slice(offset + marker.length);
+  const version = resource.search(/(?:^|\/)v\d+\//);
+  // Only rewrite versioned URLs so public IDs are never mistaken for transforms.
+  if (version < 0) return url;
+  return `${prefix}f_auto,q_auto,c_limit,w_640/${resource.slice(version).replace(/^\//, '')}`;
+}
+
 export function getOptimizedWebpUrl(imageUrl: string, width = 1600) {
   return imageUrl.replace('/upload/', `/upload/f_webp,q_auto,c_limit,w_${width}/`);
 }
@@ -59,6 +72,7 @@ async function uploadToCloudinary(
   const formData = new FormData();
   formData.append('file', file);
   formData.append('upload_preset', UPLOAD_PRESET);
+  formData.append('folder', folder);
 
   const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/${resourceType}/upload`, {
     method: 'POST',
@@ -66,11 +80,11 @@ async function uploadToCloudinary(
   });
 
   if (!response.ok) {
-    let detail = '';
+    let detail: string;
     try {
       const errBody = await response.json();
       detail = errBody?.error?.message || JSON.stringify(errBody);
-    } catch (e) {
+    } catch {
       detail = `HTTP ${response.status} ${response.statusText}`;
     }
     throw new Error(`Error de Cloudinary: ${detail}`);

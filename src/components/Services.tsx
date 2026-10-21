@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import {
   Activity,
   Boxes,
@@ -74,21 +74,21 @@ export default function Services() {
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto mb-16 max-w-3xl text-center">
-          <motion.h3
+          <m.p
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-100px' }}
             className="mb-3 text-xs font-extrabold uppercase tracking-[0.25em] text-brand-yellow sm:text-sm"
           >
             Nuestros servicios
-          </motion.h3>
+          </m.p>
           <h2
             className="font-outfit text-3xl font-extrabold text-brand-petrol sm:text-4xl md:text-5xl"
             data-gsap-title
           >
             Servicios topográficos con entregables listos para obra
           </h2>
-          <motion.p
+          <m.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-100px' }}
@@ -97,7 +97,7 @@ export default function Services() {
           >
             Medimos, procesamos y entregamos información técnica en formatos útiles para diseño,
             construcción, minería, catastro y control de avance.
-          </motion.p>
+          </m.p>
         </div>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -106,10 +106,10 @@ export default function Services() {
               key={service.title}
               data-gsap-mask
             >
-              <div className="h-full group relative flex flex-col justify-between overflow-hidden rounded-lg border border-gray-200 bg-white p-6 shadow-premium transition-all duration-300 hover:border-brand-yellow/40 hover:shadow-premium-hover sm:p-7 transform hover:-translate-y-1">
+              <div className="h-full group relative flex flex-col justify-between overflow-hidden rounded-lg border border-gray-200 bg-white p-6 shadow-premium transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 hover:border-brand-yellow/40 hover:shadow-premium-hover sm:p-7 transform hover:-translate-y-1">
               <div className="absolute inset-x-0 top-0 h-1 bg-brand-petrol transition-colors duration-300 group-hover:bg-brand-yellow" />
               <div className="space-y-4">
-                <div className="relative z-10 flex h-12 w-12 items-center justify-center rounded-lg bg-brand-petrol/5 text-brand-petrol shadow-sm transition-all duration-300 group-hover:bg-brand-yellow group-hover:text-brand-dark">
+                <div className="relative z-10 flex h-12 w-12 items-center justify-center rounded-lg bg-brand-petrol/5 text-brand-petrol shadow-sm transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 group-hover:bg-brand-yellow group-hover:text-brand-dark">
                   {service.icon}
                 </div>
                 <h3 className="relative z-10 font-outfit text-lg font-bold leading-tight text-brand-petrol transition-colors duration-300 group-hover:text-brand-yellow sm:text-xl">
@@ -124,7 +124,7 @@ export default function Services() {
                 </span>
                 <a
                   href="#contacto"
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 bg-white text-brand-petrol transition-all duration-300 hover:border-brand-yellow hover:bg-brand-yellow hover:text-brand-dark"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 bg-white text-brand-petrol transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 hover:border-brand-yellow hover:bg-brand-yellow hover:text-brand-dark"
                   title="Solicitar cotización de este servicio"
                 >
                   <ChevronRight className="h-4 w-4" />
