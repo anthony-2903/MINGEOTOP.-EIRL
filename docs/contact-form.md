@@ -21,8 +21,8 @@ si persiste, contactar al proveedor con la hora y el dominio del envío.
 
 - Solo muestra confirmación si la respuesta HTTP es correcta y el JSON contiene `success: true` o `success: "true"`.
 - Envía la dirección del visitante en `email` y `_replyto` para poder responderle.
-- Limita la espera a 20 segundos.
-- Ante un rechazo, respuesta inválida o fallo de red, conserva los datos.
+- Permite hasta 120 segundos para recibir la confirmación del proveedor; no reintenta automáticamente.
+- Ante un rechazo, respuesta inválida, fallo de red o espera agotada, conserva los datos y distingue el motivo. Un tiempo agotado no demuestra que el proveedor no haya procesado la solicitud.
 - Ofrece un enlace para preparar el mensaje en Gmail. El visitante debe enviarlo manualmente.
 - Las pruebas automatizadas usan respuestas simuladas y no envían correos reales.
 
@@ -36,3 +36,11 @@ Los cambios locales requieren desplegarse antes de afectar al formulario públic
 - Se realizó una prueba desde el formulario público con el nombre “Prueba técnica de MINGEOTOP”. Tras una espera prolongada, el formulario mostró “¡Solicitud enviada!”. La versión pública solo valida HTTP y no lee la confirmación del proveedor, por lo que esa pantalla no demuestra recepción en Gmail.
 - El propietario confirmó después la recepción en Gmail mediante una captura con solicitudes recibidas de FormSubmit. La activación y la entrega quedaron confirmadas para el formulario público.
 - Evidencia local: `.react-doctor-report/contact-live-test.png`.
+
+## Revisión posterior al despliegue
+
+- El propietario confirmó que llegó la prueba de producción del 21 de octubre, aunque el navegador había agotado la espera de 20 segundos. La entrega real de producción está confirmada; el error visual fue una confirmación tardía.
+- En desarrollo, el proveedor respondió explícitamente `This form needs Activation`. Esto requiere comprobar la activación del origen local.
+- La siguiente prueba local, con `_url` canónica, devolvió HTTP 500 del proveedor. No se considera una prueba aprobada.
+- Los cambios pendientes amplían la espera a 120 segundos, distinguen activación, rechazo HTTP, fallo de red y tiempo agotado, y preservan los datos. Las pruebas automatizadas pasan, pero el envío real local sigue pendiente.
+- No hacer push de esta revisión hasta comprobar el funcionamiento local, conforme a la instrucción del propietario.

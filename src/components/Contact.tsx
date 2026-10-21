@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { AnimatePresence, m } from 'framer-motion';
 import { CheckCircle, Loader2, Mail, MapPin, Phone, Send } from 'lucide-react';
-import { submitContactRequest } from '../lib/contact';
+import { ContactSubmissionError, getContactErrorMessage, submitContactRequest } from '../lib/contact';
 
 const services = [
   'Levantamientos Topográficos',
@@ -94,7 +94,7 @@ export default function Contact() {
     setSubmitError('');
 
     try {
-      await submitContactRequest(formData);
+      await submitContactRequest(formData, fetch, `${window.location.origin}${window.location.pathname}`);
 
       setIsSuccess(true);
       setFormData({
@@ -112,10 +112,15 @@ export default function Contact() {
         colors: ['#15171C', '#2D5B37', '#FF5C00'],
         disableForReducedMotion: true,
       })).catch(() => undefined);
-    } catch {
-      setSubmitError(
-        'No pudimos confirmar el envío. Tus datos siguen en el formulario. Puedes intentarlo de nuevo o enviar tu solicitud desde tu correo.'
-      );
+    } catch (error) {
+      setSubmitError(getContactErrorMessage(error));
+      if (error instanceof ContactSubmissionError) {
+        console.warn('Contact submission failed', JSON.stringify({
+          kind: error.kind,
+          status: error.status,
+          ...(import.meta.env.DEV ? { reason: error.message } : {}),
+        }));
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -361,6 +366,11 @@ export default function Contact() {
                       </>
                     )}
                   </button>
+                  {isSubmitting && (
+                    <p role="status" className="text-center text-sm text-gray-600">
+                      Estamos esperando la confirmación. Puede tardar hasta dos minutos.
+                    </p>
+                  )}
                 </m.form>
               ) : (
                 <m.div

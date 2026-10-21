@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { submitContactRequest, type ContactRequest } from '../src/lib/contact.ts';
+import { CONTACT_TIMEOUT_MS, ContactSubmissionError, getContactErrorMessage, submitContactRequest, type ContactRequest } from '../src/lib/contact.ts';
 
 const request: ContactRequest = {
   name: ' Cliente de prueba ', phone: ' 913000000 ',
@@ -29,13 +29,51 @@ test('rejects HTML or malformed JSON instead of showing a false success', async 
 });
 
 test('propagates a network failure so the form can preserve the request', async () => {
-  await assert.rejects(submitContactRequest(request, async () => { throw new TypeError('offline'); }));
+  await assert.rejects(
+    submitContactRequest(request, async () => { throw new TypeError('offline'); }),
+    (error: unknown) => error instanceof ContactSubmissionError && error.kind === 'network',
+  );
+});
+
+test('distinguishes a timeout from a provider rejection and warns against duplicate sends', async () => {
+  await assert.rejects(
+    submitContactRequest(request, async () => { throw new DOMException('Timed out', 'TimeoutError'); }),
+    (error: unknown) => {
+      assert.ok(error instanceof ContactSubmissionError);
+      assert.equal(error.kind, 'timeout');
+      assert.match(getContactErrorMessage(error), /revisa la recepción antes de volver/);
+      return true;
+    },
+  );
+});
+
+test('keeps the HTTP status available for diagnostics', async () => {
+  await assert.rejects(submitContactRequest(request, respond({}, 429)), (error: unknown) =>
+    error instanceof ContactSubmissionError && error.kind === 'http' && error.status === 429);
+});
+
+test('identifies a form awaiting activation instead of claiming it was sent', async () => {
+  await assert.rejects(submitContactRequest(request, respond({
+    success: 'false', message: 'This form needs Activation. Click Activate Form.',
+  })), (error: unknown) => error instanceof ContactSubmissionError && error.kind === 'activation');
+});
+
+test('allows the slow provider up to two minutes rather than aborting at twenty seconds', () => {
+  assert.equal(CONTACT_TIMEOUT_MS, 120_000);
+});
+
+test('identifies the actual local form URL instead of substituting production', async () => {
+  await submitContactRequest(request, async (_url, init) => {
+    assert.equal(JSON.parse(String(init?.body))._url, 'http://localhost:5173/');
+    return new Response('{"success":true}');
+  }, 'http://localhost:5173/');
 });
 
 test('sets the reply address, trims contact data and limits request duration', async () => {
   await submitContactRequest(request, async (url, init) => {
     assert.equal(url, 'https://formsubmit.co/ajax/mingeotop@gmail.com');
     const body = JSON.parse(String(init?.body));
+    assert.equal(body._url, 'https://mingeotop.com/');
     assert.equal(body._replyto, 'cliente@example.com');
     assert.equal(body.email, 'cliente@example.com');
     assert.equal(body.Nombre, 'Cliente de prueba');
